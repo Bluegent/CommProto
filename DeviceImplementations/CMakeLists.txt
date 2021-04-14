@@ -1,4 +1,4 @@
-project(AuthDevice)
+project(DeviceImplementations)
 
 file(GLOB_RECURSE PROJECT_SRC RELATIVE
         "${CMAKE_CURRENT_SOURCE_DIR}"

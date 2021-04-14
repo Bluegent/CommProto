@@ -16,7 +16,7 @@ namespace commproto
 			static Message serialize(messages::MessageBase&& data);
 		};
 
-		Message EmptySerializer::serialize(messages::MessageBase&& data)
+		inline Message EmptySerializer::serialize(messages::MessageBase&& data)
 		{
 			EmptyMessage& realData = static_cast<EmptyMessage&>(data);
 			parser::ByteStream stream;
@@ -36,7 +36,7 @@ namespace commproto
 			void parse(parser::ByteStream&& msg) override;
 		};
 
-		void EmptyParser::parse(parser::ByteStream&& msg)
+		inline void EmptyParser::parse(parser::ByteStream&& msg)
 		{
 
 			parser::ByteStream stream(msg);

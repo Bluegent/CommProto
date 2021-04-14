@@ -51,6 +51,7 @@ message("DEPLOY LOCATION == ${ARDUINO_LIB_DEPLOY_LOCATION}")
 
 add_custom_target(DEPLOY DEPENDS ${PROJECT_NAME} EspApp
 	COMMAND python "${CMAKE_SOURCE_DIR}/makelib/makelib.py" "${CMAKE_SOURCE_DIR}" "${ARDUINO_LIB_DEPLOY_LOCATION}/DeviceWrapper")
+set_target_properties(DEPLOY PROPERTIES FOLDER CMakePredefinedTargets)
 
 if(WIN32)
     add_subdirectory(test)
