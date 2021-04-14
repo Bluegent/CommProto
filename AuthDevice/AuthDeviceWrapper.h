@@ -3,10 +3,10 @@
 #include <vector>
 #include <commproto/sockets/Socket.h>
 
-class DeviceWrapper
+class AuthDeviceWrapper
 {
 public:
-	virtual ~DeviceWrapper() = default;
+	virtual ~AuthDeviceWrapper() = default;
 
 	virtual std::vector<std::string> listNetworks() = 0;
 	virtual void setBaudRate(const uint32_t bytes) = 0;

@@ -2,7 +2,7 @@
 #include <SocketImpl.h>
 #include <ESP8266WiFi.h>
 
-class EspAuthDevice : public DeviceWrapper
+class EspAuthDevice : public AuthDeviceWrapper
 {
   public:
   std::vector<std::string> listNetworks() override 

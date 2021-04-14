@@ -1,7 +1,0 @@
-{
-    "name":"Ghost Pepper",
-    "ideal_temperature":[27,32,10,45],
-    "ideal_humidity":[50,60,30,90],
-    "ideal_light_time":[400,800,200,2000],
-    "ideal_soil_humidity":[40,60,10,100]
-}

@@ -25,12 +25,12 @@ struct EndpointData
 class AuthDevice
 {
 public:
-	AuthDevice(DeviceWrapper* device);
+	AuthDevice(AuthDeviceWrapper* device);
 	void setup();
 	void loop();
 	void finishReading(const EndpointData& data);
 private:
-	DeviceWrapper* device;
+	AuthDeviceWrapper* device;
 	bool finishedReading;
 	EndpointData targetDevice;
 };
