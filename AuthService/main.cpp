@@ -58,10 +58,10 @@ int main(int argc, const char * argv[])
 	}
 
 
-    commproto::sockets::SocketHandle serial = std::make_shared<commproto::serial::SerialInterface>();
+    commproto::serial::SerialHandle serial = std::make_shared<commproto::serial::SerialInterface>();
 
     LOG_INFO("Authentification service connecting to device %s on baudrate %d...",device,baud);
-    if (!serial->initClient(device,SPEED))
+    if (!serial->start(device,SPEED))
 	{
         LOG_ERROR("A problem occurred while starting authentification service, shutting down...");
 		return 1;
@@ -75,7 +75,7 @@ int main(int argc, const char * argv[])
 	}
     while (true)
     {
-        int poll = serial->pollSocket();
+        int poll = serial->available();
         for(uint32_t index = 0;index<poll;++index){
             int read = serial->readByte();
             if(read>=0){

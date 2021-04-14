@@ -2,7 +2,7 @@
 #define COMMPROTO_MESSAGE_BUILDER_H
 
 #include <commproto/common/Common.h>
-#include <commproto/sockets/Socket.h>
+#include <commproto/stream/Stream.h>
 #include <commproto/parser/ParserDelegator.h>
 
 namespace commproto
@@ -19,13 +19,13 @@ namespace commproto
 		class MessageBuilder
 		{
 		public:
-			MessageBuilder(const sockets::SocketHandle& socket_, const ParserDelegatorHandle& delegator_);
+			MessageBuilder(const stream::StreamHandle& stream_, const ParserDelegatorHandle& delegator_);
 
 			bool pollAndRead();
 			bool pollAndReadTimes(const uint32_t times);
 			static uint8_t ptrSize;
 		private:
-			sockets::SocketHandle socket;
+			stream::StreamHandle stream;
 			State state;
 			Message buffer;
 			Message internal;

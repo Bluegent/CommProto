@@ -8,8 +8,8 @@ namespace commproto
 
 		uint8_t MessageBuilder::ptrSize = sizeof(void*);
 
-		MessageBuilder::MessageBuilder(const sockets::SocketHandle& socket_, const ParserDelegatorHandle& delegator_)
-			: socket{ socket_ }
+		MessageBuilder::MessageBuilder(const stream::StreamHandle& stream_, const ParserDelegatorHandle& delegator_)
+			: stream{stream_}
 			, state{ State::ReadingHandshake }
 			, expectedReadSize{ 0 }
 			, delegator{ delegator_ }
@@ -18,8 +18,8 @@ namespace commproto
 
 		bool MessageBuilder::pollAndRead()
 		{
-            while(socket->pollSocket() > 0){
-				char byte = socket->readByte();
+            while(stream->available() > 0){
+				char byte = stream->readByte();
 				switch (state)
 				{
 				case State::ReadingHandshake:

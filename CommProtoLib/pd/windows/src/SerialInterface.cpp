@@ -6,11 +6,6 @@ namespace commproto
 	namespace serial
 	{
 
-		void SerialInterface::setTimeout(const uint32_t msec)
-		{
-
-		}
-
 		SerialInterface::~SerialInterface()
 		{
 			SerialInterface::shutdown();
@@ -55,7 +50,7 @@ namespace commproto
 			return -1;
 		}
 
-		int32_t SerialInterface::pollSocket()
+		int32_t SerialInterface::available()
 		{
 			if (!connected())
 			{
@@ -103,7 +98,7 @@ namespace commproto
 			return -1;
 		}
 
-		bool SerialInterface::initClient(const std::string &addr, const uint32_t speed)
+		bool SerialInterface::start(const std::string &addr, const uint32_t speed)
 		{
 			if (connected())
 			{
@@ -154,16 +149,6 @@ namespace commproto
 
 			return true;
 
-		}
-
-		bool SerialInterface::initServer(const std::string &addr, const uint32_t port)
-		{
-			return false;
-		}
-
-		sockets::SocketHandle SerialInterface::acceptNext()
-		{
-			return nullptr;
 		}
 
 		bool SerialInterface::connected()

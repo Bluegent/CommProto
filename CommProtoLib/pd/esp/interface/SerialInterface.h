@@ -1,52 +1,55 @@
 #ifndef SERIAL_INTERFACE_H
 #define SERIAL_INTERFACE_H
-#include <commproto/sockets/Socket.h>
+#include <commproto/stream/Stream.h>
 
 namespace commproto
 {
 namespace serial
 {
-    class SerialInterface : public sockets::Socket
+    class SerialInterface : public stream::Stream
     {
     public:
-        int32_t sendBytes(const Message &message)
+        int32_t sendBytes(const Message &message) override;
         {
             return Serial.write(message.data(),message.size());
         }
-        int32_t receive(Message &message, const uint32_t size)
+        
+        int32_t receive(Message &message, const uint32_t size) override;
         {
             message.resize(size);
             message.reserve(size);
             return Serial.readBytes(message.data(),message.size());
         }
-        int32_t pollSocket()
+        
+        int32_t available()  override;
         {
             return Serial.available();
         }
-        int readByte()
+        
+        int readByte() override;
         {
             char byte = Serial.read();
             return byte;
         }
-        int sendByte(const char byte)
+        
+        int sendByte(const char byte) override;
         {
             return Serial.write(byte);
         }
-        bool initClient(const std::string &addr, const uint32_t speed)
+        
+        bool start(const uint32_t speed)
         {
             Serial.begin(speed);
         }
-        bool initServer(const std::string &addr, const uint32_t port){};
-        sockets::SocketHandle acceptNext(){return nullptr;}
-        bool connected()
+        
+        bool connected() override;
         {
             return Serial;
         }
-        void shutdown()
+        void shutdown() override;
         {
             Serial.end();
         };
-        void setTimeout(const uint32_t msec){};
         ~SerialInterface()
         {
             shutdown();

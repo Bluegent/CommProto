@@ -221,7 +221,7 @@ namespace commproto {
 			return SocketHandle(new SocketImpl(newConnection, Mode::Client, true));
 		}
 
-		int32_t SocketImpl::pollSocket()
+		int32_t SocketImpl::available()
 		{
 			if (socketHandle < 0 || !isInitialized) {
 				return 0;

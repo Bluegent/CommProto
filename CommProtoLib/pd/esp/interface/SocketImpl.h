@@ -82,7 +82,7 @@ public:
     }
 
     //poll the socket to see how many bytes are buffered
-    int32_t pollSocket() override{
+    int32_t available() override{
         if (!isInitialized || socketMode != Mode::Client)
         {
           return 0;
