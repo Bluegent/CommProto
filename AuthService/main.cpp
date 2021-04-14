@@ -2,12 +2,20 @@
 
 #include <commproto/service/Dispatch.h>
 #include <SocketImpl.h>
-#include <commproto/logger/Logging.h>
+#include <commproto/logger/Logging.h>	
 #include <commproto/service/Connection.h>
 #include <commproto/config/ConfigParser.h>
 #include <commproto/logger/FileLogger.h>
-#include <termios.h>
 #include <SerialInterface.h>
+
+#ifdef _WIN32
+#define SPEED CBR_115200
+#elif	
+#include <termios.h>
+#define SPEED B115200
+
+#endif
+
 
 namespace ConfigValues
 {
@@ -53,14 +61,18 @@ int main(int argc, const char * argv[])
     commproto::sockets::SocketHandle serial = std::make_shared<commproto::serial::SerialInterface>();
 
     LOG_INFO("Authentification service connecting to device %s on baudrate %d...",device,baud);
-    if (!serial->initClient(device,B115200))
+    if (!serial->initClient(device,SPEED))
 	{
         LOG_ERROR("A problem occurred while starting authentification service, shutting down...");
 		return 1;
 	}
 
     LOG_INFO("Authentification service started");
-
+	int res = serial->sendByte(sizeof(void*));
+	if(res!=1)
+	{
+		LOG_ERROR("An issue occurred when sending sizeof pointer on host system");
+	}
     while (true)
     {
         int poll = serial->pollSocket();

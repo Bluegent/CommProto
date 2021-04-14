@@ -24,10 +24,8 @@ set(CMAKE_FOLDER "Runnable")
 add_subdirectory(Dispatch)
 add_subdirectory(Endpoint)
 add_subdirectory(UXService)
+add_subdirectory(AuthService)
 
-if(DEFINED RPI)
-    add_subdirectory(AuthService)
-endif()
 
 if(WIN32)
     set(CMAKE_FOLDER "Embedded")

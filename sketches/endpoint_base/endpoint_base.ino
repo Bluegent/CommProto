@@ -7,9 +7,14 @@ IPAddress local_IP(192,168,1,10);
 IPAddress gateway(192,168,1,1);
 IPAddress subnet(255,255,255,0);
 WiFiServer server(9001);
+bool started = false;
 
-void setup() {
-  Serial.begin(115200);
+void startWifi()
+{
+  if(started){
+    return;
+  }
+  started = true;
   Serial.println();
   Serial.println("Starting as wifi access point");
   WiFi.mode(WIFI_AP);
@@ -19,20 +24,38 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(IP);
   server.begin();
+  digitalWrite(LED_BUILTIN, LOW);
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {
-  WiFiClient client = server.available();
-  if(client)
+  if(started)
   {
-    Serial.println("New connection established");
-    while (client.connected()) 
-    { 
-      if (client.available())
-      {        
-        char c = client.read();            
-        Serial.write(c);  
-      }       
+    WiFiClient client = server.available();
+    if(client)
+    {
+      Serial.println("New connection established");
+      while (client.connected()) 
+      { 
+        if (client.available())
+        {        
+          char c = client.read();            
+          Serial.write(c);  
+        }       
+      }
+    }
+  }
+  else
+  {
+    if (Serial.available() > 0) {
+      // read the incoming byte:
+      Serial.read();
+      startWifi();
     }
   }
 }
