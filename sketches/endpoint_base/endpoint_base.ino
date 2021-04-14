@@ -1,17 +1,19 @@
 #include "ESP8266WiFi.h"
+#include <SerialInterface.h>
 
 const char * NetworkName = "CPEP::Tester";
 const char * NetworkPassword = "COMPROTO";
 
-IPAddress local_IP(192,168,1,10);
-IPAddress gateway(192,168,1,1);
-IPAddress subnet(255,255,255,0);
+IPAddress local_IP(192, 168, 1, 10);
+IPAddress gateway(192, 168, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
 WiFiServer server(9001);
 bool started = false;
+commproto::serial::SerialInterface serial;
 
 void startWifi()
 {
-  if(started){
+  if (started) {
     return;
   }
   started = true;
@@ -19,7 +21,7 @@ void startWifi()
   Serial.println("Starting as wifi access point");
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(local_IP, gateway, subnet);   // subnet FF FF FF 00
-  WiFi.softAP(NetworkName,NetworkPassword);
+  WiFi.softAP(NetworkName, NetworkPassword);
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
@@ -28,33 +30,33 @@ void startWifi()
 }
 
 void setup() {
-  Serial.begin(115200);
+  serial.initClient("", 115200);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {
-  if(started)
+  if (started)
   {
     WiFiClient client = server.available();
-    if(client)
+    if (client)
     {
       Serial.println("New connection established");
-      while (client.connected()) 
-      { 
+      while (client.connected())
+      {
         if (client.available())
-        {        
-          char c = client.read();            
-          Serial.write(c);  
-        }       
+        {
+          char c = client.read();
+          Serial.write(c);
+        }
       }
     }
   }
   else
   {
-    if (Serial.available() > 0) {
+    if (serial.pollSocket() > 0) {
       // read the incoming byte:
-      Serial.read();
+      serial.readByte();
       startWifi();
     }
   }
