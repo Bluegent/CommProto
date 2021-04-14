@@ -38,7 +38,7 @@ commproto::parser::ParserDelegatorHandle build(AuthDevice* device)
 }
 
 
-AuthDevice::AuthDevice(DeviceWrapper* device_)
+AuthDevice::AuthDevice(AuthDeviceWrapper* device_)
 	: device{ device_ }
 	, finishedReading(false)
 {

@@ -1,7 +1,7 @@
 #include "AuthDevice.h"
 
 
-class WindowsAuthDeviceWrapper : public DeviceWrapper
+class WindowsAuthDeviceWrapper : public AuthDeviceWrapper
 {
 public:
 	std::vector<std::string> listNetworks() override { return std::vector<std::string>(); }

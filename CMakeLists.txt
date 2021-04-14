@@ -20,15 +20,10 @@ add_subdirectory(CommProtoLib)
 add_subdirectory(CommProtoService)
 
 set(CMAKE_FOLDER "Runnable")
-#add_subdirectory(ServerApp)
 add_subdirectory(Dispatch)
 add_subdirectory(Endpoint)
 add_subdirectory(UXService)
 add_subdirectory(AuthService)
 
-
-if(WIN32)
-    set(CMAKE_FOLDER "Embedded")
-    add_subdirectory(AuthDevice)
-endif()
-
+set(CMAKE_FOLDER "Embedded")
+add_subdirectory(DeviceImplementations)
