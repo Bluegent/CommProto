@@ -18,7 +18,7 @@ namespace commproto
 			{
 				return MappingResult::AlreadyRegistered;
 			}
-            LOG_DEBUG("Added a new parser mapping, %s - %d",name.c_str(), id);
+			LOG_DEBUG("Registered a new mappign type %s - %d", name.c_str(), id);
 			idToParser.emplace(id, it->second);
 			nameToId.emplace(name, id);
 			return MappingResult::Success;
@@ -35,6 +35,7 @@ namespace commproto
 			uint32_t msgId = 0;
 
 			stream.read(msgId);
+
 			auto it = idToParser.find(msgId);
 			if (it == idToParser.end())
 			{
@@ -43,6 +44,19 @@ namespace commproto
 				}
 				return false;
 			}
+			/*
+			//uncomment for more parsing info
+			//warning : makes it really spammy
+			std::string msgName = "UNKNOWN";
+			for(auto it2 = nameToId.begin(); it2!=nameToId.end();++it2)
+			{
+				if(it2->second == msgId)
+				{
+					msgName = it2->second;
+				}
+			}
+			LOG_INFO("Parsing message %d-\"%s\"", msgId, msgName.c_str());
+			*/
 			it->second->parse(std::move(stream));
 			return true;
 
@@ -62,6 +76,11 @@ namespace commproto
 				return;
 			}
 			nameToParser.emplace(typeName, parser);
+		}
+
+		bool ParserDelegator::hasMappingInternal(const std::string& name) const
+		{
+			return nameToId.find(name) != nameToId.end();
 		}
 	}
 }

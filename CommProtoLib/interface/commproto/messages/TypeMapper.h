@@ -5,7 +5,7 @@
 #include <memory>
 
 #include <commproto/messages/MessageName.h>
-#include <commproto/sockets/Socket.h>
+#include <commproto/stream/Stream.h>
 
 namespace commproto
 {
@@ -33,7 +33,7 @@ namespace commproto
 		class TypeMapperFactory
 		{
 		public:
-			static TypeMapperHandle build(const sockets::SocketHandle & socket);
+			static TypeMapperHandle build(const stream::StreamHandle & stream);
 		};
 
 		template <typename T>

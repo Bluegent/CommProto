@@ -60,4 +60,10 @@ namespace commproto
 	}
 }
 
+
+#define MAKE_DOUBLE_PROP_CHAIN(Name, Type1,Type2)											\
+	MAKE_DOUBLE_PROP_MESSAGE(Name,Type1,Type2);												\
+	using Name ## Parser = commproto::messages::DoublePropertyParser<Type1,Type2>;			\
+	using Name ## Serializer = commproto::messages::DoublePropertySerializer<Type1,Type2>;	\
+
 #endif// DOUBLE_PROPERTY_CHAIN_H

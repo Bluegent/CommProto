@@ -5,12 +5,11 @@
 #include <commproto/messages/TypeMapper.h>
 #include <commproto/parser/MessageBuilder.h>
 
-enum class State
+enum class BaseAuthState
 {
-	CheckAuth,
 	SendAuthData,
-	WaitForResponse,
-	StartAsEP,
+	WaitForReconnect,
+	ReadForResponse,
 };
 
 
@@ -21,23 +20,25 @@ struct DeviceDetails
 	std::string description;
 };
 
-class Thermostat
+
+
+class BaseEndpointAuth
 {
 public:
-	Thermostat(ThermostatWrapper& wrapper);
+	BaseEndpointAuth(BaseEndpointWrapper& wrapper);
 	void setup();
 	void loop();
 	void accept(const APData& data);
 	void reject();
 private:
-	ThermostatWrapper& device;
+	BaseEndpointWrapper& device;
 	commproto::stream::StreamHandle serial;
-	State state;
+	BaseAuthState state;
 	commproto::sockets::SocketHandle socket;
-	commproto::sockets::SocketHandle client;
 	commproto::messages::TypeMapperHandle mapper;
 	commproto::parser::MessageBuilderHandle builder;
 	commproto::parser::ParserDelegatorHandle delegator;
+	uint32_t responseAttempts;
 
 };
 

@@ -50,4 +50,9 @@ namespace commproto
 	}
 }
 
+#define MAKE_EMPTY_CHAIN(Name)											\
+	MAKE_EMPTY_MESSAGE(Name);											\
+	using Name ## Parser = commproto::messages::EmptyParser;			\
+	using Name ## Serializer = commproto::messages::EmptySerializer;	\
+
 #endif// EMPTY_CHAIN_H

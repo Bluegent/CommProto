@@ -62,4 +62,9 @@ namespace commproto
 	}
 }
 
+#define MAKE_TRIPLE_PROP_CHAIN(Name, Type1,Type2,Type3)												\
+	MAKE_TRIPLE_PROP_MESSAGE(Name,Type1,Type2,Type3);												\
+	using Name ## Parser = commproto::messages::TriplePropertyParser<Type1,Type2,Type3>;			\
+	using Name ## Serializer = commproto::messages::TriplePropertySerializer<Type1,Type2,Type3>;	\
+
 #endif// TRIPLE_PROPERTY_CHAIN_H

@@ -146,7 +146,7 @@ public:
       if(!possibleClient){
         return SocketHandle();
       }
-      return SocketHandle(new SocketImpl(server.available()));
+      return SocketHandle(new SocketImpl(possibleClient));
     }
     private:
 

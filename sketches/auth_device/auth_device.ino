@@ -2,14 +2,19 @@
 #include <SocketImpl.h>
 #include <ESP8266WiFi.h>
 
+
 class EspAuthDevice : public AuthDeviceWrapper
 {
   public:
+  void setup()
+  {
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
   std::vector<std::string> listNetworks() override 
   {
     int numberOfNetworks = WiFi.scanNetworks();
     std::vector<std::string> networks;
-    Serial.println("Scanned networks:");
     for(int i =0; i<numberOfNetworks; ++i)
     {
       String net = WiFi.SSID(i);
@@ -18,13 +23,6 @@ class EspAuthDevice : public AuthDeviceWrapper
     }
     return networks;
   }
-  
-  void setBaudRate(const uint32_t bytes) override 
-  {
-   
-    Serial.begin(bytes);
-  };
-  
   commproto::sockets::SocketHandle connectTo(const std::string& ssid, const std::string& pwd, const std::string& addr, const uint32_t port) override 
   { 
     LOG_INFO("Attempting to connect to wifi network %s",ssid.c_str());
@@ -35,28 +33,17 @@ class EspAuthDevice : public AuthDeviceWrapper
     do{
       LOG_INFO("Attempt #%d",attempt+1);    
       status = WiFi.waitForConnectResult();
-      delay(2000);
+      delay(500);
       ++attempt;
     } while( status != WL_CONNECTED && attempt != maxAttempts);
     
     if(status!=WL_CONNECTED)
     {
       LOG_INFO("Connection attempt unsuccesful");
-      Serial.println(WiFi.status());
       return nullptr;
     }
     LOG_INFO("Connection successful wifi network %s",ssid.c_str());
     commproto::sockets::SocketHandle client = std::make_shared<commproto::sockets::SocketImpl>();
-    WiFiClient cli;
-    bool cliConnected = cli.connect(addr.c_str(),static_cast<uint16_t>(port));
-    if(cliConnected){
-      LOG_INFO("Could connect via standard WiFiClient");
-    }
-    if(cli.connected()){
-      LOG_INFO("Could check via connected method");
-    }
-    cli.stop();
-    delay(1000); 
     bool connected = client->initClient(addr,port);
     if(!connected){
       LOG_WARNING("Could not connect to %s:%d",addr.c_str(),port);
@@ -64,17 +51,38 @@ class EspAuthDevice : public AuthDeviceWrapper
     }
     return client; 
   }
+
+  commproto::serial::SerialHandle getSerial(const int speed) override
+  {
+    commproto::serial::SerialHandle serial =  std::make_shared<commproto::serial::SerialInterface>();
+    serial->start(speed);
+    return serial;
+  }
+
+    void setLED(const bool on) override
+    {
+      if(on){
+         digitalWrite(LED_BUILTIN, LOW);
+      }
+      else
+      {
+         digitalWrite(LED_BUILTIN, HIGH);
+      }
+    }
+    void delayT(const uint32_t msec) override
+    {
+      delay(msec);
+    }
 };
 
 EspAuthDevice realDevice;
-AuthDevice device(&realDevice);
+AuthDevice device(realDevice);
 
 void setup() {
+  realDevice.setup();
   device.setup();
-
 }
 
 void loop() {
   device.loop();
-  delay(5000);
 }

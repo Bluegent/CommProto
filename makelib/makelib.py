@@ -55,6 +55,8 @@ copy_dir_contents(srcDir, dst)
 # copy from pd folder
 espPdFiles = src +"/CommProtoLib/pd/esp/interface"
 copy_contents(espPdFiles,dst)
+espPdFilesSrc = src +"/CommProtoLib/pd/esp/src"
+copy_contents(espPdFilesSrc,dst)
 
 # copy everything from interface   
 interfaceDir = src +"/CommProtoLib/interface/commproto"

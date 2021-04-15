@@ -1,7 +1,7 @@
 
 #include <ThermostatDevice.h>
 #include <SocketImpl.h>
-#include <AuthChains.h>
+#include <commproto/device/AuthChains.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/parser/ParserDelegatorUtils.h>
 
@@ -11,13 +11,13 @@
 class AcceptHandler : public commproto::parser::Handler
 {
 public:
-	AcceptHandler(Thermostat& thermo_)
+	AcceptHandler(BaseEndpointAuth& thermo_)
 		: thermo(thermo_)
 	{
 	}
 	void handle(commproto::messages::MessageBase&& data) override
 	{
-		ConnectionAuthorizedMessage& msg = static_cast<ConnectionAuthorizedMessage&>(data);
+		commproto::device::ConnectionAuthorizedMessage& msg = static_cast<commproto::device::ConnectionAuthorizedMessage&>(data);
 		if (msg.prop.size() != 3)
 		{
 			LOG_ERROR("Connection authorization message has too few arguments");
@@ -26,13 +26,13 @@ public:
 		thermo.accept(APData{ msg.prop[0], msg.prop[1],msg.prop[2],msg.prop2 });
 	}
 private:
-	Thermostat& thermo;
+	BaseEndpointAuth& thermo;
 };
 
 class RejectHandler : public commproto::parser::Handler
 {
 public:
-	RejectHandler(Thermostat& thermo_)
+	RejectHandler(BaseEndpointAuth& thermo_)
 		: thermo(thermo_)
 	{
 	}
@@ -41,19 +41,16 @@ public:
 		thermo.reject();
 	}
 private:
-	Thermostat& thermo;
+	BaseEndpointAuth& thermo;
 };
 
 
-
-
-
-commproto::parser::ParserDelegatorHandle build(Thermostat& device)
+commproto::parser::ParserDelegatorHandle build(BaseEndpointAuth& device)
 {
 	commproto::parser::ParserDelegatorHandle delegator = std::make_shared<commproto::parser::ParserDelegator>();
 	commproto::parser::buildBase(delegator);
-	commproto::parser::addParserHandlerPair<ConnectionAuthorizedParser, ConnectionAuthorizedMessage>(delegator, std::make_shared<AcceptHandler>(device));
-	commproto::parser::addParserHandlerPair<ConnectionRejectedParser, ConnectionRejectedMessage>(delegator, std::make_shared<RejectHandler>(device));
+	commproto::parser::addParserHandlerPair<commproto::device::ConnectionAuthorizedParser, commproto::device::ConnectionAuthorizedMessage>(delegator, std::make_shared<AcceptHandler>(device));
+	commproto::parser::addParserHandlerPair<commproto::device::ConnectionRejectedParser, commproto::device::ConnectionRejectedMessage>(delegator, std::make_shared<RejectHandler>(device));
 
 
 	return delegator;
@@ -68,92 +65,126 @@ const DeviceDetails thisDevice = { "Thermostat","Commproto","A simple device tha
 
 
 
-Thermostat::Thermostat(ThermostatWrapper& wrapper)
+BaseEndpointAuth::BaseEndpointAuth(BaseEndpointWrapper& wrapper)
 	: device(wrapper)
-	, state{ State::CheckAuth }
+	, state{ BaseAuthState::SendAuthData }
+	, responseAttempts{ 0 }
 {
 
 }
 
-void Thermostat::setup()
+void BaseEndpointAuth::setup()
 {
 	serial = device.getStream(115200);
 }
 
 
 
-void Thermostat::loop()
+void BaseEndpointAuth::loop()
 {
 	switch (state)
 	{
-	case State::CheckAuth:
-
-		if (!device.hasAuth())
-		{
-			socket = device.startAsAP(defaultAP);
-			state = State::SendAuthData;
-		}
-		else
-		{
-			socket = device.connect(device.getAuthData());
-			state = State::StartAsEP;
-		}
-
-		return;
-	case State::SendAuthData:
+	case BaseAuthState::SendAuthData:
 	{
 		if (!socket)
 		{
-			return;
-		}
+			
+			socket = device.startAsAP(defaultAP);
+			LOG_INFO("Waiting for client");
+		}		
 		commproto::sockets::SocketHandle client = socket->acceptNext();
 		if (!client || !client->connected())
 		{
 			return;
 		}
+		LOG_INFO("Sending pointer size...");
+		int sent = 0;
+		do {
+			sent = client->sendByte(sizeof(void*));
+			device.delayT(100);
+		} while (sent == 0);
+		LOG_INFO("Sending pointer size done");
+
+		LOG_INFO("Connected to client, sending authetification data.");
 		mapper = commproto::messages::TypeMapperFactory::build(client);
 		delegator = build(*this);
-		builder = std::make_shared<commproto::parser::MessageBuilder>(client, delegator);
-		uint32_t authMsgId = mapper->registerType<DeviceDataMessage>();
-		socket->sendByte(sizeof(void*));
-		commproto::Message authMsg = DeviceDataSerializer::serialize(std::move(DeviceDataMessage(authMsgId, thisDevice.name, thisDevice.manufacturer, thisDevice.description)));
-		int sent = socket->sendBytes(authMsg);
+
+		uint32_t authMsgId = mapper->registerType<commproto::device::DeviceDataMessage>();
+		commproto::Message authMsg = commproto::device::DeviceDataSerializer::serialize(std::move(commproto::device::DeviceDataMessage(authMsgId, thisDevice.name, thisDevice.manufacturer, thisDevice.description)));
+		responseAttempts = 0;
+		sent = client->sendBytes(authMsg);
 		if (sent == authMsg.size())
 		{
-			state = State::WaitForResponse;
-			LOG_ERROR("A problem occurred when sending device details");
+			state = BaseAuthState::WaitForReconnect;
+			responseAttempts = 0;
+			LOG_INFO("Sent auth details, waiting for reply");
+			client->shutdown();
 			return;
 		}
-		LOG_ERROR("A problem occurred when sending device details");
+		LOG_ERROR("A problem occurred when sending device details (sent:%d of %d)", sent, authMsg.size());
 		return;
 
 	}
-	case State::WaitForResponse:
+	case BaseAuthState::WaitForReconnect:
 	{
-		device.delay(100);
-		builder->pollAndReadTimes(10);
-		device.delay(100);
-	}
-	return;
-	case State::StartAsEP:
-	{
+		commproto::sockets::SocketHandle reconnect = socket->acceptNext();
+		if (responseAttempts % 100 == 0) {
+			LOG_INFO("Attempt #%d waiting for auth connection", responseAttempts/100);
+		}
+		if (responseAttempts >= 600)
+		{
+			LOG_WARNING("Timed out while waiting for a connection");
+			state = BaseAuthState::SendAuthData;
+		}
+		++responseAttempts;
+		device.delayT(10);
+		
+		if (!reconnect || !reconnect->connected())
+		{
+			return;
+		}
 
+		LOG_INFO("Sending pointer size...");
+		int sent = 0;
+		do {
+			sent = reconnect->sendByte(sizeof(void*));
+			device.delayT(100);
+		} while (sent == 0);
+		LOG_INFO("Sending pointer size done");
+
+		delegator = build(*this);
+		builder = std::make_shared<commproto::parser::MessageBuilder>(reconnect, delegator);
+
+		responseAttempts = 0;
+		LOG_INFO("Waiting for authetification response");
+
+		while(responseAttempts <=10)
+		{
+			LOG_INFO("Attempt #%d to read", responseAttempts);
+			builder->pollAndReadTimes(100);
+			device.delayT(6000);
+			++responseAttempts;
+		}
+		LOG_WARNING("Timed out while waiting for a response");
+		state = BaseAuthState::SendAuthData;
+		reconnect->shutdown();
+		return;
 	}
-	return;
+	default:;
 	}
 }
 
-void Thermostat::accept(const APData& data)
+void BaseEndpointAuth::accept(const APData& data)
 {
 	device.saveAPData(data);
 	LOG_INFO("Got authentification data");
-	LOG_INFO("Server SSID:\"%s\" PASS:\"%s\" ADDR:%s:%d",data.ssid,data.password,data.addr,data.port);
+	LOG_INFO("Server SSID:\"%s\" PASS:\"%s\" ADDR:%s:%d", data.ssid.c_str(), data.password.c_str(), data.addr.c_str(), data.port);
 	device.reboot();
 }
 
-void Thermostat::reject()
+void BaseEndpointAuth::reject()
 {
-	state = State::SendAuthData;
+	state = BaseAuthState::SendAuthData;
 	delegator.reset();
 	builder.reset();
 	mapper.reset();

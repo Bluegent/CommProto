@@ -57,4 +57,9 @@ namespace commproto
 	}
 }
 
+#define MAKE_SINGLE_PROP_CHAIN(Name, Type1)												\
+	MAKE_SINGLE_PROP_MESSAGE(Name,Type1);												\
+	using Name ## Parser = commproto::messages::SinglePropertyParser<Type1>;			\
+	using Name ## Serializer = commproto::messages::SinglePropertySerializer<Type1>;	\
+
 #endif// SINGLE_PROPERTY_CHAIN_H

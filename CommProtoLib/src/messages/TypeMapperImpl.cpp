@@ -21,8 +21,9 @@ namespace commproto
 
 			uint32_t id = counter++;
 			types.emplace(type, id);
-			observer->notify(type, id);
-			
+			if (id != 0) {
+				observer->notify(type, id);
+			}
 			return id;
 		}
 

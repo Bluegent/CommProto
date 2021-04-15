@@ -1,8 +1,7 @@
 #ifndef COMMPROTO_TYPE_MAPPER_OBSERVER_H
 #define COMMPROTO_TYPE_MAPPER_OBSERVER_H
-#include <commproto/sockets/Socket.h>
+#include <commproto/stream/Stream.h>
 #include <commproto/parser/MappingType.h>
-#include "commproto/logger/Logging.h"
 
 namespace commproto
 {
@@ -12,8 +11,8 @@ namespace commproto
 		class TypeMapperObserver
 		{
 		public:
-			TypeMapperObserver(const sockets::SocketHandle & socket_)
-				: socket{ socket_ }
+			TypeMapperObserver(const stream::StreamHandle & stream_)
+				: stream{ stream_ }
 			{
 
 			}
@@ -24,11 +23,10 @@ namespace commproto
 				{
 					return;
 				}
-				LOG_DEBUG("Observed a new type mapping, %s - %d", name.c_str(), id);
-				socket->sendBytes(MappingTypeSerializer::serialize(std::move(MappingType(name, id))));
+				stream->sendBytes(MappingTypeSerializer::serialize(std::move(MappingType(name, id))));
 			}
 		private:
-			sockets::SocketHandle socket;
+			stream::StreamHandle stream;
 		};
 		using TypeMapperObserverHandle = std::shared_ptr<TypeMapperObserver>;
 	}
