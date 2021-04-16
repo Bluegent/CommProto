@@ -27,8 +27,6 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
         src/*.h
         )
 
-
-
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SRC})
 
 foreach(source IN LISTS PROJECT_SRC)

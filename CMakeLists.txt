@@ -18,12 +18,10 @@ endif()
 set(CMAKE_FOLDER "Libs")
 add_subdirectory(CommProtoLib)
 add_subdirectory(CommProtoService)
+add_subdirectory(CommProtoDevice)
 
 set(CMAKE_FOLDER "Runnable")
 add_subdirectory(Dispatch)
 add_subdirectory(Endpoint)
 add_subdirectory(UXService)
 add_subdirectory(AuthService)
-
-set(CMAKE_FOLDER "Embedded")
-add_subdirectory(DeviceImplementations)

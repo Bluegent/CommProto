@@ -3,9 +3,19 @@ import sys
 from shutil import copytree
 from shutil import rmtree
 from shutil import copy
+from shutil import copy2
 import os
 import re
 
+
+def copytree_(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copytree(s, d, symlinks, ignore)
+        else:
+            copy2(s, d)
 
 def copy_dir_contents(source,dst):
     src_files = os.listdir(source)
@@ -67,5 +77,7 @@ cqSrc = src+"/ConcurrentQueue/moodycamel"
 copy_contents_cond(cqSrc, dst,["CMakeLists.txt"])
 
 # copy stuff from DeviceImplementations
-cqSrc = src+"/DeviceImplementations"
-copy_contents_cond(cqSrc, dst,["CMakeLists.txt","main.cpp"])
+devInterface = src+"/CommProtoDevice/interface/commproto"
+srcDir = src +"/CommProtoDevice/src"
+copytree_(devInterface, os.path.join(dst,"commproto"))
+copy_dir_contents(srcDir, dst)
