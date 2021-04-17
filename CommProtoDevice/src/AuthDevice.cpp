@@ -134,8 +134,9 @@ namespace commproto
 				LOG_ERROR("Incomplete reply for connection %s", name.c_str());
 				return;
 			}
-
-			sockets::SocketHandle connection = device.connectTo(name, "COMPROTO", "192.168.1.10", 9001);
+			ConnectionData data = ConnectionData::defaultData;
+			data.ssid = name;
+			sockets::SocketHandle connection = device.connectTo(data);
 			if (!connection)
 			{
 				LOG_INFO("Could not connect to network \"%s\"", name.c_str());
@@ -168,7 +169,9 @@ namespace commproto
 		void AuthDevice::responseDeny(const std::string& name)
 		{
 			LOG_INFO("Rejected device \"%s\", sending message", name.c_str());
-			sockets::SocketHandle connection = device.connectTo(name, "COMPROTO", "192.168.1.10", 9001);
+			ConnectionData data = ConnectionData::defaultData;
+			data.ssid = name;
+			sockets::SocketHandle connection = device.connectTo(data);
 			if (!connection)
 			{
 				LOG_INFO("Could not connect to network \"%s\"", name.c_str());
@@ -209,7 +212,9 @@ namespace commproto
 				{
 					finishedReading = false;
 					targetDevice.reset();
-					sockets::SocketHandle connection = device.connectTo(name, "COMPROTO", "192.168.1.10", 9001);
+					ConnectionData data = ConnectionData::defaultData;
+					data.ssid = name;
+					sockets::SocketHandle connection = device.connectTo(data);
 					if (!connection)
 					{
 						LOG_WARNING("Could not connect to network %s", name.c_str());

@@ -5,7 +5,7 @@
 
 namespace commproto
 {
-	namespace endpointdevice 
+	namespace endpointdevice
 	{
 		parser::ParserDelegatorHandle build(BaseEndpointAuth& device)
 		{
@@ -23,18 +23,54 @@ namespace commproto
 			, state{ BaseAuthState::SendAuthData }
 			, responseAttempts{ 0 }
 			, thisDevice(details)
+			, isAP(true)
 		{
 
 		}
 
 		void BaseEndpointAuth::setup()
 		{
+			
 			serial = device.getStream(115200);
+			device.initFs();
+			isAP = !device.readAPData();
+
+			LOG_INFO();
+			LOG_INFO("Starting base endpoint setup...");
+			if (isAP)
+			{
+				LOG_INFO("Failed to read auth data from memory, starting as access point.");
+				setupAP();
+			}
+			else
+			{
+				auto data = device.getAuthData();
+				LOG_INFO("Starting as client to %s(pwd:%s), dispatch: %s:%d",data.ssid.c_str(),data.password.c_str(),data.addr.c_str(),data.port);
+				setupDevice();
+			}
+		}
+
+		void BaseEndpointAuth::loop()
+		{
+			if (isAP)
+			{
+				loopAP();
+			}
+			else
+			{
+				loopDevice();
+			}
 		}
 
 
 
-		void BaseEndpointAuth::loop()
+		void BaseEndpointAuth::setupAP()
+		{
+		}
+
+
+
+		void BaseEndpointAuth::loopAP()
 		{
 			switch (state)
 			{
@@ -128,11 +164,20 @@ namespace commproto
 			}
 		}
 
+		void BaseEndpointAuth::setupDevice()
+		{
+		}
+
+		void BaseEndpointAuth::loopDevice()
+		{
+			LOG_INFO("Pretend I'm a device :)");
+			device.delayT(10000);
+		}
+
 		void BaseEndpointAuth::accept(const authdevice::ConnectionData& data)
 		{
 			device.saveAPData(data);
 			LOG_INFO("Got authentification data");
-			LOG_INFO("Server SSID:\"%s\" PASS:\"%s\" ADDR:%s:%d", data.ssid.c_str(), data.password.c_str(), data.addr.c_str(), data.port);
 			device.reboot();
 		}
 

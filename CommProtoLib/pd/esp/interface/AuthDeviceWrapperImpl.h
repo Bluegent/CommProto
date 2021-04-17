@@ -32,13 +32,13 @@ namespace commproto
 				return networks;
 			}
 
-			commproto::sockets::SocketHandle connectTo(const std::string& ssid, const std::string& pwd, const std::string& addr, const uint32_t port) override
+			commproto::sockets::SocketHandle connectTo(const ConnectionData & data) override
 			{
-				LOG_INFO("Attempting to connect to wifi network %s", ssid.c_str());
+				LOG_INFO("Attempting to connect to wifi network %s", data.ssid.c_str());
 				int status = WL_IDLE_STATUS;
 				int attempt = 0;
 				int maxAttempts = 5;
-				WiFi.begin(ssid.c_str(), pwd.c_str());
+				WiFi.begin(data.ssid.c_str(), data.password.c_str());
 				do {
 					LOG_INFO("Attempt #%d", attempt + 1);
 					status = WiFi.waitForConnectResult();
@@ -51,11 +51,11 @@ namespace commproto
 					LOG_INFO("Connection attempt unsuccesful");
 					return nullptr;
 				}
-				LOG_INFO("Connection successful wifi network %s", ssid.c_str());
+				LOG_INFO("Connection successful wifi network %s", data.ssid.c_str());
 				commproto::sockets::SocketHandle client = std::make_shared<commproto::sockets::SocketImpl>();
-				bool connected = client->initClient(addr, port);
+				bool connected = client->initClient(data.addr, data.port);
 				if (!connected) {
-					LOG_WARNING("Could not connect to %s:%d", addr.c_str(), port);
+					LOG_WARNING("Could not connect to %s:%d", data.addr.c_str(), data.port);
 					return nullptr;
 				}
 				return client;

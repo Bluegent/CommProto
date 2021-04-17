@@ -4,11 +4,11 @@
 #include <commproto/authdevice/AuthDevice.h>
 #include <commproto/endpointdevice/BaseEndpointAuth.h>
 
-class WindowsAuthDeviceWrapper : public AuthDeviceWrapper
+class WindowsAuthDeviceWrapper : public commproto::authdevice::AuthDeviceWrapper
 {
 public:
 	std::vector<std::string> listNetworks() override { return std::vector<std::string>(); }
-	commproto::sockets::SocketHandle connectTo(const std::string& ssid, const std::string& pwd, const std::string& addr, const uint32_t port) override { return nullptr; }
+	commproto::sockets::SocketHandle connectTo(const commproto::authdevice::ConnectionData& data) override { return nullptr; }
 	commproto::serial::SerialHandle getSerial(const int speed) override {return nullptr; }
 	void setLED(const bool on) override{}
 	void delayT(const uint32_t delay) override{}
@@ -29,6 +29,8 @@ public:
 	void saveAPData(const commproto::authdevice::ConnectionData& data) override {}
 	void delayT(uint32_t msec) override { }
 	void reboot() override {}
+	bool readAPData() override { return false; }
+	void initFs() override{};
 };
 
 int main(int argc, const char * argv[])

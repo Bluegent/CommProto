@@ -25,7 +25,6 @@ namespace commproto
 			std::string description;
 		};
 
-		// { "Thermostat","Commproto","A simple device that provides data about temperature, humidity and the possibility to start heating." };
 		class BaseEndpointAuth : public EndpointAuthRequestHandler
 		{
 		public:
@@ -34,6 +33,12 @@ namespace commproto
 			void loop();
 			void accept(const authdevice::ConnectionData& data) override;
 			void reject() override;
+
+		protected:
+			void setupAP();
+			void loopAP();
+			virtual void setupDevice();
+			virtual void loopDevice();
 		private:
 			BaseEndpointWrapper& device;
 			stream::StreamHandle serial;
@@ -44,6 +49,7 @@ namespace commproto
 			parser::ParserDelegatorHandle delegator;
 			uint32_t responseAttempts; 
 			const DeviceDetails thisDevice;
+			bool isAP;
 
 		};
 	}
