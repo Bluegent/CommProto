@@ -10,7 +10,10 @@ namespace commproto
 		class BaseControl
 		{
 		public:
-			BaseControl(const std::string& name_, const uint32_t id_) : name{ name_ } , id{id_}
+			BaseControl(const std::string& name_, const uint32_t id_)
+				: name{ name_ }
+				, id{ id_ }
+				, enabled{ true }
 			{
 			}
 
@@ -23,9 +26,16 @@ namespace commproto
 			{
 				return id;
 			}
+
+			void setState(const bool enabled_)
+			{
+				enabled = enabled_;
+			}
+
 		protected:
 			const std::string name;
 			const uint32_t id;
+			bool enabled;
 		};
 
 	}

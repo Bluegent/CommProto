@@ -151,9 +151,6 @@ int main(int argc, const char * argv[])
 		builder->pollAndRead();
 	} while (SenderMapping::getId() == 0);
 
-
-	socket->sendBytes(controller->serialize());
-
 	for (uint32_t index = 0; index < 100; ++index)
 	{
 		builder->pollAndRead();

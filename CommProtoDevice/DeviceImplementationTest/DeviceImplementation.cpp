@@ -30,7 +30,8 @@ public:
 	void delayT(uint32_t msec) override { }
 	void reboot() override {}
 	bool readAPData() override { return false; }
-	void initFs() override{};
+	void initFs() override{}
+	void resetAPData() override{}
 };
 
 int main(int argc, const char * argv[])

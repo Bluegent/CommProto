@@ -29,8 +29,7 @@ namespace commproto
 		}
 
 		void BaseEndpointAuth::setup()
-		{
-			
+		{			
 			serial = device.getStream(115200);
 			device.initFs();
 			isAP = !device.readAPData();
@@ -172,6 +171,29 @@ namespace commproto
 		{
 			LOG_INFO("Pretend I'm a device :)");
 			device.delayT(10000);
+		}
+
+		sockets::SocketHandle BaseEndpointAuth::tryConnect(const uint32_t attempts) const
+		{
+			if(isAP)
+			{
+				return nullptr;
+			}
+
+			authdevice::ConnectionData connection = device.getAuthData();
+			LOG_INFO("Attempting to connect to dispatch service");
+			sockets::SocketHandle client;
+			for(uint32_t attempt = 0;attempt < attempts; ++attempt)
+			{
+				client = device.connect(connection);
+				if(!client)
+				{
+					LOG_INFO("Attempt #%d failed", attempt);
+				}
+				device.delayT(500);
+			}
+
+			return client;
 		}
 
 		void BaseEndpointAuth::accept(const authdevice::ConnectionData& data)

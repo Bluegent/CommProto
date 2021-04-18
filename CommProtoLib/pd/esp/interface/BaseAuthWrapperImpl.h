@@ -169,6 +169,16 @@ namespace commproto
 				return true;
 
 			}
+            
+            void resetAPData() override
+            {
+                 bool success = LittleFS.remove("/config.txt");
+                 if(!success)
+                 {
+                     LOG_ERROR("Could not delete config file");
+                 }
+                 
+            }
 		private:
 			authdevice::ConnectionData apData;
 			bool readAuth;

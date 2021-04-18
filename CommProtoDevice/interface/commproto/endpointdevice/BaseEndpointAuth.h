@@ -28,28 +28,32 @@ namespace commproto
 		class BaseEndpointAuth : public EndpointAuthRequestHandler
 		{
 		public:
-			BaseEndpointAuth(BaseEndpointWrapper& wrapper, const DeviceDetails& details );
+			BaseEndpointAuth(BaseEndpointWrapper& wrapper, const DeviceDetails& details);
 			void setup();
 			void loop();
 			void accept(const authdevice::ConnectionData& data) override;
 			void reject() override;
-
 		protected:
-			void setupAP();
-			void loopAP();
 			virtual void setupDevice();
 			virtual void loopDevice();
-		private:
+			sockets::SocketHandle tryConnect(const uint32_t attempts = 10) const;
+			bool isAP;
 			BaseEndpointWrapper& device;
+
+		private:
+			void setupAP();
+			void loopAP();
+
+			
 			stream::StreamHandle serial;
 			BaseAuthState state;
 			sockets::SocketHandle socket;
 			messages::TypeMapperHandle mapper;
 			parser::MessageBuilderHandle builder;
 			parser::ParserDelegatorHandle delegator;
-			uint32_t responseAttempts; 
+			uint32_t responseAttempts;
 			const DeviceDetails thisDevice;
-			bool isAP;
+			
 
 		};
 	}

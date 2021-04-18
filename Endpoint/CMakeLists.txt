@@ -1,4 +1,4 @@
-project(Endpoint)
+project(EndpointSimulator)
 
 include (${CMAKE_SOURCE_DIR}/cmake/utility.cmake)
 

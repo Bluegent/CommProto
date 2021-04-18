@@ -19,6 +19,7 @@ namespace commproto
 			virtual sockets::SocketHandle startAsAP(const authdevice::ConnectionData & data) = 0;
 			virtual sockets::SocketHandle connect(const authdevice::ConnectionData& data) = 0;
 			virtual void saveAPData(const authdevice::ConnectionData& data) = 0;
+			virtual void resetAPData() = 0;
 			virtual void delayT(uint32_t msec) = 0;
 			virtual void reboot() = 0;
 			virtual bool readAPData() = 0;
