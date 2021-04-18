@@ -57,5 +57,15 @@ namespace commproto
 	    {
 		    device.scan();
 	    }
+
+	    RebootHandler::RebootHandler(AuthRequestHandler& device_)
+			: device(device_)
+	    {
+	    }
+
+	    void RebootHandler::handle(messages::MessageBase&& data)
+	    {
+			device.reboot();
+	    }
     }
 }

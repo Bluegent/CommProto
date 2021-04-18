@@ -95,7 +95,7 @@ namespace commproto
 				sstream << "<span class=\"c_label\">" << control.getName() << ": " << control.getText() << "</span>";
 				return sstream.str();
 			}
-
+			 
 
 			template <>
 			inline std::string Generator::generate(const NotificationImpl& control) const

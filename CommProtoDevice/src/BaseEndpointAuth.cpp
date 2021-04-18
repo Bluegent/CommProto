@@ -19,11 +19,11 @@ namespace commproto
 		}
 
 		BaseEndpointAuth::BaseEndpointAuth(BaseEndpointWrapper& wrapper, const DeviceDetails& details)
-			: device(wrapper)
+			: isAP(true)
+			, device(wrapper)
 			, state{ BaseAuthState::SendAuthData }
 			, responseAttempts{ 0 }
 			, thisDevice(details)
-			, isAP(true)
 		{
 
 		}
@@ -117,16 +117,16 @@ namespace commproto
 			case BaseAuthState::WaitForReconnect:
 			{
 				sockets::SocketHandle reconnect = socket->acceptNext();
-				if (responseAttempts % 100 == 0) {
+				if (responseAttempts % 600 == 0) {
 					LOG_INFO("Attempt #%d waiting for auth connection", responseAttempts / 100);
 				}
-				if (responseAttempts >= 600)
+				if (responseAttempts >= 5*600)
 				{
 					LOG_WARNING("Timed out while waiting for a connection");
 					state = BaseAuthState::SendAuthData;
 				}
 				++responseAttempts;
-				device.delayT(10);
+				device.delayT(100);
 
 				if (!reconnect || !reconnect->connected())
 				{
@@ -151,7 +151,7 @@ namespace commproto
 				{
 					LOG_INFO("Attempt #%d to read", responseAttempts);
 					builder->pollAndReadTimes(100);
-					device.delayT(6000);
+					device.delayT(1000);
 					++responseAttempts;
 				}
 				LOG_WARNING("Timed out while waiting for a response");
@@ -182,16 +182,8 @@ namespace commproto
 
 			authdevice::ConnectionData connection = device.getAuthData();
 			LOG_INFO("Attempting to connect to dispatch service");
-			sockets::SocketHandle client;
-			for(uint32_t attempt = 0;attempt < attempts; ++attempt)
-			{
-				client = device.connect(connection);
-				if(!client)
-				{
-					LOG_INFO("Attempt #%d failed", attempt);
-				}
-				device.delayT(500);
-			}
+			sockets::SocketHandle client = device.connect(connection,attempts);
+
 
 			return client;
 		}

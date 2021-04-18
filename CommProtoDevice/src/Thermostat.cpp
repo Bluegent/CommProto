@@ -17,7 +17,8 @@ namespace commproto
 			if(!client)
 			{
 				LOG_INFO("All connection attempts failed, ressetting configuration and restarting in AP mode");
-				device.resetAPData();
+				//device.resetAPData();
+				device.reboot();
 			}
 			
 		}
@@ -27,6 +28,7 @@ namespace commproto
 			if(!client)
 			{
 				LOG_INFO("Something went wrong during device setup, please reset.");
+				return;
 			}
 
 			int32_t temp = thermo.getTemp();

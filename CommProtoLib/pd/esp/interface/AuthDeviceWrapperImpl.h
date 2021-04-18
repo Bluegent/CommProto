@@ -18,7 +18,12 @@ namespace commproto
 				pinMode(LED_BUILTIN, OUTPUT);
 				digitalWrite(LED_BUILTIN, HIGH);
 			}
-
+            
+			void reboot() override {
+				Serial.println("Rebooting...");
+				ESP.restart();
+			}
+            
 			std::vector<std::string> listNetworks() override
 			{
 				int numberOfNetworks = WiFi.scanNetworks();
@@ -48,7 +53,7 @@ namespace commproto
 
 				if (status != WL_CONNECTED)
 				{
-					LOG_INFO("Connection attempt unsuccesful");
+					LOG_INFO("Connection attempt unsuccesful with code %d", status);
 					return nullptr;
 				}
 				LOG_INFO("Connection successful wifi network %s", data.ssid.c_str());

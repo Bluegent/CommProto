@@ -19,6 +19,7 @@ namespace commproto
 			virtual sockets::SocketHandle connectTo(const ConnectionData & data) = 0;
 			virtual void delayT(const uint32_t delay) = 0;
 			virtual void setLED(const bool on) = 0;
+			virtual void reboot() = 0;
 		};
 	}
 }

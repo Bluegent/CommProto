@@ -9,8 +9,6 @@
 #include <LittleFS.h>
 #include <string>
 
-void(*resetFunc) (void) = 0;
-
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 
@@ -68,29 +66,48 @@ namespace commproto
 				return socket;
 			}
 
-			commproto::sockets::SocketHandle connect(const authdevice::ConnectionData& data) override
+			commproto::sockets::SocketHandle connect(const authdevice::ConnectionData& data, const uint32_t attempts) override
 			{
-				LOG_INFO("Attempting to connect to wifi network %s", data.ssid.c_str());
+                WiFi.disconnect();
+                WiFi.mode(WIFI_STA);
+                
+				LOG_INFO("Attempting to connect to wifi network \"%s\"", data.ssid.c_str());
 				int status = WL_IDLE_STATUS;
 				int attempt = 0;
-				int maxAttempts = 5;
 				WiFi.begin(data.ssid.c_str(), data.password.c_str());
 				do {
-					LOG_INFO("Attempt #%d", attempt + 1);
+					LOG_INFO("Attempt #%d connecting to wifi", attempt + 1);
 					status = WiFi.waitForConnectResult();
 					delay(500);
 					++attempt;
-				} while (status != WL_CONNECTED && attempt != maxAttempts);
+				} while (status != WL_CONNECTED && attempt != attempts);
 
 				if (status != WL_CONNECTED)
 				{
-					LOG_INFO("Connection attempt unsuccesful");
+					LOG_INFO("Connection attempt unsuccesful with code %d", status);
 					return nullptr;
 				}
+                attempt = 0;
 				LOG_INFO("Connection successful wifi network %s", data.ssid.c_str());
-				commproto::sockets::SocketHandle client = std::make_shared<commproto::sockets::SocketImpl>();
-				bool connected = client->initClient(data.addr, data.port);
-				if (!connected) {
+				commproto::sockets::SocketHandle client;
+                LOG_INFO("Attempting to connect to dispatch at %s:%d", data.addr.c_str(),data.port);
+                
+                bool connected = false;
+                do{
+                    LOG_INFO("Attempt #%d connecting to dispatch", attempt + 1);
+                    client = std::make_shared<commproto::sockets::SocketImpl>();
+                    client->initClient(data.addr, data.port);
+                    connected = client->connected();
+                    
+                    ++attempt;
+                    if(attempt == 100)
+                    {
+                        break;
+                    }
+                    delay(1000);
+				}while(!connected); 
+                
+                if (!client->connected()) {
 					LOG_WARNING("Could not connect to %s:%d", data.addr.c_str(), data.port);
 					return nullptr;
 				}
@@ -103,12 +120,12 @@ namespace commproto
 			}
 			void reboot() override {
 				Serial.println("Rebooting...");
-				resetFunc();
+				ESP.restart();
 			}
 
 			void saveAPData(const authdevice::ConnectionData& data) override
 			{
-				LOG_INFO("Saving hub AP data");
+				LOG_INFO("Saving hub AP data"); 
 				File f = LittleFS.open("/config.txt", "w");
 				if (!f)
 				{
@@ -150,8 +167,14 @@ namespace commproto
 					return false;
 				}
 				apData.ssid = lines[0].c_str();
+                apData.ssid = apData.ssid.substr(0,apData.ssid.size()-1);
+                
 				apData.password = lines[1].c_str();
+                apData.password = apData.password.substr(0,apData.password.size()-1);
+                
 				apData.addr = lines[2].c_str();
+                apData.addr = apData.addr.substr(0,apData.addr.size()-1);
+                
 				apData.port = lines[3].toInt();
 				if (apData.port == 0)
 				{

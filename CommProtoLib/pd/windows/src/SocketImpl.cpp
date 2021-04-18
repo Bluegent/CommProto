@@ -170,12 +170,20 @@ namespace commproto {
 			hints.ai_socktype = SOCK_STREAM;
 			hints.ai_protocol = IPPROTO_TCP;
 			hints.ai_flags = AI_PASSIVE;
-			hints.ai_addr;
 			std::stringstream stream;
 			stream << port;
+			int iResult;
 
+			if(addr.compare("127.0.0.1")==0 || addr.compare("localhost")==0)
+			{
+				iResult = getaddrinfo(NULL, stream.str().c_str(), &hints, &result);
+			}
+			else
+			{
+				iResult = getaddrinfo(addr.c_str(), stream.str().c_str(), &hints, &result);
+			}
 			// resolve our own address
-			int iResult = getaddrinfo(addr.c_str(), stream.str().c_str(), &hints, &result);
+			
 			if (iResult != 0) {
 				return false;
 			}

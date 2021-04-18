@@ -15,6 +15,7 @@
 
 #ifdef _WIN32
 #define SPEED CBR_115200
+
 #elif	
 #include <termios.h>
 #define SPEED B115200
@@ -41,7 +42,6 @@ struct APData
 	std::string manufacturer;
 	std::string description;
 };
-
 
 class AuthService
 {
@@ -86,9 +86,9 @@ public:
 	void accept(const std::string & name)
 	{
 		std::vector<std::string> props;
-		props.push_back("CommProtoHub"); //ssid of hub
-		props.push_back("commprotopassword"); //password for hub
-		props.push_back("192.168.1.8"); //dispatch address
+		props.push_back("EstiNebun"); //ssid of hub
+		props.push_back("01LMS222"); //password for hub
+		props.push_back("192.168.1.2"); //dispatch address
 		uint32_t port = 25565; //dispatch port
 		commproto::Message accept = commproto::device::DeviceAuthAcceptSerializer::serialize(std::move(commproto::device::DeviceAuthAccept(authorizeId,name,props,port)));
 		stream->sendBytes(accept);
@@ -150,6 +150,11 @@ void ScanFinishedHandler::handle(commproto::messages::MessageBase&& data)
 	service->setScanFinished();
 }
 
+class KeepAliveHandler : public commproto::parser::Handler
+{
+public:
+	void handle(commproto::messages::MessageBase&& data) override{}
+};
 
 
 commproto::parser::ParserDelegatorHandle build(const AuthServiceHandle & service)
@@ -159,6 +164,7 @@ commproto::parser::ParserDelegatorHandle build(const AuthServiceHandle & service
 	commproto::parser::addParserHandlerPair<commproto::logger::LogParser, commproto::logger::LogMessage>(delegator, std::make_shared<commproto::logger::LogHandler>());
 	commproto::parser::addParserHandlerPair<commproto::device::DeviceAuthRequestParser, commproto::device::DeviceAuthRequestMessage>(delegator, std::make_shared<DeviceReqHandler>(service));
 	commproto::parser::addParserHandlerPair<commproto::device::ScanFinishedParser, commproto::device::ScanFinished>(delegator, std::make_shared<ScanFinishedHandler>(service));
+	commproto::parser::addParserHandlerPair<commproto::device::KeepAliveParser, commproto::device::KeepAlive>(delegator, std::make_shared<KeepAliveHandler>());
 
 	return delegator;
 }
@@ -190,7 +196,6 @@ int main(int argc, const char * argv[]) {
 		commproto::logger::setLoggable(&logger);
 	}
 
-
 	commproto::serial::SerialHandle serial = std::make_shared<commproto::serial::SerialInterface>();
 
 	LOG_INFO("Authentification service connecting to device %s on baudrate %d...", device, baud);
@@ -215,7 +220,6 @@ int main(int argc, const char * argv[]) {
 		builder->pollAndReadTimes(100);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	} while (!delegator->hasMapping<commproto::logger::LogMessage>());
-
 
 	auto now = std::chrono::system_clock::now();
 	auto then = std::chrono::system_clock::now();

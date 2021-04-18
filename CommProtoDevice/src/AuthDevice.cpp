@@ -8,6 +8,7 @@
 #include <commproto/authdevice/AuthHandlers.h>
 #include <algorithm>
 #include <commproto/logger/LoggingMessage.h>
+#include "commproto/messages/KeepAlive.h"
 
 
 namespace commproto
@@ -72,6 +73,7 @@ namespace commproto
 					provider = std::make_shared<IdProvider>(mapper);
 					builder = std::make_shared<parser::MessageBuilder>(serial, buildSerialDelegator(*this));
 
+
 					LOG_INFO("Service connection established");
 					serviceConnected = true;
 
@@ -88,6 +90,16 @@ namespace commproto
 			if (builder)
 			{
 				builder->pollAndReadTimes(100);
+			}
+
+		
+			if (serial) {
+				Message keepAlive = device::KeepAliveSerializer::serialize(messages::KeepAliveMessage(provider->keepAliveId));
+				int result = serial->sendBytes(keepAlive);
+				if (result != keepAlive.size())
+				{
+					device.reboot();
+				}
 			}
 
 			device.delayT(1000);
@@ -149,10 +161,7 @@ namespace commproto
 				++attempts;
 				device.delayT(100);
 			} while (attempts < 5 && !connection->connected());
-
-
-			LOG_INFO("Socket open and connected(? %s) \"%s\"", (connection->connected() ? "true" : "false"), name.c_str());
-
+			device.delayT(100);
 			connection->sendByte(sizeof(void*));
 			messages::TypeMapperHandle connectionMapper = messages::TypeMapperFactory::build(connection);
 			uint32_t id = connectionMapper->registerType<device::ConnectionAuthorizedMessage>();
@@ -163,6 +172,8 @@ namespace commproto
 			auto it = std::find(previouslyScanned.begin(), previouslyScanned.end(), name);
 			previouslyScanned.erase(it);
 			LOG_INFO("Sent approval message to \"%s\"", name.c_str());
+			device.delayT(500);
+			connection->shutdown();
 
 		}
 
@@ -184,15 +195,21 @@ namespace commproto
 				++attempts;
 				device.delayT(100);
 			} while (attempts < 5 && !connection->connected());
-
+			device.delayT(100);
 			connection->sendByte(sizeof(void*));
 			messages::TypeMapperHandle connectionMapper = messages::TypeMapperFactory::build(connection);
 			uint32_t id = connectionMapper->registerType<device::ConnectionRejectedMessage>();
 
 			Message  msg = device::ConnectionRejectedSerializer::serialize(device::ConnectionRejectedMessage(id));
 			sendMessage(connection, msg);
+			device.delayT(500);
+			connection->shutdown();
 		}
 
+		void AuthDevice::reboot()
+		{
+			device.reboot();
+		}
 
 
 		void AuthDevice::scanNetworks()

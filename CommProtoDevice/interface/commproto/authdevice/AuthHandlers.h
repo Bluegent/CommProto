@@ -46,6 +46,16 @@ namespace commproto
 			AuthRequestHandler& device;
 		};
 
+
+		class RebootHandler : public parser::Handler
+		{
+		public:
+			RebootHandler(AuthRequestHandler& device_);
+			void handle(messages::MessageBase&& data) override;
+		private:
+			AuthRequestHandler& device;
+		};
+
     }
 }
 

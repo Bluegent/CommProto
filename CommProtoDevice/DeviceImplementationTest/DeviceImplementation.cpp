@@ -12,6 +12,7 @@ public:
 	commproto::serial::SerialHandle getSerial(const int speed) override {return nullptr; }
 	void setLED(const bool on) override{}
 	void delayT(const uint32_t delay) override{}
+	void reboot() override {}
 };
 
 
@@ -25,13 +26,16 @@ public:
 
 	commproto::authdevice::ConnectionData getAuthData() override { return commproto::authdevice::ConnectionData(); }
 	commproto::sockets::SocketHandle startAsAP(const commproto::authdevice::ConnectionData& data) override { return nullptr; }
-	commproto::sockets::SocketHandle connect(const commproto::authdevice::ConnectionData& data) override { return nullptr; }
 	void saveAPData(const commproto::authdevice::ConnectionData& data) override {}
 	void delayT(uint32_t msec) override { }
 	void reboot() override {}
 	bool readAPData() override { return false; }
 	void initFs() override{}
 	void resetAPData() override{}
+	commproto::sockets::SocketHandle connect(const commproto::authdevice::ConnectionData& data, const uint32_t attempts) override
+	{
+		return nullptr;
+	}
 };
 
 int main(int argc, const char * argv[])

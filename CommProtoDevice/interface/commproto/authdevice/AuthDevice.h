@@ -22,6 +22,7 @@ namespace commproto
 			void scan() override;
 			void responseAccept(const std::string & name, const std::vector<std::string> & reply, const uint32_t port) override;
 			void responseDeny(const std::string & name) override;
+			void reboot() override;
 		private:
 			void scanNetworks();
 			bool alreadyScanned(const std::string & name);

@@ -33,6 +33,9 @@ namespace commproto
 		MAKE_SINGLE_PROP_CHAIN(DeviceAuthReject, std::string);
 		MAKE_EMPTY_CHAIN(ScanFinished);
 
+
+		MAKE_EMPTY_CHAIN(KeepAlive);
+
 	}
 
 	DEFINE_DATA_TYPE(device::DeviceDataMessage);
@@ -43,6 +46,7 @@ namespace commproto
 	DEFINE_DATA_TYPE(device::DeviceAuthAccept);
 	DEFINE_DATA_TYPE(device::DeviceAuthReject);
 	DEFINE_DATA_TYPE(device::ScanFinished);
+	DEFINE_DATA_TYPE(device::KeepAlive);
 }
 
 

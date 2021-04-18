@@ -17,10 +17,12 @@ namespace commproto
 			IdProvider(const messages::TypeMapperHandle &mapper)
 				: deviceAuthId{ mapper->registerType<device::DeviceAuthRequestMessage>() }
 				, finishScanId{ mapper->registerType<device::ScanFinished>() }
+				, keepAliveId{ mapper->registerType<device::KeepAlive>() }
 			{
 			}
 			const uint32_t deviceAuthId;
 			const uint32_t finishScanId;
+			const uint32_t keepAliveId;
 		};
 
 		using ProviderHandle = std::shared_ptr<IdProvider>;
@@ -34,6 +36,7 @@ namespace commproto
 			virtual void scan() = 0;
 			virtual void responseAccept(const std::string & name, const std::vector<std::string> & reply, const uint32_t port) = 0;
 			virtual void responseDeny(const std::string & name) = 0;
+			virtual void reboot() = 0;
 		};
 	}
 }
