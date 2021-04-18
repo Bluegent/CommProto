@@ -24,6 +24,7 @@ commproto::parser::ParserDelegatorHandle UXServiceProvider::provide(const std::s
 	auto controller = std::make_shared<commproto::control::ux::UIFactory>("UI", name, mapper, socket, id)->build();
 	commproto::control::ux::addParsers(delegator, controller);
 	controllers->addController(name, controller);
+	controller->requestState();
 
 	LOG_INFO("Added controller for connection \"%s\" - %d", name.c_str(), id);
 

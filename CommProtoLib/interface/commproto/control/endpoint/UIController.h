@@ -21,9 +21,11 @@ namespace commproto
 				virtual void addNotification(const NotificationHandle& notification) = 0;
 				virtual NotificationHandle getNotification(const uint32_t id) const = 0;
 				virtual void displayNotification(const uint32_t id) const = 0;
+				virtual void sendState() = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;
+
 		}
 
 	}

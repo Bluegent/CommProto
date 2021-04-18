@@ -23,7 +23,6 @@ namespace commproto
 
 		namespace ux
 		{
-
 			MAKE_DOUBLE_PROP_MESSAGE(NotificationResponseMessage, uint32_t, std::string);
 			using NotificationResponseSerializer = messages::DoublePropertySerializer<uint32_t, std::string>;
 			using NotificationResponseParser = messages::DoublePropertyParser<uint32_t, std::string>;

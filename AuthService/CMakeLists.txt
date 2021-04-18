@@ -3,7 +3,7 @@ project(AuthService)
 include (${CMAKE_SOURCE_DIR}/cmake/utility.cmake)
 
 add_executable(${PROJECT_NAME} 
-    main.cpp
+    auth_main.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} CommProtoService)

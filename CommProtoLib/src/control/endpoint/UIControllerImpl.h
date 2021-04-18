@@ -26,6 +26,7 @@ namespace commproto
 				void addNotification(const NotificationHandle& notification) override;
 				NotificationHandle getNotification(const uint32_t id) const override;
 				void displayNotification(const uint32_t id) const override;
+				void sendState() override;
 			private:
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;
@@ -33,6 +34,16 @@ namespace commproto
 				uint32_t idCounter;
 				sockets::SocketHandle socket;
 			};
+
+			class RequestStateHandler : public parser::Handler
+			{
+			public:
+				RequestStateHandler(const UIControllerHandle & controller);
+				void handle(messages::MessageBase&& data) override;
+			private:
+				UIControllerHandle controller;
+			};
+
 		}
 	}
 }

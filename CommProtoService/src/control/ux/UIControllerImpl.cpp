@@ -2,6 +2,7 @@
 #include <sstream>
 #include <commproto/logger/Logging.h>
 #include <algorithm>
+#include <commproto/control/ControllerChains.h>
 
 namespace commproto
 {
@@ -166,6 +167,12 @@ namespace commproto
 				}
 
 				pendingNotifications.erase(it);
+			}
+
+			void UIControllerImpl::requestState()
+			{
+				Message msg = RequestControllerStateSerializer::serialize(std::move(RequestControllerState(provider.requestStateId)));
+				send(msg);
 			}
 		}
 	}

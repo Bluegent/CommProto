@@ -36,6 +36,7 @@ namespace commproto
 				bool hasNotifications() override;
 				std::string getNotifications() override;
 				void dismissNotification(const uint32_t id) override;
+				void requestState() override;
 			private:
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;

@@ -27,6 +27,7 @@ namespace commproto
 				virtual bool hasNotifications() = 0;
 				virtual std::string getNotifications() = 0;
 				virtual void dismissNotification(const uint32_t id) = 0;
+				virtual void requestState() = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;

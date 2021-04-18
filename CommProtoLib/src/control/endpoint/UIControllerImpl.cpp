@@ -75,7 +75,7 @@ namespace commproto
 
 			void UIControllerImpl::send(Message msg)
 			{
-				if(!socket)
+				if (!socket)
 				{
 					return;
 				}
@@ -85,7 +85,7 @@ namespace commproto
 			void UIControllerImpl::addNotification(const NotificationHandle& notification)
 			{
 				const uint32_t id = notification->getId();
-				if(notifications.find(id) != notifications.end())
+				if (notifications.find(id) != notifications.end())
 				{
 					return;
 				}
@@ -96,7 +96,7 @@ namespace commproto
 			NotificationHandle UIControllerImpl::getNotification(const uint32_t id) const
 			{
 				auto it = notifications.find(id);
-				if(it == notifications.end())
+				if (it == notifications.end())
 				{
 					return nullptr;
 				}
@@ -111,6 +111,21 @@ namespace commproto
 					return;
 				}
 				socket->sendBytes(it->second->serializeDisplay());
+			}
+
+			void UIControllerImpl::sendState()
+			{
+				send(serialize());
+			}
+
+			RequestStateHandler::RequestStateHandler(const UIControllerHandle& controller_)
+				:controller{ controller_ }
+			{
+			}
+
+			void RequestStateHandler::handle(messages::MessageBase&& data)
+			{
+				controller->sendState();
 			}
 		}
 	}

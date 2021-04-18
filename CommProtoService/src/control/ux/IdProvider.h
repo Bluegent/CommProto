@@ -5,6 +5,7 @@
 #include <commproto/control/ButtonChains.h>
 #include <commproto/control/ToggleChains.h>
 #include <commproto/control/NotificationChains.h>
+#include <commproto/control/ControllerChains.h>
 
 namespace commproto
 {
@@ -20,6 +21,7 @@ namespace commproto
 					, toggleId{ mapper->registerType<ToggleMessage>() }
 					, sendToId{ mapper->registerType<service::SendToMessage>() }
 					, notificationResponseId{ mapper->registerType<NotificationResponseMessage>() }
+					, requestStateId{ mapper->registerType<RequestControllerState>() }
 				{
 
 				}
@@ -27,6 +29,7 @@ namespace commproto
 				const uint32_t toggleId;
 				const uint32_t sendToId;
 				const uint32_t notificationResponseId;
+				const uint32_t requestStateId;
 			};
 		}
 

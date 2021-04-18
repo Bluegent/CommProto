@@ -14,6 +14,7 @@ namespace commproto
 				: name{ name_ }
 				, id{ id_ }
 				, enabled{ true }
+				, shown{ true }
 			{
 			}
 
@@ -32,10 +33,16 @@ namespace commproto
 				enabled = enabled_;
 			}
 
+			void setDisplayState(const bool shown_)
+			{
+				shown = shown_;
+			}
+
 		protected:
 			const std::string name;
 			const uint32_t id;
 			bool enabled;
+			bool shown;
 		};
 
 	}
