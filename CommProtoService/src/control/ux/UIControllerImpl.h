@@ -50,6 +50,26 @@ namespace commproto
 				std::vector<uint32_t> pendingNotifications;
 				std::mutex notificationMutex;
 			};
+
+
+			class ControlStateHandler: public parser::Handler
+			{
+			public:
+				ControlStateHandler(const UIControllerHandle & controller_);
+				void handle(messages::MessageBase&& data) override;
+			private:
+				UIControllerHandle controller;
+			};
+
+
+			class ControlShownHandler : public parser::Handler
+			{
+			public:
+				ControlShownHandler(const UIControllerHandle & controller_);
+				void handle(messages::MessageBase&& data) override;
+			private:
+				UIControllerHandle controller;
+			};
 		}
 	}
 }

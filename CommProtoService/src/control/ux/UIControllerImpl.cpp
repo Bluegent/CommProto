@@ -7,7 +7,7 @@
 namespace commproto
 {
 	namespace control {
-	
+
 		namespace ux
 		{
 
@@ -18,7 +18,7 @@ namespace commproto
 				, socket{ socket_ }
 				, connectionId{ id }
 				, update{ true }
-				, hasNotif{false}
+				, hasNotif{ false }
 			{
 			}
 
@@ -103,7 +103,7 @@ namespace commproto
 
 			void UIControllerImpl::addNotification(const NotificationHandle& notification)
 			{
-				const uint32_t id = notification->getId();		
+				const uint32_t id = notification->getId();
 				if (notifications.find(id) != notifications.end())
 				{
 					return;
@@ -130,9 +130,9 @@ namespace commproto
 					return;
 				}
 				std::lock_guard<std::mutex> lock(notificationMutex);
-                pendingNotifications.push_back(id);
+				pendingNotifications.push_back(id);
 				hasNotif = true;
-								
+
 			}
 
 			bool UIControllerImpl::hasNotifications()
@@ -144,10 +144,10 @@ namespace commproto
 			{
 				std::stringstream stream;
 				std::lock_guard<std::mutex> lock(notificationMutex);
-				for(auto id : pendingNotifications)
+				for (auto id : pendingNotifications)
 				{
 					auto it = notifications.find(id);
-					if(it == notifications.end())
+					if (it == notifications.end())
 					{
 						continue;
 					}
@@ -160,8 +160,8 @@ namespace commproto
 			void UIControllerImpl::dismissNotification(const uint32_t id)
 			{
 				std::lock_guard<std::mutex> lock(notificationMutex);
-				auto it = std::find(pendingNotifications.begin(), pendingNotifications.end(),id);
-				if(it == pendingNotifications.end())
+				auto it = std::find(pendingNotifications.begin(), pendingNotifications.end(), id);
+				if (it == pendingNotifications.end())
 				{
 					return;
 				}
@@ -173,6 +173,42 @@ namespace commproto
 			{
 				Message msg = RequestControllerStateSerializer::serialize(std::move(RequestControllerState(provider.requestStateId)));
 				send(msg);
+			}
+
+			ControlStateHandler::ControlStateHandler(const UIControllerHandle& controller_)
+				: controller{ controller_ }
+			{
+			}
+
+			void ControlStateHandler::handle(messages::MessageBase&& data)
+			{
+				endpoint::ToggleControlEnabledState & msg = static_cast<endpoint::ToggleControlEnabledState&>(data);
+
+				ControlHandle control = controller->getControl(msg.prop);
+				if (!control)
+				{
+					return;
+				}
+				control->setState(msg.prop2);
+				controller->notifyUpdate();
+			}
+
+			ControlShownHandler::ControlShownHandler(const UIControllerHandle& controller_)
+				: controller{ controller_ }
+			{
+			}
+
+			void ControlShownHandler::handle(messages::MessageBase&& data)
+			{
+				endpoint::ToggleControlShownState & msg = static_cast<endpoint::ToggleControlShownState&>(data);
+
+				ControlHandle control = controller->getControl(msg.prop);
+				if (!control)
+				{
+					return;
+				}
+				control->setDisplayState(msg.prop2);
+				controller->notifyUpdate();
 			}
 		}
 	}

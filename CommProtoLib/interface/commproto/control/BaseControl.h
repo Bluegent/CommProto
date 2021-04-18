@@ -33,9 +33,19 @@ namespace commproto
 				enabled = enabled_;
 			}
 
+			bool isEnabled() const
+			{
+				return enabled;
+			}
+
 			void setDisplayState(const bool shown_)
 			{
 				shown = shown_;
+			}
+
+			bool isVisible() const
+			{
+				return shown;
 			}
 
 		protected:

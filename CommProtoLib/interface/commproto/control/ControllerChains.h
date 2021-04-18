@@ -11,7 +11,6 @@ namespace commproto
 	{
 		namespace endpoint
 		{
-
 			MAKE_DOUBLE_PROP_CHAIN(ToggleControlEnabledState, uint32_t, bool);
 			MAKE_DOUBLE_PROP_CHAIN(ToggleControlShownState, uint32_t, bool);
 		}

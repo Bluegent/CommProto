@@ -16,6 +16,8 @@ namespace commproto
 				virtual uint32_t reserveId() = 0;
 				virtual ControlHandle getControl(const uint32_t id) = 0;
 				virtual void clear() = 0;
+				virtual void setControlState(const uint32_t id, const bool enabled) = 0;
+				virtual void setControlShownState(const uint32_t id, const bool shown) = 0;
 			};
 		}
     }

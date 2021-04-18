@@ -4,6 +4,7 @@
 #include "ToggleImpl.h"
 #include "LabelImpl.h"
 #include "NotificationImpl.h"
+#include "UIControllerImpl.h"
 
 namespace commproto
 {
@@ -19,6 +20,8 @@ namespace commproto
 				parser::addParserHandlerPair<endpoint::LabelUpdateParser, endpoint::LabelUpdateMessage>(delegator, std::make_shared<LabelUpdateHandler>(controller));
 				parser::addParserHandlerPair<endpoint::NotificationParser, endpoint::NotificationMessage>(delegator, std::make_shared<NotificationHandler>(controller));
 				parser::addParserHandlerPair<endpoint::DisplayNotificationParser, endpoint::DisplayNotificationMessage>(delegator, std::make_shared<DisplayNotificationHandler>(controller));
+				parser::addParserHandlerPair<endpoint::ToggleControlEnabledStateParser, endpoint::ToggleControlEnabledState>(delegator, std::make_shared<ControlStateHandler>(controller));
+				parser::addParserHandlerPair<endpoint::ToggleControlShownStateParser, endpoint::ToggleControlShownState>(delegator, std::make_shared<ControlShownHandler>(controller));
 			}
 		}
 	}

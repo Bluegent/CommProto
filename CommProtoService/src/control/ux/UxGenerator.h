@@ -52,6 +52,11 @@ namespace commproto
 			template <>
 			inline std::string Generator::generate(const ButtonImpl& control) const
 			{
+				if(!control.isVisible())
+				{
+					return std::string();
+				}
+
 				std::stringstream sstream;
 				sstream << "<button onclick = \"postButton('" << manager.getConnectionName() << "','" << control.getId() << "')\">" << control.getName() << " </button>";
 				return sstream.str();
@@ -60,6 +65,11 @@ namespace commproto
 			template <>
 			inline std::string Generator::generate(const ToggleImpl& control) const
 			{
+				if (!control.isVisible())
+				{
+					return std::string();
+				}
+
 				std::stringstream sstream;
 				sstream << manager.getConnectionName() << "-toggle" << control.getId();
 				std::string controlIdString = sstream.str();
@@ -76,6 +86,11 @@ namespace commproto
 			template <>
 			inline std::string Generator::generate(const LabelImpl& control) const
 			{
+				if (!control.isVisible())
+				{
+					return std::string();
+				}
+
 				std::stringstream sstream;
 				sstream << "<span class=\"c_label\">" << control.getName() << ": " << control.getText() << "</span>";
 				return sstream.str();

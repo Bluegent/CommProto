@@ -118,6 +118,45 @@ namespace commproto
 				send(serialize());
 			}
 
+			void UIControllerImpl::setControlState(const uint32_t id, const bool enabled)
+			{
+				ControlHandle control = getControl(id);
+				if (!control)
+				{
+					return;
+				}
+				control->setState(enabled);
+				Message state = ToggleControlEnabledStateSerializer::serialize(ToggleControlEnabledState(provider.toggleControlStateId, id, enabled));
+				send(state);
+			}
+
+			void UIControllerImpl::setControlShownState(const uint32_t id, const bool shown)
+			{
+				ControlHandle control = getControl(id);
+				if(!control)
+				{
+					return;
+				}
+				control->setDisplayState(shown);
+				Message state = ToggleControlShownStateSerializer::serialize(ToggleControlShownState(provider.toggleControlShownStateId, id, shown));
+				send(state);
+			}
+
+			ControlHandle UIControllerImpl::getControlFromAll(const uint32_t id) const
+			{
+				auto it = controls.find(id);
+				if (it != controls.end())
+				{
+					it->second;
+				}
+				auto notif = notifications.find(id);
+				if (notif != notifications.end())
+				{
+					return notif->second;
+				}
+				return ControlHandle();
+			}
+
 			RequestStateHandler::RequestStateHandler(const UIControllerHandle& controller_)
 				:controller{ controller_ }
 			{

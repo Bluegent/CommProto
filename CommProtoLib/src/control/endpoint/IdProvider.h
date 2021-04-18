@@ -7,6 +7,7 @@
 #include <commproto/control/NotificationChains.h>
 #include <commproto/control/ToggleChains.h>
 #include <commproto/control/LabelChains.h>
+#include <commproto/control/ControllerChains.h>
 
 namespace commproto
 {
@@ -24,6 +25,8 @@ namespace commproto
 					, labelUpdateId{ mapper->registerType<LabelUpdateMessage>() }
 					, notificationId{ mapper->registerType<NotificationMessage>() }
 					, displayNotificationId{ mapper->registerType<DisplayNotificationMessage>() }
+					, toggleControlStateId{ mapper->registerType<ToggleControlEnabledState>() }
+					, toggleControlShownStateId{ mapper->registerType<ToggleControlShownState>() }
 				{
 
 				}
@@ -33,6 +36,8 @@ namespace commproto
 				const uint32_t labelUpdateId;
 				const uint32_t notificationId;
 				const uint32_t displayNotificationId;
+				const uint32_t toggleControlStateId;
+				const uint32_t toggleControlShownStateId;
 			};
 
 		}
