@@ -7,6 +7,8 @@
 #include <fstream>
 #include <commproto/control/ux/Toggle.h>
 #include <Poco/Path.h>
+#include <Poco/JSON/Array.h>
+#include <Poco/JSON/Object.h>
 #include <sstream>
 
 const std::map<std::string, ControlType> stringMap = {
@@ -124,8 +126,9 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 
 		if (url.find("/update") == 0)
 		{
-			bool update = controllers->hasUpdate() || (url.find("force") != std::string::npos);
-			if (!update)
+			bool force = url.find("force") != std::string::npos;
+			bool update = controllers->hasUpdate();
+			if (!update && !force)
 			{
 				resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
 				resp.send() << "<null>";
@@ -133,13 +136,28 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 			}
 			LOG_INFO("POST%s ", url.c_str());
 			std::ostream& out = resp.send();
+			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+			resp.setContentType("application/json");
 
-			//TODO: actually handle other controllers
-			auto simulator = controllers->getController("Endpoint::Simulator");
-			if (simulator)
+			auto ctrls = controllers->getControllers();
+
+			Poco::JSON::Array uisJSON;
+
+			for(auto controller : ctrls)
 			{
-				out << simulator->getUx();
+				if(force || controller.second->hasUpdate())
+				{
+					Poco::JSON::Object uiJSON;
+					uiJSON.set("name", controller.first);
+					uiJSON.set("ui", controller.second->getUx());
+					uisJSON.add(uiJSON);
+				}
 			}
+
+			std::stringstream uis;
+			uisJSON.stringify(uis);
+			out << uis.str();
+
 			resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 			out.flush();
 			return;

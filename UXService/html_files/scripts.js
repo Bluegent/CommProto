@@ -106,7 +106,18 @@ function updateUI()
                 else 
                 {
                     console.log('updating UI');
-                    document.getElementById('uis').innerHTML = xhttp.responseText;
+                    
+                    var response = JSON.parse(xhttp.responseText);
+                    for(var i = 0; i < response.length; i++) {
+                        var obj = response[i];
+                        var div = document.getElementById(obj["name"]);
+                        if(!div){
+                            document.getElementById("uis").innerHTML +='<div id="'+obj["name"]+'"</div>';
+                            div = document.getElementById(obj["name"]);
+                        }
+                        
+                        div.innerHTML = obj["ui"];
+                    }                   
                 }
             }
         } 
