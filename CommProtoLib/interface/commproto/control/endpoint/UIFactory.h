@@ -17,11 +17,11 @@ namespace commproto
 			{
 			public:
 				UIFactory(const std::string & name, const messages::TypeMapperHandle& mapper , const sockets::SocketHandle& socket);
-				ButtonHandle addButton(const std::string& name, const ButtonAction& action) const;
-				ToggleHandle addToggle(const std::string& name, const ToggleAction & action, const bool defaultState = false) const;
-				LabelHandle addLabel(const std::string& name, const std::string & text) const;
-				NotificationHandle addNotification(const std::string& name) const;
-				UIControllerHandle build() const;
+				ButtonHandle makeButton(const std::string& name, const ButtonAction& action) const;
+				ToggleHandle makeToggle(const std::string& name, const ToggleAction & action, const bool defaultState = false) const;
+				LabelHandle makeLabel(const std::string& name, const std::string & text) const;
+				NotificationHandle makeNotification(const std::string& name) const;
+				UIControllerHandle makeController() const;
 			private:
 				UIControllerHandle controller;
 			};

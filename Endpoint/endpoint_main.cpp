@@ -106,8 +106,9 @@ int main(int argc, const char * argv[])
 
 	//delegator to parse incoming messages
 	auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", mapper, socket);
+	control::endpoint::UIControllerHandle controller = uiFactory->makeController();
 
-	uiFactory->addToggle("Toggle increment 0.x/x.0", [&increment](bool state)
+	auto toggleIncrement = uiFactory->makeToggle("Toggle increment 0.x/x.0", [&increment](bool state)
 	{
 		LOG_INFO("MyToggle state switched: %s", state ? "True" : "False");
 		if (state)
@@ -119,24 +120,27 @@ int main(int argc, const char * argv[])
 			increment = 0.01;
 		}
 	});
+	controller->addControl(toggleIncrement);
 
-	auto notif = uiFactory->addNotification("You just pressed the notification button.");
+	auto notif = uiFactory->makeNotification("You just pressed the notification button.");
 	notif->addOption("Oh... okay?");
 	notif->setAction([](const std::string& option)
 	{
 		LOG_INFO("Generic notification response with option :\"%s\"", option.c_str());
 	});
-	control::endpoint::UIControllerHandle controller = uiFactory->build();
+	controller->addNotification(notif);
 
-	uiFactory->addButton("Send me a notification", [&direction, &controller, &notif]()
+	auto notifButton = uiFactory->makeButton("Send me a notification", [&direction, &controller, &notif]()
 	{
 		LOG_INFO("MyButton has been pressed");
 		controller->displayNotification(notif->getId());
 
 	});
+	controller->addControl(notifButton);
 
 
-	control::endpoint::LabelHandle tempLabel = uiFactory->addLabel("Temperature", "0.00 C");
+	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 C");
+	controller->addControl(tempLabel);
 
 	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper, controller);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
