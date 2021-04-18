@@ -6,16 +6,18 @@
 #include <Poco/Net/HTTPServerResponse.h>
 #include <fstream>
 #include <commproto/control/ux/Toggle.h>
+#include <commproto/control/ux/Slider.h>
 #include <Poco/Path.h>
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 #include <sstream>
 
 const std::map<std::string, ControlType> stringMap = {
-	{ "button",ControlType::Button },
-	{ "slider",ControlType::Slider },
-	{ "toggle",ControlType::Toggle },
-	{ "label",ControlType::Label },
+	{ "button",		ControlType::Button },
+	{ "slider",		ControlType::Slider },
+	{ "toggle",		ControlType::Toggle },
+	{ "label",		ControlType::Label },
+	{ "slider",		ControlType::Slider },
 	{"notification",ControlType::Notification}
 };
 
@@ -60,6 +62,43 @@ void UxRequestHandler::handleButton(KVMap&& map) const
 	button->press();
 }
 
+void UxRequestHandler::handleSlider(KVMap&& map) const
+{
+	std::string connection = "";
+	uint32_t controlId = 0;
+	handleBase(map, connection, controlId);
+	auto controller = controllers->getController(connection);
+	if (!controller)
+	{
+		return;
+	}
+	auto it = map.find("value");
+	if(it == map.end())
+	{
+		return;
+	}
+
+	float value = 0.f;
+	try 
+	{
+		value = std::stof(it->second);
+	}
+	catch (std::invalid_argument arg)
+	{
+		return;
+	}
+	commproto::control::ux::SliderHandle slider = std::static_pointer_cast<commproto::control::ux::Slider>(controller->getControl(controlId));
+
+	if (!slider)
+	{
+		return;
+	}
+
+	slider->setValue(value);
+
+}
+
+
 void UxRequestHandler::parseKVMap(KVMap&& map) const
 {
 	auto type = map.find("controlType");
@@ -78,7 +117,9 @@ void UxRequestHandler::parseKVMap(KVMap&& map) const
 	case ControlType::Button:
 		handleButton(std::move(map));
 		break;
-	case ControlType::Slider: break;
+	case ControlType::Slider:
+		handleSlider(std::move(map));
+		break;
 	case ControlType::Toggle:
 		handleToggle(std::move(map));
 		break;
@@ -143,9 +184,9 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 
 			Poco::JSON::Array uisJSON;
 
-			for(auto controller : ctrls)
+			for (auto controller : ctrls)
 			{
-				if(force || controller.second->hasUpdate())
+				if (force || controller.second->hasUpdate())
 				{
 					Poco::JSON::Object uiJSON;
 					uiJSON.set("name", controller.first);
@@ -249,7 +290,7 @@ void UxRequestHandler::handleNotification(KVMap&& map) const
 		return;
 	}
 
-	notif->execute(it->second);	
+	notif->execute(it->second);
 	controller->dismissNotification(controlId);
 
 }

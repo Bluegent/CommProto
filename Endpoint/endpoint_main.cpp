@@ -138,6 +138,15 @@ int main(int argc, const char * argv[])
 	});
 	controller->addControl(notifButton);
 
+	control::endpoint::SliderAction slAction = [](float value)
+	{
+		LOG_INFO("Desired temp: %.2f", value);
+	};
+	auto slider = uiFactory->makeSlider("Desired temperature", slAction);
+	slider->setLimits(0.f, 40.f);
+	slider->setStep(0.5f);
+	slider->setInitialValue(24.f);
+	controller->addControl(slider);
 
 	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 C");
 	controller->addControl(tempLabel);

@@ -32,6 +32,7 @@ private:
 	void handleButton(KVMap&& map) const;
 	void handleToggle(KVMap&& map) const;
 	void handleNotification(KVMap && map) const;
+	void handleSlider(KVMap && map) const;
 	void parseKVMap(KVMap&& map) const;
 	commproto::control::ux::UxControllersHandle controllers;
 

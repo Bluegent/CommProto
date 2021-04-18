@@ -5,6 +5,7 @@
 #include "ToggleImpl.h"
 #include "NotificationImpl.h"
 #include "UIControllerImpl.h"
+#include "SliderImpl.h"
 
 namespace commproto
 {
@@ -19,6 +20,7 @@ namespace commproto
 				parser::addParserHandlerPair<ux::ToggleParser, ux::ToggleMessage>(delegator, std::make_shared<ToggleHandler>(controller));
 				parser::addParserHandlerPair<ux::NotificationResponseParser, ux::NotificationResponseMessage>(delegator, std::make_shared<NotificationResponseHandler>(controller));
 				parser::addParserHandlerPair<ux::RequestControllerStateParser, ux::RequestControllerState>(delegator, std::make_shared<RequestStateHandler>(controller));
+				parser::addParserHandlerPair<ux::SliderAdjustParser, ux::SliderAdjust>(delegator, std::make_shared<SliderAdjustHandler>(controller));
 			}
 		}
 	}

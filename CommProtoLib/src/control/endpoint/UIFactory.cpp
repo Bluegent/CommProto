@@ -5,6 +5,7 @@
 #include "NotificationImpl.h"
 #include "LabelImpl.h"
 #include "ToggleImpl.h"
+#include "SliderImpl.h"
 
 namespace commproto
 {
@@ -22,6 +23,11 @@ namespace commproto
 				
 				ButtonHandle button = std::make_shared<ButtonImpl>(name, controller->reserveId(), controller->getIdProvider().buttonId, action);
 				return button;
+			}
+
+			SliderHandle UIFactory::makeSlider(const std::string& name, const SliderAction& action) const
+			{
+				return std::make_shared<SliderImpl>(name, controller->reserveId(), controller->getIdProvider().sliderId, action);
 			}
 
 			ToggleHandle UIFactory::makeToggle(const std::string& name, const ToggleAction& action, const bool defaultState) const

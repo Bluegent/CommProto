@@ -8,6 +8,8 @@
 #include "ToggleImpl.h"
 #include "LabelImpl.h"
 #include "NotificationImpl.h"
+#include "SliderImpl.h"
+#include <commproto/utils/Math.h>
 
 namespace commproto
 {
@@ -19,7 +21,7 @@ namespace commproto
 			{
 			public:
 				Generator(UIController& manager_)
-					: manager( manager_)
+					: manager(manager_)
 				{
 
 				}
@@ -52,7 +54,7 @@ namespace commproto
 			template <>
 			inline std::string Generator::generate(const ButtonImpl& control) const
 			{
-				if(!control.isVisible())
+				if (!control.isVisible())
 				{
 					return std::string();
 				}
@@ -95,13 +97,13 @@ namespace commproto
 				sstream << "<span class=\"c_label\">" << control.getName() << ": " << control.getText() << "</span>";
 				return sstream.str();
 			}
-			 
+
 
 			template <>
 			inline std::string Generator::generate(const NotificationImpl& control) const
 			{
 				std::stringstream stream;
-				
+
 				stream << "notification-" << manager.getConnectionName() << "-" << control.getId();
 				std::string notifId = stream.str();
 
@@ -121,7 +123,7 @@ namespace commproto
 				stream << "<div class=\"notification\" id=\"" << notifId << "\">";
 				stream << control.getName() << "<br>";
 				auto options = control.getOptions();
-				for(auto opt : options)
+				for (auto opt : options)
 				{
 					stream << "<button " << attributes << opt << "\" >" << opt << " </button>";
 				}
@@ -129,6 +131,43 @@ namespace commproto
 				stream << "</div>";
 				return stream.str();
 			}
+
+			template <>
+			inline std::string Generator::generate(const SliderImpl& control) const
+			{
+				if (!control.isVisible())
+				{
+					return std::string();
+				}
+
+				float left, right, value, step;
+				control.getValues(left, right, value, step);
+
+				std::stringstream sstream;
+				sstream << "slid-" << manager.getConnectionId() << "-" << control.getId();
+				std::string sliderId = sstream.str();
+
+				sstream.str(std::string());
+				sstream.clear();
+				
+				sstream.precision(3);
+
+				sstream << control.getName() << ":";
+				sstream << "<div class=\"slidecontainer\">";
+				sstream << left << " - " << right;
+				sstream << "<input type=\"range\" class=\"slider\" ";
+				sstream << "value=\"" << value << "\" ";
+				sstream << "min=\"" << left << "\" ";
+				sstream << "max=\"" << right << "\" ";
+				sstream << "step=\"" << step << "\" ";
+				sstream << "oninput=\"setSliderValue('" << sliderId<< "' ,this.value)\" ";
+				sstream << "onmouseup=\"postSlider('" << manager.getConnectionName() << "', '" << control.getId() <<"', this.value, this.min, this.max)\"/>";
+				sstream << "<div id=\""<< sliderId << "\"> value:" << value <<"</div>";
+				sstream << "</div>";
+
+				return sstream.str();
+			}
+
 
 			using GeneratorHandle = std::shared_ptr<Generator>;
 		}

@@ -6,6 +6,7 @@
 #include <commproto/control/ToggleChains.h>
 #include <commproto/control/NotificationChains.h>
 #include <commproto/control/ControllerChains.h>
+#include <commproto/control/SliderChains.h>
 
 namespace commproto
 {
@@ -22,6 +23,8 @@ namespace commproto
 					, sendToId{ mapper->registerType<service::SendToMessage>() }
 					, notificationResponseId{ mapper->registerType<NotificationResponseMessage>() }
 					, requestStateId{ mapper->registerType<RequestControllerState>() }
+					, adjustSliderId{ mapper->registerType<SliderAdjust>() }
+				
 				{
 
 				}
@@ -30,6 +33,7 @@ namespace commproto
 				const uint32_t sendToId;
 				const uint32_t notificationResponseId;
 				const uint32_t requestStateId;
+				const uint32_t adjustSliderId;
 			};
 		}
 

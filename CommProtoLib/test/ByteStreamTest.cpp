@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <commproto/parser/ByteStream.h>
+#include "commproto/utils/Math.h"
 
 namespace commproto
 {
@@ -94,6 +95,17 @@ namespace commproto
 
 				ASSERT_TRUE(res);
 				ASSERT_EQ(input, output);
+			}
+
+
+			TEST(TestNearestFunction,CanGetAccurateNumbers)
+			{
+				ASSERT_NEAR(30.f,math::getNearest(0.f,100.f,0.37,10.f),0.01f);
+				ASSERT_NEAR(.5f,math::getNearest(0.f,10.f,0.056f,.5f),0.01f);
+				ASSERT_NEAR(.0f,math::getNearest(0.f,10.f,0.03f,.5f),0.01f);
+				ASSERT_NEAR(0.f,math::getNearest(0.f,10.f,0.047f,5.f),0.01f);
+				ASSERT_NEAR(10.f,math::getNearest(0.f,10.f,0.99f,5.f),0.01f);
+				ASSERT_NEAR(0.f,math::getNearest(0.f,10.f,0.01f,5.f),0.01f);
 			}
 		}
 	}

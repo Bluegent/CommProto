@@ -12,6 +12,13 @@ function invoke(event)
         let optionStr = event.target.getAttribute('optionStr');
         window[nameOfFunction](conn,controlId,elementId,optionStr);
     }
+    
+    if(nameOfFunction == "postSlider")
+    {
+        let elementId = event.target.getAttribute('elementId');
+        let optionStr = event.target.getAttribute('optionStr');
+        window[nameOfFunction](conn,controlId,elementId,optionStr);
+    }
 }
 
 
@@ -62,6 +69,23 @@ function postNotification(connection,id, elemId,optionStr)
     data.append('controlType','notification');
     data.append('controlId',id);
     data.append('option',optionStr);
+    http.open('POST', 'action', true);
+    http.send(data);
+}
+
+function setSliderValue(sliderId, value)
+{
+    document.getElementById(sliderId).innerHTML = "value: "+value;
+}    
+    
+function postSlider(connection,id,value, max, min)
+{
+    var http = new XMLHttpRequest();
+    var data = new FormData();
+    data.append('connection',connection);
+    data.append('controlType','slider');
+    data.append('controlId',id);
+    data.append('value',value);
     http.open('POST', 'action', true);
     http.send(data);
 }

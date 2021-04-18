@@ -23,6 +23,7 @@ namespace commproto
 					, toggleId{ mapper->registerType<ToggleMessage>() }
 					, labelId{ mapper->registerType<LabelMessage>() }
 					, labelUpdateId{ mapper->registerType<LabelUpdateMessage>() }
+					, sliderId{ mapper->registerType<SliderMessage>() }
 					, notificationId{ mapper->registerType<NotificationMessage>() }
 					, displayNotificationId{ mapper->registerType<DisplayNotificationMessage>() }
 					, toggleControlStateId{ mapper->registerType<ToggleControlEnabledState>() }
@@ -34,10 +35,12 @@ namespace commproto
 				const uint32_t toggleId;
 				const uint32_t labelId;
 				const uint32_t labelUpdateId;
+				const uint32_t sliderId;
 				const uint32_t notificationId;
 				const uint32_t displayNotificationId;
 				const uint32_t toggleControlStateId;
 				const uint32_t toggleControlShownStateId;
+				
 			};
 
 		}
