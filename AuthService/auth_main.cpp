@@ -160,11 +160,11 @@ public:
 commproto::parser::ParserDelegatorHandle build(const AuthServiceHandle & service)
 {
 	commproto::parser::ParserDelegatorHandle delegator = std::make_shared<commproto::parser::ParserDelegator>();
-	commproto::parser::buildBase(delegator);
-	commproto::parser::addParserHandlerPair<commproto::logger::LogParser, commproto::logger::LogMessage>(delegator, std::make_shared<commproto::logger::LogHandler>());
-	commproto::parser::addParserHandlerPair<commproto::device::DeviceAuthRequestParser, commproto::device::DeviceAuthRequestMessage>(delegator, std::make_shared<DeviceReqHandler>(service));
-	commproto::parser::addParserHandlerPair<commproto::device::ScanFinishedParser, commproto::device::ScanFinished>(delegator, std::make_shared<ScanFinishedHandler>(service));
-	commproto::parser::addParserHandlerPair<commproto::device::KeepAliveParser, commproto::device::KeepAlive>(delegator, std::make_shared<KeepAliveHandler>());
+	commproto::parser::DelegatorUtils::buildBase(delegator);
+	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::logger::LogParser, commproto::logger::LogMessage>(delegator, std::make_shared<commproto::logger::LogHandler>());
+	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::DeviceAuthRequestParser, commproto::device::DeviceAuthRequestMessage>(delegator, std::make_shared<DeviceReqHandler>(service));
+	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::ScanFinishedParser, commproto::device::ScanFinished>(delegator, std::make_shared<ScanFinishedHandler>(service));
+	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::KeepAliveParser, commproto::device::KeepAlive>(delegator, std::make_shared<KeepAliveHandler>());
 
 	return delegator;
 }

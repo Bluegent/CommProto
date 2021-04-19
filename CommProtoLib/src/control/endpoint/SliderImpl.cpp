@@ -1,6 +1,5 @@
 #include "SliderImpl.h"
-#include <commproto/utils/Math.h>
-#include "commproto/logger/Logging.h"
+#include <commproto/logger/Logging.h>
 
 
 namespace commproto

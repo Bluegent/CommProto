@@ -1,8 +1,12 @@
 #ifndef AUTH_DEVICE_WRAPPER_IMPL_H
 #define AUTH_DEVICE_WRAPPER_IMPL_H
 
+#ifdef ESP32
+    #include <WiFi.h>
+#elif defined(ESP8266)
+    #include <ESP8266WiFi.h>
+#endif
 #include <SocketImpl.h>
-#include <ESP8266WiFi.h>
 #include <commproto/authdevice/AuthDeviceWrapper.h>
 #include <commproto/logger/Logging.h>
 
@@ -47,7 +51,6 @@ namespace commproto
 				do {
 					LOG_INFO("Attempt #%d", attempt + 1);
 					status = WiFi.waitForConnectResult();
-					delay(500);
 					++attempt;
 				} while (status != WL_CONNECTED && attempt != maxAttempts);
 

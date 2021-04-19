@@ -57,6 +57,7 @@ namespace commproto {
 
 		void Dispatch::registerChannel(const uint32_t id, const std::string& name)
 		{
+			LOG_INFO("Registering channel name %s for %d", name.c_str(), id);
 			auto connection = connections.find(id);
 			if(connectionMapping.find(name) != connectionMapping.end() || connection == connections.end())
 			{

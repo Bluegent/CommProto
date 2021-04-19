@@ -8,7 +8,7 @@ namespace commproto
 	{
 		inline bool floatEq(float a, float b, float epsilon = 0.0001f)
 		{
-			return abs(a - b) < epsilon;
+			return fabs(a - b) < epsilon;
 		}
 
 		inline float getNearest(float left, float right, float value, float step)

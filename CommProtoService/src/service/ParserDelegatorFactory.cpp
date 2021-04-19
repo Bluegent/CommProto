@@ -14,12 +14,12 @@ namespace commproto {
 		parser::ParserDelegatorHandle ParserDelegatorFactory::build(Connection& connection, Dispatch * dispatch)
 		{
 			std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<ParserDelegator>(connection);
-			parser::buildBase(delegator);
+			parser::DelegatorUtils::buildBase(delegator);
 
-			parser::addParserHandlerPair<RegisterChannelParser, RegisterChannelMessage>(delegator, std::make_shared<RegisterChannelHandler>(dispatch,connection.getId()));
-			parser::addParserHandlerPair<SubscribeParser, SubscribeMessage>(delegator, std::make_shared<SubscribeHandler>(connection));
-			parser::addParserHandlerPair<UnsubscribeParser, UnsubscribeMessage>(delegator, std::make_shared<UnsubscribeHandler>(connection));
-			parser::addParserHandlerPair<SendtoParser, SendToMessage>(delegator, std::make_shared<SendToHandler>(dispatch));
+			parser::DelegatorUtils::addParserHandlerPair<RegisterChannelParser, RegisterChannelMessage>(delegator, std::make_shared<RegisterChannelHandler>(dispatch,connection.getId()));
+			parser::DelegatorUtils::addParserHandlerPair<SubscribeParser, SubscribeMessage>(delegator, std::make_shared<SubscribeHandler>(connection));
+			parser::DelegatorUtils::addParserHandlerPair<UnsubscribeParser, UnsubscribeMessage>(delegator, std::make_shared<UnsubscribeHandler>(connection));
+			parser::DelegatorUtils::addParserHandlerPair<SendtoParser, SendToMessage>(delegator, std::make_shared<SendToHandler>(dispatch));
 
 			return delegator;
 		}

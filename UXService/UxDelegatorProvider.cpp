@@ -7,7 +7,7 @@
 commproto::parser::ParserDelegatorHandle buildSelfDelegator()
 {
 	std::shared_ptr<commproto::parser::ParserDelegator> delegator = std::make_shared<commproto::parser::ParserDelegator>();
-	buildBase(delegator);
+	commproto::parser::DelegatorUtils::buildBase(delegator);
 	return delegator;
 }
 

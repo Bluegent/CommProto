@@ -43,7 +43,8 @@ namespace commproto
 			ParserDelegatorHandle delegator;
 		};
 
-		void buildBase(const ParserDelegatorHandle & delegator)
+
+		void DelegatorUtils::buildBase(const ParserDelegatorHandle & delegator)
 		{
 
 			ParserHandle mappingParser = std::make_shared<MappingTypeParser>(std::make_shared<MappingTypeHandler>(delegator));
@@ -55,7 +56,7 @@ namespace commproto
 			delegator->registerParser<messages::KeepAliveMessage>(keepAliveParser);
 		}
 
-		void sendMappings(const ParserDelegatorHandle& delegator, const sockets::SocketHandle& socket)
+		void DelegatorUtils::sendMappings(const ParserDelegatorHandle& delegator, const sockets::SocketHandle& socket)
 		{
 			auto mappings = delegator->getMappings();
 			for (auto it = mappings.begin(); it != mappings.end(); ++it)

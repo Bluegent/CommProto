@@ -10,9 +10,9 @@ namespace commproto
 		parser::ParserDelegatorHandle build(BaseEndpointAuth& device)
 		{
 			parser::ParserDelegatorHandle delegator = std::make_shared<parser::ParserDelegator>();
-			parser::buildBase(delegator);
-			parser::addParserHandlerPair<device::ConnectionAuthorizedParser, device::ConnectionAuthorizedMessage>(delegator, std::make_shared<AcceptHandler>(device));
-			parser::addParserHandlerPair<device::ConnectionRejectedParser, device::ConnectionRejectedMessage>(delegator, std::make_shared<RejectHandler>(device));
+			parser::DelegatorUtils::buildBase(delegator);
+			parser::DelegatorUtils::addParserHandlerPair<device::ConnectionAuthorizedParser, device::ConnectionAuthorizedMessage>(delegator, std::make_shared<AcceptHandler>(device));
+			parser::DelegatorUtils::addParserHandlerPair<device::ConnectionRejectedParser, device::ConnectionRejectedMessage>(delegator, std::make_shared<RejectHandler>(device));
 
 
 			return delegator;
@@ -31,10 +31,12 @@ namespace commproto
 		void BaseEndpointAuth::setup()
 		{			
 			serial = device.getStream(115200);
+			LOG_INFO();
+
 			device.initFs();
 			isAP = !device.readAPData();
 
-			LOG_INFO();
+			
 			LOG_INFO("Starting base endpoint setup...");
 			if (isAP)
 			{

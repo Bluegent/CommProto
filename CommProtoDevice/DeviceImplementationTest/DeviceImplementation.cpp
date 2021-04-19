@@ -3,6 +3,7 @@
 #include <commproto/endpointdevice/BaseEndpointWrapper.h>
 #include <commproto/authdevice/AuthDevice.h>
 #include <commproto/endpointdevice/BaseEndpointAuth.h>
+#include "commproto/thermo/Thermostat.h"
 
 class WindowsAuthDeviceWrapper : public commproto::authdevice::AuthDeviceWrapper
 {
@@ -16,7 +17,7 @@ public:
 };
 
 
-class WindowsThermo : public commproto::endpointdevice::BaseEndpointWrapper
+class WindowsEpWrapper : public commproto::endpointdevice::BaseEndpointWrapper
 {
 public:
 	commproto::stream::StreamHandle getStream(const int speed) override { return nullptr; }
@@ -38,11 +39,27 @@ public:
 	}
 };
 
+class WindowsThermo : public commproto::thermo::ThermostateWrapper
+{
+public:
+	void setup() override{}
+	void loop() override{}
+	float getTemp() override { return 0.f; }
+	float getHumidity() override { return 0.f; }
+	void toggleTempAdjust(float intensity) override {}
+	void toggleAutoTempAdjust(const bool on) override{}
+	void setDesiredTemp(const float temp) override{}
+	uint32_t getMs() override { return 0; }
+};
+
 int main(int argc, const char * argv[])
 {
 	WindowsAuthDeviceWrapper wrapper;
 	commproto::authdevice::AuthDevice dev(wrapper);
 
-	WindowsThermo thermo;
-	commproto::endpointdevice::BaseEndpointAuth stat(thermo,{ "Thermostat","Commproto","A simple device that provides data about temperature, humidity and the possibility to start heating." });
+	WindowsEpWrapper epauth;
+	commproto::endpointdevice::BaseEndpointAuth stat(epauth,{ "Thermostat","Commproto","A simple device that provides data about temperature, humidity and the possibility to start heating." });
+
+	WindowsThermo thermostat;
+	commproto::thermo::Thermostat thermoDevice(epauth, { "Thermostat","Commproto","A simple device that provides data about temperature, humidity and the possibility to start heating." },thermostat);
 }

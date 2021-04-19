@@ -10,7 +10,12 @@ namespace commproto
     {
 		namespace endpoint 
     	{
-			void addParsers(const parser::ParserDelegatorHandle & delegator, const UIControllerHandle & controller);
+			class DelegatorUtils
+			{
+			public:
+				static void addParsers(const parser::ParserDelegatorHandle & delegator, const UIControllerHandle & controller);
+			};
+			
 		}
     }
 }

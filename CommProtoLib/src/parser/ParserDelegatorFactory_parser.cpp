@@ -15,7 +15,7 @@ namespace commproto
 		{
 
 			ParserDelegatorHandle delegator = std::make_shared<ParserDelegator>();
-			buildBase(delegator);
+			DelegatorUtils::buildBase(delegator);
 
 			ParserHandle variableParser = std::make_shared<variable::VariableParser>(std::make_shared<variable::VariableHandler>(context));
 

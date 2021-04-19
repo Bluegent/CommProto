@@ -164,6 +164,7 @@ namespace commproto
 
 			void RequestStateHandler::handle(messages::MessageBase&& data)
 			{
+				LOG_INFO("Got a request for ui state");
 				controller->sendState();
 			}
 		}

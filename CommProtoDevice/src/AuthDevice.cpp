@@ -20,10 +20,10 @@ namespace commproto
 		parser::ParserDelegatorHandle buildSerialDelegator(AuthDevice& device)
 		{
 			parser::ParserDelegatorHandle delegator = std::make_shared<parser::ParserDelegator>();
-			parser::buildBase(delegator);
-			parser::addParserHandlerPair<device::ScanForNetworksParser, device::ScanForNetworksMessage>(delegator, std::make_shared<ScanHandler>(device));
-			parser::addParserHandlerPair<device::DeviceAuthAcceptParser, device::DeviceAuthAccept>(delegator, std::make_shared<DeviceAuthHandler>(device));
-			parser::addParserHandlerPair<device::DeviceAuthRejectParser, device::DeviceAuthReject>(delegator, std::make_shared<DeviceRejectandler>(device));
+			parser::DelegatorUtils::buildBase(delegator);
+			parser::DelegatorUtils::addParserHandlerPair<device::ScanForNetworksParser, device::ScanForNetworksMessage>(delegator, std::make_shared<ScanHandler>(device));
+			parser::DelegatorUtils::addParserHandlerPair<device::DeviceAuthAcceptParser, device::DeviceAuthAccept>(delegator, std::make_shared<DeviceAuthHandler>(device));
+			parser::DelegatorUtils::addParserHandlerPair<device::DeviceAuthRejectParser, device::DeviceAuthReject>(delegator, std::make_shared<DeviceRejectandler>(device));
 
 			return delegator;
 		}
@@ -32,8 +32,8 @@ namespace commproto
 		parser::ParserDelegatorHandle buildDeviceDelegator(AuthDevice& device, const std::string& name)
 		{
 			parser::ParserDelegatorHandle delegator = std::make_shared<parser::ParserDelegator>();
-			parser::buildBase(delegator);
-			parser::addParserHandlerPair<device::DeviceDataParser, device::DeviceDataMessage>(delegator, std::make_shared<DeviceDataHandler>(device, name));
+			parser::DelegatorUtils::buildBase(delegator);
+			parser::DelegatorUtils::addParserHandlerPair<device::DeviceDataParser, device::DeviceDataMessage>(delegator, std::make_shared<DeviceDataHandler>(device, name));
 
 
 			return delegator;

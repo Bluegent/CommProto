@@ -11,11 +11,11 @@ namespace commproto {
 		parser::ParserDelegatorHandle ParserDelegatorFactory::build(const ChannelParserDelegatorHandle & channelDelegator)
 		{
 			std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
-			parser::buildBase(delegator);
+			parser::DelegatorUtils::buildBase(delegator);
 
-			parser::addParserHandlerPair<RegisterIdParser, RegisterIdMessage>(delegator, std::make_shared<RegisterIdHandler>());
-			parser::addParserHandlerPair<ChannelMappingParser, ChannelMappingMessage>(delegator, std::make_shared<ChannelMappingHandler>(channelDelegator));
-			parser::addParserHandlerPair<ChannelTerminationParser, ChannelTerminationMessage>(delegator, std::make_shared<ChannelTerminationHandler>(channelDelegator));
+			parser::DelegatorUtils::addParserHandlerPair<RegisterIdParser, RegisterIdMessage>(delegator, std::make_shared<RegisterIdHandler>());
+			parser::DelegatorUtils::addParserHandlerPair<ChannelMappingParser, ChannelMappingMessage>(delegator, std::make_shared<ChannelMappingHandler>(channelDelegator));
+			parser::DelegatorUtils::addParserHandlerPair<ChannelTerminationParser, ChannelTerminationMessage>(delegator, std::make_shared<ChannelTerminationHandler>(channelDelegator));
 
 			return delegator;
 		}

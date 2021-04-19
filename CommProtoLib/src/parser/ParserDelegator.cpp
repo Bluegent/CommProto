@@ -18,7 +18,6 @@ namespace commproto
 			{
 				return MappingResult::AlreadyRegistered;
 			}
-			LOG_DEBUG("Registered a new mappign type %s - %d", name.c_str(), id);
 			idToParser.emplace(id, it->second);
 			nameToId.emplace(name, id);
 			return MappingResult::Success;

@@ -10,14 +10,14 @@ namespace commproto
 		{
 		public:
 			virtual ~ThermostateWrapper() = default;
+			virtual uint32_t getMs() = 0;
 			virtual void setup() = 0;
 			virtual void loop() = 0;
-			virtual int32_t getTemp() = 0;
-			virtual int32_t getHumidity() = 0;
-			virtual void toggleHeating(const bool on) = 0;
-			virtual void toggleCooling(const bool on) = 0;
+			virtual float getTemp() = 0;
+			virtual float getHumidity() = 0;
+			virtual void toggleTempAdjust(float intensity) = 0;
 			virtual void toggleAutoTempAdjust(const bool on) = 0;
-			virtual void setDesiredTemp(const int32_t temp) = 0;
+			virtual void setDesiredTemp(const float temp) = 0;
 		};
 	}
 }

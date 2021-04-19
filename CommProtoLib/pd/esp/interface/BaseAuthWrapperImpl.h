@@ -1,12 +1,18 @@
 #ifndef BASE_AUTH_WRAPPER_IMPL_H
 #define BASE_AUTH_WRAPPER_IMPL_H
 
-#include <ESP8266WiFi.h>
+#ifdef ESP32
+    #include <WiFi.h>
+    #include <SPIFFS.h>
+#elif defined(ESP8266)
+    #include <ESP8266WiFi.h>
+    #include <LittleFS.h>
+#endif
 #include <commproto/endpointdevice/BaseEndpointWrapper.h>
 #include <SocketImpl.h>
 #include <SerialInterface.h>
-#include <FS.h>
-#include <LittleFS.h>
+#include <Fs.h>
+
 #include <string>
 
 IPAddress gateway(192, 168, 1, 1);
@@ -23,9 +29,14 @@ namespace commproto
             
             void initFs() override
             {
-                if(!LittleFS.begin())
+                
+#ifdef ESP32                
+                if(!SPIFFS.begin(true))        
+#elif defined(ESP8266)
+                if(!LittleFS.begin()) 
+#endif
                 {
-                    Serial.println("Could not moutn filesystem");
+                    Serial.println("Could not mount filesystem");
                 }
             }
             
@@ -48,6 +59,18 @@ namespace commproto
 
 			commproto::sockets::SocketHandle startAsAP(const authdevice::ConnectionData& data) override
 			{
+#ifdef ESP32 
+                authdevice::ConnectionData data2;
+				data2.ssid = "EstiNebun";
+				data2.password = "01LMS222";
+				data2.addr = "192.168.1.2";
+				data2.port = 25565;
+                saveAPData(data2);
+                reboot();
+                return nullptr;
+#endif  
+                
+                
 				Serial.println();
 				Serial.println("Starting as wifi access point");
 				WiFi.mode(WIFI_AP);
@@ -68,7 +91,6 @@ namespace commproto
 
 			commproto::sockets::SocketHandle connect(const authdevice::ConnectionData& data, const uint32_t attempts) override
 			{
-                WiFi.disconnect();
                 WiFi.mode(WIFI_STA);
                 
 				LOG_INFO("Attempting to connect to wifi network \"%s\"", data.ssid.c_str());
@@ -78,7 +100,6 @@ namespace commproto
 				do {
 					LOG_INFO("Attempt #%d connecting to wifi", attempt + 1);
 					status = WiFi.waitForConnectResult();
-					delay(500);
 					++attempt;
 				} while (status != WL_CONNECTED && attempt != attempts);
 
@@ -104,7 +125,6 @@ namespace commproto
                     {
                         break;
                     }
-                    delay(1000);
 				}while(!connected); 
                 
                 if (!client->connected()) {
@@ -126,7 +146,12 @@ namespace commproto
 			void saveAPData(const authdevice::ConnectionData& data) override
 			{
 				LOG_INFO("Saving hub AP data"); 
-				File f = LittleFS.open("/config.txt", "w");
+                File f;
+#ifdef ESP32           
+                f = SPIFFS.open("/config.txt", "w");
+#elif defined(ESP8266)
+                f = LittleFS.open("/config.txt", "w");
+#endif
 				if (!f)
 				{
                     LOG_INFO("File did not open.");
@@ -143,8 +168,14 @@ namespace commproto
 
 			bool readAPData() override
 			{
-				LOG_INFO("Attempting to read auth config");
-				File f = LittleFS.open("/config.txt", "r");
+				LOG_INFO("Attempting to read auth config");      
+                File f;                
+#ifdef ESP32           
+                f = SPIFFS.open("/config.txt", "r");
+#elif defined(ESP8266)
+                f = LittleFS.open("/config.txt", "r");
+#endif
+				
 				if (!f)
 				{
                     LOG_INFO("File did not open.");
@@ -195,7 +226,12 @@ namespace commproto
             
             void resetAPData() override
             {
-                 bool success = LittleFS.remove("/config.txt");
+#ifdef ESP32                       
+                bool success = SPIFFS.remove("/config.txt");
+#elif defined(ESP8266)
+                bool success = LittleFS.remove("/config.txt");
+#endif
+                 
                  if(!success)
                  {
                      LOG_ERROR("Could not delete config file");

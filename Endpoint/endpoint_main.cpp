@@ -31,7 +31,7 @@ using namespace service;
 parser::ParserDelegatorHandle buildSelfDelegator()
 {
 	std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
-	parser::buildBase(delegator);
+	parser::DelegatorUtils::buildBase(delegator);
 	return delegator;
 }
 
@@ -47,7 +47,7 @@ public:
 	parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override
 	{
 		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
-		control::endpoint::addParsers(delegator, controller);
+		control::endpoint::DelegatorUtils::addParsers(delegator, controller);
 
 		return delegator;
 	}
