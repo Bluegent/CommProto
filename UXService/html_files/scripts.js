@@ -12,13 +12,6 @@ function invoke(event)
         let optionStr = event.target.getAttribute('optionStr');
         window[nameOfFunction](conn,controlId,elementId,optionStr);
     }
-    
-    if(nameOfFunction == "postSlider")
-    {
-        let elementId = event.target.getAttribute('elementId');
-        let optionStr = event.target.getAttribute('optionStr');
-        window[nameOfFunction](conn,controlId,elementId,optionStr);
-    }
 }
 
 
@@ -75,7 +68,7 @@ function postNotification(connection,id, elemId,optionStr)
 
 function setSliderValue(sliderId, value)
 {
-    document.getElementById(sliderId).innerHTML = "value: "+value;
+    document.getElementById(sliderId).innerHTML = value;
 }    
     
 function postSlider(connection,id,value)

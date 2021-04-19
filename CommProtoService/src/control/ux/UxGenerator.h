@@ -28,9 +28,19 @@ namespace commproto
 				template <typename ControlType>
 				std::string generate(const ControlType& control) const;
 
+				template <typename ControlType>
+				std::string getControlId(const ControlType& control) const;
+
+				template <typename ControlType>
+				std::string getControlTypeId(const ControlType& control) const;
+
 				void send(Message && msg) const;
 				void notifyUpdate() const;
-			protected:
+			private:
+				template <typename ControlType>
+				std::map<std::string, std::string> getBaseReplacements(const ControlType& control) const;
+
+
 				UIController& manager;
 
 			};
@@ -46,10 +56,54 @@ namespace commproto
 			}
 
 			template <typename ControlType>
+			inline std::map<std::string, std::string> Generator::getBaseReplacements(const ControlType& control)const
+			{
+				std::map<std::string, std::string>  replacements;
+				replacements.emplace("@name", control.getName());
+				replacements.emplace("@control_id", std::to_string(control.getId()));
+				replacements.emplace("@id", getControlId(control));
+				replacements.emplace("@connection_name", manager.getConnectionName());
+				return replacements;
+			}
+
+			template <typename ControlType>
 			std::string Generator::generate(const ControlType& control) const
 			{
 				return "";
 			}
+
+			template <typename ControlType>
+			std::string Generator::getControlId(const ControlType& control) const
+			{
+				std::stringstream stream;
+
+				stream << manager.getConnectionName() << "-" << control.getId();
+				return stream.str();
+			}
+
+			template <typename ControlType>
+			std::string Generator::getControlTypeId(const ControlType& control) const
+			{
+				return std::string();
+			}
+
+			template <>
+			inline std::string Generator::getControlTypeId(const ToggleImpl& control) const
+			{
+				std::stringstream sstream;
+				sstream << manager.getConnectionName() << "-toggle-" << control.getId();
+				return sstream.str();
+			}
+
+
+			template <>
+			inline std::string Generator::getControlTypeId(const SliderImpl& control) const
+			{
+				std::stringstream sstream;
+				sstream << manager.getConnectionName() << "-slider-" << control.getId();
+				return sstream.str();
+			}
+
 
 			template <>
 			inline std::string Generator::generate(const ButtonImpl& control) const
@@ -59,9 +113,9 @@ namespace commproto
 					return std::string();
 				}
 
-				std::stringstream sstream;
-				sstream << "<button onclick = \"postButton('" << manager.getConnectionName() << "','" << control.getId() << "')\">" << control.getName() << " </button>";
-				return sstream.str();
+				auto replacements = getBaseReplacements(control);
+
+				return manager.getEngine()->getTemplateWithReplacements("button", std::move(replacements));
 			}
 
 			template <>
@@ -72,17 +126,12 @@ namespace commproto
 					return std::string();
 				}
 
-				std::stringstream sstream;
-				sstream << manager.getConnectionName() << "-toggle" << control.getId();
-				std::string controlIdString = sstream.str();
-				sstream.clear();
-				sstream.str(std::string());
+				auto replacements = getBaseReplacements(control);
+				replacements.emplace("@toggle_id", getControlTypeId(control));
+				replacements.emplace("@checked", control.getState() ? "checked" : "");
 
-				sstream << "<div class=\"toggle-switch\">";
-				sstream << control.getName() << " : <input type=\"checkbox\" id=\"" << controlIdString << "\" onclick=\"postToggle(this, '" << manager.getConnectionName() << "', '" << control.getId() << "')\"" << (control.getState() ? " checked>" : " >");
-				sstream << "<label for=\"" << controlIdString << "\"></label>";
-				sstream << "</div>";
-				return sstream.str();
+				return manager.getEngine()->getTemplateWithReplacements("toggle", std::move(replacements));
+
 			}
 
 			template <>
@@ -92,43 +141,37 @@ namespace commproto
 				{
 					return std::string();
 				}
+				auto replacements = getBaseReplacements(control);
+				replacements.emplace("@text", control.getText());
+				return manager.getEngine()->getTemplateWithReplacements("label", std::move(replacements));
 
-				std::stringstream sstream;
-				sstream << "<span class=\"c_label\">" << control.getName() << ": " << control.getText() << "</span>";
-				return sstream.str();
 			}
 
 
 			template <>
 			inline std::string Generator::generate(const NotificationImpl& control) const
 			{
-				std::stringstream stream;
 
-				stream << "notification-" << manager.getConnectionName() << "-" << control.getId();
-				std::string notifId = stream.str();
-
-				stream.clear();
-				stream.str(std::string());
-
-				stream << "onclick = \"invoke(event)\"";
-				stream << "name='postNotification'";
-				stream << "connectionId=\"" << manager.getConnectionName() << "\"";
-				stream << "controlId=\"" << control.getId() << "\"";
-				stream << "elementId=\"" << notifId << "\"";
-				stream << "optionStr=\"";
-				std::string attributes = stream.str();
-				stream.clear();
-				stream.str(std::string());
-
-				stream << "<div class=\"notification\" id=\"" << notifId << "\">";
-				stream << control.getName() << "<br>";
+				std::stringstream buttons;
 				auto options = control.getOptions();
 				for (auto opt : options)
 				{
-					stream << "<button " << attributes << opt << "\" >" << opt << " </button>";
+					auto replacements = getBaseReplacements(control);
+					replacements.emplace("@option", opt);
+					buttons << manager.getEngine()->getTemplateWithReplacements("notif_button", std::move(replacements));
 				}
 
-				stream << "</div>";
+				auto replacements = getBaseReplacements(control);
+				replacements.emplace("@buttons", buttons.str());
+				replacements.emplace("@text", "pretend I implemented this :(");
+				return manager.getEngine()->getTemplateWithReplacements("notification", std::move(replacements));
+			}
+
+			inline std::string getString(const float value, const uint32_t precision = 3)
+			{
+				std::stringstream stream;
+				stream.precision(precision);
+				stream << value;
 				return stream.str();
 			}
 
@@ -143,29 +186,14 @@ namespace commproto
 				float left, right, value, step;
 				control.getValues(left, right, value, step);
 
-				std::stringstream sstream;
-				sstream << "slid-" << manager.getConnectionId() << "-" << control.getId();
-				std::string sliderId = sstream.str();
+				auto replacements = getBaseReplacements(control);
+				replacements.emplace("@slider_id", getControlTypeId(control));
+				replacements.emplace("@left", getString(left));
+				replacements.emplace("@right", getString(right));
+				replacements.emplace("@value", getString(value));
+				replacements.emplace("@step", getString(step));
 
-				sstream.str(std::string());
-				sstream.clear();
-				
-				sstream.precision(3);
-
-				sstream << control.getName() << ":";
-				sstream << "<div class=\"slidecontainer\">";
-				sstream << left << " - " << right;
-				sstream << "<input type=\"range\" class=\"slider\" ";
-				sstream << "value=\"" << value << "\" ";
-				sstream << "min=\"" << left << "\" ";
-				sstream << "max=\"" << right << "\" ";
-				sstream << "step=\"" << step << "\" ";
-				sstream << "oninput=\"setSliderValue('" << sliderId<< "' ,this.value)\" ";
-				sstream << "onmouseup=\"postSlider('" << manager.getConnectionName() << "', '" << control.getId() <<"', this.value, this.min, this.max)\"/>";
-				sstream << "<div id=\""<< sliderId << "\"> value:" << value <<"</div>";
-				sstream << "</div>";
-
-				return sstream.str();
+				return manager.getEngine()->getTemplateWithReplacements("slider", std::move(replacements));
 			}
 
 

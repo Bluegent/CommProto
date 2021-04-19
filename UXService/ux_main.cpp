@@ -100,7 +100,7 @@ int main(int argc, char * argv[])
 
 	//delegator to parse incoming messages
 	control::ux::UxControllersHandle controllers = std::make_shared<control::ux::UxControllers>();
-	std::shared_ptr<UXServiceProvider> provider = std::make_shared<UXServiceProvider>(mapper, socket, controllers);
+	std::shared_ptr<UXServiceProvider> provider = std::make_shared<UXServiceProvider>(mapper, socket, controllers,engine);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 
 	endpoint::MappingNotification removeController = [controllers](const std::string & name, const uint32_t id)

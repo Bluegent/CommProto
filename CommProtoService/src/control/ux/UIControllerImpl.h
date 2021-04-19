@@ -3,6 +3,7 @@
 
 #include <commproto/control/ux/UIController.h>
 #include <commproto/sockets/Socket.h>
+#include <commproto/control/ux/TemplateEngine.h>
 #include <map>
 #include "IdProvider.h"
 #include <mutex>
@@ -18,7 +19,7 @@ namespace commproto
 			class UIControllerImpl : public UIController
 			{
 			public:
-				UIControllerImpl(const std::string& name, const std::string& connectionName_, const messages::TypeMapperHandle & mapper, const sockets::SocketHandle & socket, const uint32_t id);
+				UIControllerImpl(const std::string& name, const std::string& connectionName_, const messages::TypeMapperHandle & mapper, const sockets::SocketHandle & socket, const uint32_t id, const TemplateEngineHandle& engine_);
 				void addControl(const ControlHandle& control) override;
 				std::string getConnectionName() override;
 				std::string getUx() override;
@@ -37,6 +38,7 @@ namespace commproto
 				std::string getNotifications() override;
 				void dismissNotification(const uint32_t id) override;
 				void requestState() override;
+				TemplateEngineHandle getEngine() override;
 			private:
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;
@@ -49,6 +51,7 @@ namespace commproto
 				std::atomic_bool hasNotif;
 				std::vector<uint32_t> pendingNotifications;
 				std::mutex notificationMutex;
+				TemplateEngineHandle engine;
 			};
 
 

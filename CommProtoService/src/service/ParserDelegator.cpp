@@ -1,5 +1,4 @@
 #include <commproto/service/ParserDelegator.h>
-#include <commproto/logger/Logging.h>
 #include <commproto/service/Connection.h>
 #include <commproto/parser/MappingType.h>
 
@@ -14,7 +13,6 @@ namespace commproto
 
 		parser::MappingResult ParserDelegator::registerMapping(const std::string& name, uint32_t id)
 		{
-			LOG_DEBUG("Attempting to add a new parser mapping, %s - %d", name.c_str(), id);
 			parser::MappingResult registered = parser::ParserDelegator::registerMapping(name,id);
 			if( id == 0)
 			{
@@ -22,7 +20,6 @@ namespace commproto
 			}
 			messages::MappingType msg = messages::MappingType(name, id);
 			msg.senderId = owner.getId();
-			LOG_INFO("Parser delegator forwarding mapping %s -> %d",name.c_str(), id);
 			owner.receive(messages::MappingTypeSerializer::serialize(std::move(msg)));
 
 			return registered;

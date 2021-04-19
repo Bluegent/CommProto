@@ -11,17 +11,18 @@ commproto::parser::ParserDelegatorHandle buildSelfDelegator()
 	return delegator;
 }
 
-UXServiceProvider::UXServiceProvider(const commproto::messages::TypeMapperHandle& mapper_, const commproto::sockets::SocketHandle& socket_, const commproto::control::ux::UxControllersHandle& controllers)
+UXServiceProvider::UXServiceProvider(const commproto::messages::TypeMapperHandle& mapper_, const commproto::sockets::SocketHandle& socket_, const commproto::control::ux::UxControllersHandle& controllers, const commproto::control::ux::TemplateEngineHandle & engine_)
 	: mapper{ mapper_ }
 	, socket{ socket_ }
 	, controllers{ controllers }
+	, engine{engine_}
 {
 }
 
 commproto::parser::ParserDelegatorHandle UXServiceProvider::provide(const std::string& name, const uint32_t id)
 {
 	commproto::parser::ParserDelegatorHandle delegator = buildSelfDelegator();
-	auto controller = std::make_shared<commproto::control::ux::UIFactory>("UI", name, mapper, socket, id)->build();
+	auto controller = std::make_shared<commproto::control::ux::UIFactory>("UI", name, mapper, socket, id,engine)->build();
 	commproto::control::ux::addParsers(delegator, controller);
 	controllers->addController(name, controller);
 	controller->requestState();

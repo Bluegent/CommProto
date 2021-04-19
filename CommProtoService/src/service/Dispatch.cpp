@@ -9,8 +9,6 @@ namespace commproto {
 		{
 		}
 
-
-
 		void Dispatch::sendTo(const uint32_t sender, const std::string& name, const Message& msg)
 		{
 			std::lock_guard<std::mutex> lock(connectionMutex);
@@ -206,7 +204,6 @@ namespace commproto {
 
 		void Dispatch::sendToNoLock(const uint32_t senderId, const uint32_t id, const commproto::Message& msg)
 		{
-			LOG_INFO("[Dispatch] Sending message from %d to %d", senderId, id);
 			auto sender = connections.find(senderId);
 			auto receiver = connections.find(id);
 			if (sender == connections.end() || receiver == connections.end())

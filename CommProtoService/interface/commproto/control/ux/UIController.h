@@ -1,9 +1,10 @@
 #ifndef UX_UICONTROLLER_H
 #define UX_UICONTROLLER_H
+
 #include <commproto/control/ux/Control.h>
 #include <commproto/control/ux/ControlCollection.h>
 #include <commproto/control/ux/Notification.h>
-
+#include <commproto/control/ux/TemplateEngine.h>
 namespace commproto
 {
 	namespace control {
@@ -28,6 +29,7 @@ namespace commproto
 				virtual std::string getNotifications() = 0;
 				virtual void dismissNotification(const uint32_t id) = 0;
 				virtual void requestState() = 0;
+				virtual TemplateEngineHandle getEngine() = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;

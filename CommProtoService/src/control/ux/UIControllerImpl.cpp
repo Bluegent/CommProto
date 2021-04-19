@@ -11,7 +11,12 @@ namespace commproto
 		namespace ux
 		{
 
-			UIControllerImpl::UIControllerImpl(const std::string& name, const std::string& connectionName_, const messages::TypeMapperHandle & mapper, const sockets::SocketHandle & socket_, const uint32_t id)
+			UIControllerImpl::UIControllerImpl(
+				const std::string& name, const std::string& connectionName_
+				, const messages::TypeMapperHandle & mapper
+				, const sockets::SocketHandle & socket_
+				, const uint32_t id
+				, const TemplateEngineHandle & engine_)
 				: UIController{ name }
 				, connectionName{ connectionName_ }
 				, provider{ mapper }
@@ -19,6 +24,7 @@ namespace commproto
 				, connectionId{ id }
 				, update{ true }
 				, hasNotif{ false }
+				, engine{ engine_ }
 			{
 			}
 
@@ -173,6 +179,11 @@ namespace commproto
 			{
 				Message msg = RequestControllerStateSerializer::serialize(std::move(RequestControllerState(provider.requestStateId)));
 				send(msg);
+			}
+
+			TemplateEngineHandle UIControllerImpl::getEngine()
+			{
+				return engine;
 			}
 
 			ControlStateHandler::ControlStateHandler(const UIControllerHandle& controller_)

@@ -14,7 +14,7 @@ namespace commproto
 			class UIFactory
 			{
 			public:
-				UIFactory(const std::string & name, const std::string & connectionName, const messages::TypeMapperHandle& mapper, const sockets::SocketHandle& socket, const uint32_t id);
+				UIFactory(const std::string & name, const std::string & connectionName, const messages::TypeMapperHandle& mapper, const sockets::SocketHandle& socket, const uint32_t id, const TemplateEngineHandle & engine);
 				UIControllerHandle build() const;
 			private:
 				UIControllerHandle controller;
