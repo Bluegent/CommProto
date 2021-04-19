@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <commproto/parser/ByteStream.h>
-#include "commproto/utils/Math.h"
+#include <commproto/utils/Math.h>
+#include <commproto/utils/String.h>
 
 namespace commproto
 {
@@ -106,6 +107,26 @@ namespace commproto
 				ASSERT_NEAR(0.f,math::getNearest(0.f,10.f,0.047f,5.f),0.01f);
 				ASSERT_NEAR(10.f,math::getNearest(0.f,10.f,0.99f,5.f),0.01f);
 				ASSERT_NEAR(0.f,math::getNearest(0.f,10.f,0.01f,5.f),0.01f);
+			}
+
+			TEST(StringReplace,CanReplaceStuff)
+			{
+				std::string target = "@name: My name is @name, you @reason, prepare to @reaction!";
+				std::string expected = "Inigo Montoya: My name is Inigo Montoya, you killed my father, prepare to die!";
+
+				utils::replaceAll(target, "@name", "Inigo Montoya");
+				utils::replaceAll(target, "@reason", "killed my father");
+				utils::replaceAll(target, "@reaction", "die");
+				ASSERT_EQ(target, expected);
+			}
+
+			TEST(StringReplace, ReplacesAllStuff)
+			{
+				std::string target = "@thing @thing, @thing? @thing @thing thing!";
+				std::string expected = "desu desu, desu? desu desu thing!";
+
+				utils::replaceAll(target, "@thing", "desu");
+				ASSERT_EQ(target, expected);
 			}
 		}
 	}

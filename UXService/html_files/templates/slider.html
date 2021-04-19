@@ -1,0 +1,7 @@
+<div class="container-slider" id="@id">
+<div class="slidecontainer">
+@name <br>
+@left ---- |@value| --- @right
+<input type="range" class="slider" value="@value" min="@left" max="@right" step="@step" oninput="setSliderValue('@controlid',this.value)" onmouseup="postSlider('@connetion_name','@control_id',this.value)"> 
+</div>
+</div>

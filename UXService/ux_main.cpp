@@ -12,6 +12,8 @@
 
 #include "HttpServer.h"
 #include "UxDelegatorProvider.h"
+#include <commproto/control/ux/TemplateEngine.h>
+#include "TemplateEngineLoader.h"
 
 namespace ConfigValues
 {
@@ -67,6 +69,13 @@ int main(int argc, char * argv[])
 	}
 
 	SenderMapping::InitializeName(name);
+
+	auto engine = std::make_shared<control::ux::TemplateEngine>();
+	TemplateEngineLoader loader(engine);
+	Poco::Path dir("html_files");
+	dir.append("templates");
+	std::string path = dir.toString();
+	loader.load(path);
 
 	sockets::SocketHandle socket = std::make_shared<sockets::SocketImpl>();
 	if (!socket->initClient(dispatchAddr, dispatchPort))

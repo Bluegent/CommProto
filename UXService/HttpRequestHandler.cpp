@@ -145,8 +145,6 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 				resp.send() << "<null>";
 				return;
 			}
-
-			LOG_INFO("POST%s ", url.c_str());
 			auto ctrls = controllers->getControllers();
 			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
 			std::ostream& out = resp.send();
@@ -175,7 +173,6 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 				resp.send() << "<null>";
 				return;
 			}
-			LOG_INFO("POST%s ", url.c_str());
 			std::ostream& out = resp.send();
 			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
 			resp.setContentType("application/json");
@@ -225,8 +222,6 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 		{
 			uri = "/index.html";
 		}
-
-		LOG_INFO("GET request for file \"%s\"", uri.c_str());
 
 		Poco::Path path(uri);
 		std::string extension = Poco::toLower(path.getExtension());

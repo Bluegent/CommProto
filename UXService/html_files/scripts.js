@@ -78,7 +78,7 @@ function setSliderValue(sliderId, value)
     document.getElementById(sliderId).innerHTML = "value: "+value;
 }    
     
-function postSlider(connection,id,value, max, min)
+function postSlider(connection,id,value)
 {
     var http = new XMLHttpRequest();
     var data = new FormData();
