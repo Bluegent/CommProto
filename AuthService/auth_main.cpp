@@ -55,6 +55,7 @@ public:
 		, scanId{ mapper->registerType<commproto::device::ScanForNetworksMessage>() }
 		, authorizeId{ mapper->registerType<commproto::device::DeviceAuthAccept>() }
 		, rejectId{ mapper->registerType<commproto::device::DeviceAuthReject>() }
+		, keepAliveId{ mapper->registerType<commproto::device::KeepAlive>() }
 	{
 
 	}
@@ -98,6 +99,11 @@ public:
 		commproto::Message reject = commproto::device::DeviceAuthRejectSerializer::serialize(std::move(commproto::device::DeviceAuthReject(rejectId,name)));
 		stream->sendBytes(reject);
 	}
+	void sendPong()
+	{
+		commproto::Message reject = commproto::device::KeepAliveSerializer::serialize(std::move(commproto::device::KeepAlive(keepAliveId)));
+		stream->sendBytes(reject);
+	}
 
 
 private:
@@ -107,6 +113,7 @@ private:
 	uint32_t scanId;
 	uint32_t authorizeId;
 	uint32_t rejectId;
+	uint32_t keepAliveId;
 };
 using AuthServiceHandle = std::shared_ptr<AuthService>;
 
@@ -153,7 +160,21 @@ void ScanFinishedHandler::handle(commproto::messages::MessageBase&& data)
 class KeepAliveHandler : public commproto::parser::Handler
 {
 public:
-	void handle(commproto::messages::MessageBase&& data) override{}
+	KeepAliveHandler(const AuthServiceHandle & service_)
+		:service{ service_ }
+	{
+
+	}
+	void handle(commproto::messages::MessageBase&& data) override
+	{
+		if(!service)
+		{
+			return;
+		}
+		service->sendPong();
+	}
+	private:
+		AuthServiceHandle service;
 };
 
 
@@ -164,7 +185,7 @@ commproto::parser::ParserDelegatorHandle build(const AuthServiceHandle & service
 	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::logger::LogParser, commproto::logger::LogMessage>(delegator, std::make_shared<commproto::logger::LogHandler>());
 	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::DeviceAuthRequestParser, commproto::device::DeviceAuthRequestMessage>(delegator, std::make_shared<DeviceReqHandler>(service));
 	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::ScanFinishedParser, commproto::device::ScanFinished>(delegator, std::make_shared<ScanFinishedHandler>(service));
-	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::KeepAliveParser, commproto::device::KeepAlive>(delegator, std::make_shared<KeepAliveHandler>());
+	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::KeepAliveParser, commproto::device::KeepAlive>(delegator, std::make_shared<KeepAliveHandler>(service));
 
 	return delegator;
 }

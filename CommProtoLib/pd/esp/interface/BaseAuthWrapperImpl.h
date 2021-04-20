@@ -26,7 +26,7 @@ namespace commproto
 		class BaseAuthWrapperImpl : public BaseEndpointWrapper
 		{
 		public:
-            
+                
             void initFs() override
             {
                 

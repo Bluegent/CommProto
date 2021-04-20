@@ -14,6 +14,7 @@ public:
 	void setLED(const bool on) override{}
 	void delayT(const uint32_t delay) override{}
 	void reboot() override {}
+	uint32_t getMs() override { return 0; }
 };
 
 

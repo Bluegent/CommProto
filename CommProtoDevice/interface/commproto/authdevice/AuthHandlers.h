@@ -56,6 +56,15 @@ namespace commproto
 			AuthRequestHandler& device;
 		};
 
+
+		class KeepAliveHandler : public commproto::parser::Handler
+		{
+		public:
+			KeepAliveHandler(AuthRequestHandler& device_);
+			void handle(commproto::messages::MessageBase&& data) override;
+		private:
+			AuthRequestHandler& device;
+		};
     }
 }
 

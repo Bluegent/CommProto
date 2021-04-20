@@ -8,15 +8,13 @@
 #include <commproto/authdevice/AuthHandlers.h>
 #include <algorithm>
 #include <commproto/logger/LoggingMessage.h>
-#include "commproto/messages/KeepAlive.h"
+#include <commproto/messages/KeepAlive.h>
 
 
 namespace commproto
 {
 	namespace authdevice
 	{
-
-
 		parser::ParserDelegatorHandle buildSerialDelegator(AuthDevice& device)
 		{
 			parser::ParserDelegatorHandle delegator = std::make_shared<parser::ParserDelegator>();
@@ -24,6 +22,7 @@ namespace commproto
 			parser::DelegatorUtils::addParserHandlerPair<device::ScanForNetworksParser, device::ScanForNetworksMessage>(delegator, std::make_shared<ScanHandler>(device));
 			parser::DelegatorUtils::addParserHandlerPair<device::DeviceAuthAcceptParser, device::DeviceAuthAccept>(delegator, std::make_shared<DeviceAuthHandler>(device));
 			parser::DelegatorUtils::addParserHandlerPair<device::DeviceAuthRejectParser, device::DeviceAuthReject>(delegator, std::make_shared<DeviceRejectandler>(device));
+			parser::DelegatorUtils::addParserHandlerPair<device::KeepAliveParser, device::KeepAlive>(delegator, std::make_shared<KeepAliveHandler>(device));
 
 			return delegator;
 		}
@@ -45,6 +44,8 @@ namespace commproto
 			, finishedReading(false)
 			, serviceConnected(false)
 			, shouldScan(false)
+			, lastPing(0)
+			, lastPong(0)
 		{
 		}
 
@@ -87,19 +88,15 @@ namespace commproto
 				shouldScan = false;
 			}
 
+			if (lastPing - lastPong > 5000)
+			{
+				device.reboot();
+			}
+			
+			sendPing();
 			if (builder)
 			{
 				builder->pollAndReadTimes(100);
-			}
-
-		
-			if (serial) {
-				Message keepAlive = device::KeepAliveSerializer::serialize(messages::KeepAliveMessage(provider->keepAliveId));
-				int result = serial->sendBytes(keepAlive);
-				if (result != keepAlive.size())
-				{
-					device.reboot();
-				}
 			}
 
 			device.delayT(1000);
@@ -140,6 +137,7 @@ namespace commproto
 
 		void AuthDevice::responseAccept(const std::string & name, const std::vector<std::string> & reply, const uint32_t port)
 		{
+			disableKeepAlive();
 			LOG_INFO("Authorized device \"%s\", sending message", name.c_str());
 			if (reply.size() != 3)
 			{
@@ -174,7 +172,7 @@ namespace commproto
 			LOG_INFO("Sent approval message to \"%s\"", name.c_str());
 			device.delayT(500);
 			connection->shutdown();
-
+			enableKeepAlive();
 		}
 
 		void AuthDevice::responseDeny(const std::string& name)
@@ -211,10 +209,41 @@ namespace commproto
 			device.reboot();
 		}
 
+		void AuthDevice::sendPing()
+		{
+			if (!serial)
+			{
+				return;
+			}
+			Message keepAlive = device::KeepAliveSerializer::serialize(messages::KeepAliveMessage(provider->keepAliveId));
+			serial->sendBytes(keepAlive);
+			lastPing = device.getMs();
+		}
+
+		void AuthDevice::gotPong()
+		{
+			lastPong = device.getMs();
+		}
+
+		void AuthDevice::disableKeepAlive()
+		{
+			lastPing = 0;
+			lastPong = 0;
+			keepAliveOn = false;
+		}
+
+		void AuthDevice::enableKeepAlive()
+		{
+			lastPing = 0;
+			lastPong = 0;
+			keepAliveOn = true;
+		}
+
 
 		void AuthDevice::scanNetworks()
 		{
 			LOG_INFO("Scanning networks");
+			disableKeepAlive();
 			std::vector<std::string> networks = device.listNetworks();
 			for (auto name : networks)
 			{
@@ -254,6 +283,7 @@ namespace commproto
 				}
 			}
 			serial->sendBytes(device::ScanFinishedSerializer::serialize(std::move(device::ScanFinished(provider->finishScanId))));
+			enableKeepAlive();
 		}
 
 		bool AuthDevice::alreadyScanned(const std::string& name)

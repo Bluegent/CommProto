@@ -17,6 +17,10 @@ namespace commproto
 		class AuthDeviceWrapperImpl : public AuthDeviceWrapper
 		{
 		public:
+            uint32_t getMs() override 
+            { 
+                return millis();
+            }
 			void setup()
 			{
 				pinMode(LED_BUILTIN, OUTPUT);

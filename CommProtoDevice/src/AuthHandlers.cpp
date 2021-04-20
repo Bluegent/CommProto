@@ -67,5 +67,15 @@ namespace commproto
 	    {
 			device.reboot();
 	    }
+
+	    KeepAliveHandler::KeepAliveHandler(AuthRequestHandler& device_)
+			:device(device_)
+	    {
+	    }
+
+	    void KeepAliveHandler::handle(commproto::messages::MessageBase&& data)
+	    {
+		    device.gotPong();
+	    }
     }
 }

@@ -23,9 +23,14 @@ namespace commproto
 			void responseAccept(const std::string & name, const std::vector<std::string> & reply, const uint32_t port) override;
 			void responseDeny(const std::string & name) override;
 			void reboot() override;
+			void sendPing();
+			void gotPong() override;
+			void disableKeepAlive();
+			void enableKeepAlive();
 		private:
 			void scanNetworks();
 			bool alreadyScanned(const std::string & name);
+		private:
 			AuthDeviceWrapper& device;
 			bool finishedReading;
 			EndpointData targetDevice;
@@ -37,6 +42,9 @@ namespace commproto
 			serial::LogToSerialHandle log;
 			bool shouldScan;
 			std::vector<std::string> previouslyScanned;
+			uint32_t lastPing;
+			uint32_t lastPong;
+			bool keepAliveOn;
 		};
 	}
 }

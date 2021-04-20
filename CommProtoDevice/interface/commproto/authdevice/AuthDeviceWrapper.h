@@ -20,6 +20,7 @@ namespace commproto
 			virtual void delayT(const uint32_t delay) = 0;
 			virtual void setLED(const bool on) = 0;
 			virtual void reboot() = 0;
+			virtual uint32_t getMs() = 0;
 		};
 	}
 }

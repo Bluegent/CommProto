@@ -37,6 +37,7 @@ namespace commproto
 			virtual void responseAccept(const std::string & name, const std::vector<std::string> & reply, const uint32_t port) = 0;
 			virtual void responseDeny(const std::string & name) = 0;
 			virtual void reboot() = 0;
+			virtual void gotPong() = 0;
 		};
 	}
 }
