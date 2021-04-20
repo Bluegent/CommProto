@@ -6,3 +6,11 @@ function(set_executable_path NAME)
         configure_file(${CMAKE_SOURCE_DIR}/cmake/msvc_target_properties.user.in "${TARGET_USER_PROPERTY_FILE}" @ONLY)
     endif()
 endfunction() 
+
+function(installConfig NAME DIR)
+if(NOT EXISTS "${DIR}/${NAME}")
+	install(FILES config/${NAME} DESTINATION ${DIR})
+endif()
+
+
+endfunction()

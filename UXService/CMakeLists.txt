@@ -22,7 +22,9 @@ set(INSTALL_DIR "${CMAKE_BINARY_DIR}/../install")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_DIR})
 install (DIRECTORY "html_files" DESTINATION ${INSTALL_DIR})
-install (FILES "config/uxservice.cfg" DESTINATION ${INSTALL_DIR})
+
+SET(CONFIG_FILE uxservice.cfg)
+installConfig(${CONFIG_FILE} ${INSTALL_DIR})
 
 IF(WIN32)
 message("win32 TYPE=${CMAKE_BUILD_TYPE}")
