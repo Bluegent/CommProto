@@ -81,9 +81,11 @@ namespace commproto
 				{
 
 					socket = device.startAsAP(authdevice::ConnectionData::defaultData);
+					device.delayT(100);
 					LOG_INFO("Waiting for client");
 				}
 				sockets::SocketHandle client = socket->acceptNext();
+				device.delayT(100);
 				if (!client || !client->connected())
 				{
 					return;
@@ -109,6 +111,7 @@ namespace commproto
 					state = BaseAuthState::WaitForReconnect;
 					responseAttempts = 0;
 					LOG_INFO("Sent auth details, waiting for reply");
+					device.delayT(500);
 					client->shutdown();
 					return;
 				}

@@ -58,19 +58,8 @@ namespace commproto
 			}
 
 			commproto::sockets::SocketHandle startAsAP(const authdevice::ConnectionData& data) override
-			{
-#ifdef ESP32 
-                authdevice::ConnectionData data2;
-				data2.ssid = "EstiNebun";
-				data2.password = "01LMS222";
-				data2.addr = "192.168.1.2";
-				data2.port = 25565;
-                saveAPData(data2);
-                reboot();
-                return nullptr;
-#endif  
-                
-                
+			{  
+                             
 				Serial.println();
 				Serial.println("Starting as wifi access point");
 				WiFi.mode(WIFI_AP);
@@ -100,6 +89,10 @@ namespace commproto
 				do {
 					LOG_INFO("Attempt #%d connecting to wifi", attempt + 1);
 					status = WiFi.waitForConnectResult();
+                    if(status!=WL_CONNECTED)
+                    {
+                        delay(6000);
+                    }
 					++attempt;
 				} while (status != WL_CONNECTED && attempt != attempts);
 
@@ -119,9 +112,12 @@ namespace commproto
                     client = std::make_shared<commproto::sockets::SocketImpl>();
                     client->initClient(data.addr, data.port);
                     connected = client->connected();
-                    
+                    if(!connected)
+                    {
+                        delay(6000);
+                    }
                     ++attempt;
-                    if(attempt == 100)
+                    if(attempt == 10)
                     {
                         break;
                     }

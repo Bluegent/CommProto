@@ -59,7 +59,7 @@ namespace commproto
 			if (!dep.client)
 			{
 				LOG_INFO("All connection attempts failed, ressetting configuration and restarting in AP mode");
-				//device.resetAPData();
+				device.resetAPData();
 				device.reboot();
 				return;
 			}
