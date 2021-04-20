@@ -13,10 +13,10 @@ namespace commproto
                 public:
                 virtual ~ControlCollection() = default;
 				virtual void addControl(const ControlHandle & control) = 0;
-				virtual bool hasUpdate() = 0;
+				virtual bool hasUpdate(const std::string& tracker) = 0;
 				virtual ControlHandle getControl(const uint32_t id) = 0;
 				virtual void clear() = 0;
-				virtual void notifyUpdate() = 0;
+				virtual void notifyUpdate(const uint32_t &controlId) = 0;
 			};
         }
     }

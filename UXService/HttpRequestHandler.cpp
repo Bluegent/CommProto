@@ -73,13 +73,13 @@ void UxRequestHandler::handleSlider(KVMap&& map) const
 		return;
 	}
 	auto it = map.find("value");
-	if(it == map.end())
+	if (it == map.end())
 	{
 		return;
 	}
 
 	float value = 0.f;
-	try 
+	try
 	{
 		value = std::stof(it->second);
 	}
@@ -166,13 +166,8 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 		if (url.find("/update") == 0)
 		{
 			bool force = url.find("force") != std::string::npos;
-			bool update = controllers->hasUpdate();
-			if (!update && !force)
-			{
-				resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-				resp.send() << "<null>";
-				return;
-			}
+			Poco::Net::HTMLForm form(req, req.stream());
+			std::string tracker = form["session"];
 			std::ostream& out = resp.send();
 			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
 			resp.setContentType("application/json");
@@ -180,21 +175,41 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 			auto ctrls = controllers->getControllers();
 
 			Poco::JSON::Array uisJSON;
-
 			for (auto controller : ctrls)
 			{
-				if (force || controller.second->hasUpdate())
+				if (force)
 				{
-					Poco::JSON::Object uiJSON;
-					uiJSON.set("name", controller.first);
-					uiJSON.set("ui", controller.second->getUx());
-					uisJSON.add(uiJSON);
+					controller.second->addTracker(tracker);
+				}
+				if (force || controller.second->hasUpdate(tracker))
+				{
+					auto updates = controller.second->getUpdates(tracker, force);
+					Poco::JSON::Object ui;
+					ui.set("name", controller.second->getConnectionName());
+					Poco::JSON::Array cUpdates;
+					for (auto controlUpdate : updates)
+					{
+						Poco::JSON::Object cUpdate;
+						cUpdate.set("element", controlUpdate.first);
+						cUpdate.set("controlString", controlUpdate.second);
+						cUpdates.add(cUpdate);
+					}
+
+					ui.set("updates", cUpdates);
+					uisJSON.add(ui);
 				}
 			}
 
-			std::stringstream uis;
-			uisJSON.stringify(uis);
-			out << uis.str();
+			if (uisJSON.size() != 0) {
+				std::stringstream uis;
+				uisJSON.stringify(uis);
+				out << uis.str();
+			}
+			else
+			{
+
+				out << "<null>";
+			}
 
 			resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 			out.flush();

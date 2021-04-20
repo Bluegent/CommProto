@@ -34,7 +34,14 @@ namespace commproto
 				{
 					Message controlSerialized = it->second->serialize();
 					result.insert(result.end(), controlSerialized.begin(), controlSerialized.end());
+					if(!it->second->isEnabled())
+					{
+						Message state = ToggleControlEnabledStateSerializer::serialize(ToggleControlEnabledState(provider.toggleControlStateId, it->first, false));
+						result.insert(result.end(), state.begin(), state.end());
+					}
 				}
+
+
 				for (auto it = notifications.begin(); it != notifications.end(); ++it)
 				{
 					Message controlSerialized = it->second->serialize();

@@ -25,12 +25,12 @@ namespace commproto
 				, update{ true }
 				, hasNotif{ false }
 				, engine{ engine_ }
+				, checkingTrackers(false)
 			{
 			}
 
 			void UIControllerImpl::addControl(const ControlHandle& control)
 			{
-				LOG_INFO("Adding a control named \"%s\"", control->getName().c_str());
 				std::lock_guard<std::mutex> lock(controlMutex);
 				update = true;
 				const uint32_t id = control->getId();
@@ -39,9 +39,13 @@ namespace commproto
 					return;
 				}
 				controls.emplace(id, control);
+				for (auto tracker : trackers)
+				{
+					tracker.second->add(control->getId());
+				}
 			}
 
-			std::string UIControllerImpl::getConnectionName()
+			std::string UIControllerImpl::getConnectionName() const
 			{
 				return connectionName;
 			}
@@ -68,6 +72,11 @@ namespace commproto
 			UIControllerImpl::~UIControllerImpl()
 			{
 				controls.clear();
+				checkingTrackers = false;
+				if(checkTrackersThread)
+				{
+					checkTrackersThread->join();
+				}
 			}
 
 			IdProvider& UIControllerImpl::getIdProvider()
@@ -91,8 +100,17 @@ namespace commproto
 				return  it->second;
 			}
 
-			bool UIControllerImpl::hasUpdate()
+			bool UIControllerImpl::hasUpdate(const std::string& tracker)
 			{
+
+				std::lock_guard<std::mutex> lock(controlMutex);
+				auto it = trackers.find(tracker);
+				if (it == trackers.end())
+				{
+					return false;
+				}
+				bool update = it->second->hasUpdates();
+				it->second->setAccessed();
 				return update;
 			}
 
@@ -102,9 +120,13 @@ namespace commproto
 				controls.clear();
 			}
 
-			void UIControllerImpl::notifyUpdate()
+			void UIControllerImpl::notifyUpdate(const uint32_t &controlId)
 			{
-				update = true;
+				std::lock_guard<std::mutex> lock(controlMutex); 
+				for (auto tracker : trackers)
+				{
+					tracker.second->setUpdate(controlId, true);
+				}
 			}
 
 			void UIControllerImpl::addNotification(const NotificationHandle& notification)
@@ -114,7 +136,6 @@ namespace commproto
 				{
 					return;
 				}
-				LOG_INFO("Adding notification with id %d", id);
 				notifications.emplace(id, notification);
 			}
 
@@ -186,6 +207,80 @@ namespace commproto
 				return engine;
 			}
 
+			void UIControllerImpl::addTracker(const std::string& addr)
+			{
+				std::lock_guard<std::mutex> lock(controlMutex);
+				if (trackers.find(name) != trackers.end())
+				{
+					return;
+				}
+				UpdateTrackerHandle tracker = std::make_shared<UpdateTracker>();
+				tracker->name = addr;
+				for (auto control : controls)
+				{
+					tracker->add(control.first);
+				}
+				trackers.emplace(addr, tracker);
+
+			}
+
+			std::string UIControllerImpl::getControlId(const uint32_t control) const
+			{
+				std::stringstream stream;
+				stream << getConnectionName() << "-" << control;
+				return stream.str();
+			}
+
+			std::map<std::string, std::string> UIControllerImpl::getUpdates(const std::string& addr, bool force)
+			{
+				std::lock_guard<std::mutex> lock(controlMutex);
+				
+				auto trackerIt = trackers.find(addr);
+
+				std::map<std::string, std::string> updates;
+				if (trackerIt == trackers.end())
+				{
+					return updates;
+				}
+
+				if (!force && !trackerIt->second->hasUpdates())
+				{
+					return updates;
+				}
+
+				for (auto control : controls)
+				{
+					if (!force && !trackerIt->second->hasUpdate(control.first))
+					{
+						continue;
+					}
+					updates.emplace(getControlId(control.first), control.second->getUx());
+					trackerIt->second->setUpdate(control.first, false);
+				}
+				return updates;
+			}
+
+			void UIControllerImpl::startCheckingTrackers()
+			{
+				if(checkingTrackers)
+				{
+					return;
+				}
+				checkingTrackers = true;
+				checkTrackersThread = std::make_shared<std::thread>([this]() 
+				{
+					uint32_t times = 0;
+					while (checkingTrackers) {
+						++times;
+						if (times == 3) {
+							times = 0;
+							this->checkTrackers();
+						}
+						std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+					}
+				});
+			}
+
 			ControlStateHandler::ControlStateHandler(const UIControllerHandle& controller_)
 				: controller{ controller_ }
 			{
@@ -201,7 +296,7 @@ namespace commproto
 					return;
 				}
 				control->setState(msg.prop2);
-				controller->notifyUpdate();
+				controller->notifyUpdate(msg.prop);
 			}
 
 			ControlShownHandler::ControlShownHandler(const UIControllerHandle& controller_)
@@ -219,7 +314,24 @@ namespace commproto
 					return;
 				}
 				control->setDisplayState(msg.prop2);
-				controller->notifyUpdate();
+				controller->notifyUpdate(msg.prop);
+			}
+
+			void UIControllerImpl::checkTrackers()
+			{
+				std::lock_guard<std::mutex> lock(controlMutex);
+				for (auto it = trackers.begin(); it != trackers.end();)
+				{
+					uint32_t timeSince = it->second->getTimeSinceLastAccess();
+					if (timeSince > 30000)
+					{
+						it = trackers.erase(it);
+					}
+					else
+					{
+						++it;
+					}
+				}
 			}
 		}
 	}

@@ -49,7 +49,7 @@ namespace commproto
 				return controllers;
 	        }
 
-	        bool UxControllers::hasUpdate()
+	        bool UxControllers::hasUpdate(const std::string & tracker)
 	        {
 				if(update)
 				{
@@ -59,7 +59,7 @@ namespace commproto
 				std::lock_guard<std::mutex> lock(controllerMutex);
 		        for (auto it : controllers)
 		        {
-			        if (it.second->hasUpdate())
+			        if (it.second->hasUpdate(tracker))
 			        {
 				        return true;
 			        }

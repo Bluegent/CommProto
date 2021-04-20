@@ -58,7 +58,7 @@ namespace commproto
 			void LabelImpl::setText(const std::string& text_)
 			{
 				text = text_;
-				generator->notifyUpdate();
+				generator->notifyUpdate(id);
 			}
 
 			std::string LabelImpl::getText() const

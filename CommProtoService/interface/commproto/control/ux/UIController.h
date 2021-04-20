@@ -17,7 +17,7 @@ namespace commproto
 			{
 			public:
 				UIController(const std::string & name) : Control{ name,0 } {}
-				virtual std::string getConnectionName() = 0;
+				virtual std::string getConnectionName() const = 0;
 				virtual uint32_t getConnectionId() = 0;
 				virtual ~UIController() = default;
 				virtual IdProvider& getIdProvider() = 0;
@@ -30,6 +30,9 @@ namespace commproto
 				virtual void dismissNotification(const uint32_t id) = 0;
 				virtual void requestState() = 0;
 				virtual TemplateEngineHandle getEngine() = 0;
+				virtual void addTracker(const std::string & addr) = 0;
+				virtual std::map<std::string, std::string> getUpdates(const std::string & addr, bool force = false) = 0;
+				virtual void startCheckingTrackers() = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;

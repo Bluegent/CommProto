@@ -26,6 +26,7 @@ commproto::parser::ParserDelegatorHandle UXServiceProvider::provide(const std::s
 	commproto::control::ux::addParsers(delegator, controller);
 	controllers->addController(name, controller);
 	controller->requestState();
+	controller->startCheckingTrackers();
 
 	LOG_INFO("Added controller for connection \"%s\" - %d", name.c_str(), id);
 

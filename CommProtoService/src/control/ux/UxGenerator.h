@@ -35,7 +35,7 @@ namespace commproto
 				std::string getControlTypeId(const ControlType& control) const;
 
 				void send(Message && msg) const;
-				void notifyUpdate() const;
+				void notifyUpdate(const uint32_t id) const;
 			private:
 				template <typename ControlType>
 				std::map<std::string, std::string> getBaseReplacements(const ControlType& control) const;
@@ -50,9 +50,9 @@ namespace commproto
 				manager.send(msg);
 			}
 
-			inline void Generator::notifyUpdate() const
+			inline void Generator::notifyUpdate(const uint32_t id) const
 			{
-				manager.notifyUpdate();
+				manager.notifyUpdate(id);
 			}
 
 			template <typename ControlType>

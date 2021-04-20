@@ -37,14 +37,6 @@ function postButton(connection,button)
     http.send(data);
 }
 
-var updateURI = "update";
-function forceUpdateUI()
-{
-    updateURI = "update-force";
-    updateUI();
-    updateURI = "update";
-}    
-
 var notificationURI = "notification";
 function forceNotifications()
 {
@@ -105,42 +97,6 @@ function getNotifications()
         
     };
     xhttp.open('POST', notificationURI, true);
-    xhttp.send();
-}
-
-function updateUI()
-{
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() 
-    {
-        if (this.readyState == 4)
-        {
-            if(this.status == 200)
-            {
-                if(xhttp.responseText == '<null>')
-                {
-                } 
-                else 
-                {
-                    console.log('updating UI');
-                    
-                    var response = JSON.parse(xhttp.responseText);
-                    for(var i = 0; i < response.length; i++) {
-                        var obj = response[i];
-                        var div = document.getElementById(obj["name"]);
-                        if(!div){
-                            document.getElementById("uis").innerHTML +='<div id="'+obj["name"]+'"</div>';
-                            div = document.getElementById(obj["name"]);
-                        }
-                        
-                        div.innerHTML = obj["ui"];
-                    }                   
-                }
-            }
-        } 
-        
-    };  
-    xhttp.open('POST', updateURI, true);
     xhttp.send();
 }
 
