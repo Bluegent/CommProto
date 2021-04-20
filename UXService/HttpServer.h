@@ -4,16 +4,17 @@
 #include <commproto/control/ux/UxControllers.h>
 #include <Poco/Util/ServerApplication.h>
 #include <Poco/Net/HTTPServer.h>
-
 #include "HttpRequestHandler.h"
 
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-	RequestHandlerFactory(const commproto::control::ux::UxControllersHandle & controller) : controller{ controller } {}
+	RequestHandlerFactory(const commproto::control::ux::UxControllersHandle& controller);
 	Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest&) override;
 private:
+	void loadMimeMapping();
 	commproto::control::ux::UxControllersHandle controller;
+	KVMap mimeTypes;
 };
 
 class UxServerApp : public Poco::Util::ServerApplication

@@ -1,8 +1,7 @@
 #include "TemplateEngineLoader.h"
 #include <Poco/Path.h>
 #include <Poco/DirectoryIterator.h>
-#include <fstream>
-#include <sstream>
+#include "FileLoader.h"
 
 
 TemplateEngineLoader::TemplateEngineLoader(const commproto::control::ux::TemplateEngineHandle& engine_)
@@ -10,23 +9,6 @@ TemplateEngineLoader::TemplateEngineLoader(const commproto::control::ux::Templat
 {
 }
 
-
-std::string getFileContents(const std::string & path)
-{
-	std::ifstream file(path);
-	std::stringstream stream;
-	if (file.is_open())
-	{
-		while (!file.eof())
-		{
-			std::string line;
-			std::getline(file, line);
-			stream << line;
-		}
-	}
-	file.close();
-	return stream.str();
-}
 
 void TemplateEngineLoader::load(std::string& pathStr) const
 {
@@ -52,7 +34,7 @@ void TemplateEngineLoader::load(std::string& pathStr) const
 			templateName = templateName.substr(0, lastindex);
 		}
 
-		std::string templateContent = getFileContents(path.absolute().toString());
+		std::string templateContent = FileLoader::getFileContents(path.absolute().toString());
 
 		if(templateContent.empty())
 		{

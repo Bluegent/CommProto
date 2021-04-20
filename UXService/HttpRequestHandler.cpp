@@ -10,6 +10,7 @@
 #include <Poco/Path.h>
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
+#include <Poco/StreamCopier.h>
 #include <sstream>
 
 const std::map<std::string, ControlType> stringMap = {
@@ -20,6 +21,39 @@ const std::map<std::string, ControlType> stringMap = {
 	{ "slider",		ControlType::Slider },
 	{"notification",ControlType::Notification}
 };
+
+void UxRequestHandler::handleGet(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+{
+	std::string uri = req.getURI();
+	if (uri == "/")
+	{
+		uri = "/index.html";
+	}
+
+	Poco::Path path(uri);
+	std::string extension = Poco::toLower(path.getExtension());
+
+	auto type = mimeTypes.find(extension);
+	if(type == mimeTypes.end())
+	{
+		resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+		return;
+	}
+	resp.setContentType(type->second);
+	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+
+	Poco::Path root("html_files");
+	std::string reqFile = uri.substr(1);
+	root.append(reqFile);
+	std::ostream& out = resp.send();
+	std::ifstream file(root.toString(), std::ifstream::in | std::ifstream::binary);
+	if (file.is_open())
+	{
+		Poco::StreamCopier::copyStream(file, out);
+	}
+	file.close();
+	out.flush();
+}
 
 void UxRequestHandler::handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const
 {
@@ -131,150 +165,105 @@ void UxRequestHandler::parseKVMap(KVMap&& map) const
 	}
 }
 
+UxRequestHandler::UxRequestHandler(const commproto::control::ux::UxControllersHandle& controllers,const KVMap & mimeTypes_)
+	: controllers{controllers}
+	, mimeTypes(mimeTypes_)
+{
+}
+
 void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
 {
-	if (req.getMethod().compare("POST") == 0)
+	if (req.getMethod() == "POST")
 	{
-		std::string url = req.getURI();
-		if (url.find("/notification") == 0)
+		handlePost(req, resp);
+		return;
+	}
+	if (req.getMethod() == "GET")
+	{
+		handleGet(req, resp);
+	}
+}
+
+void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+{
+	std::string url = req.getURI();
+	bool force = url.find("force") != std::string::npos;
+
+	Poco::Net::HTMLForm form(req, req.stream());
+	std::string tracker = form["session"];
+	std::ostream& out = resp.send();
+
+	resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+	resp.setContentType("application/json");
+
+	auto ctrls = controllers->getControllers();
+
+	Poco::JSON::Array uisJSON;
+	for (auto controller : ctrls)
+	{
+		if (force)
 		{
-			bool update = controllers->hasNotifications() || (url.find("force") != std::string::npos);
-			if (!update)
-			{
-				resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-				resp.send() << "<null>";
-				return;
-			}
-			auto ctrls = controllers->getControllers();
-			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-			std::ostream& out = resp.send();
-			resp.setContentType("text/html");
-
-			std::stringstream stream;
-
-			for (auto it = ctrls.begin(); it != ctrls.end(); ++it)
-			{
-				if (update || it->second->hasNotifications())
-				{
-					stream << it->second->getNotifications();
-				}
-			}
-			out << stream.str();
-
+			controller.second->addTracker(tracker);
 		}
-
-		if (url.find("/update") == 0)
+		if (force || controller.second->hasUpdate(tracker))
 		{
-			bool force = url.find("force") != std::string::npos;
-			Poco::Net::HTMLForm form(req, req.stream());
-			std::string tracker = form["session"];
-			std::ostream& out = resp.send();
-			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-			resp.setContentType("application/json");
-
-			auto ctrls = controllers->getControllers();
-
-			Poco::JSON::Array uisJSON;
-			for (auto controller : ctrls)
+			auto updates = controller.second->getUpdates(tracker, force);
+			Poco::JSON::Object ui;
+			ui.set("name", controller.second->getConnectionName());
+			Poco::JSON::Array cUpdates;
+			for (auto controlUpdate : updates)
 			{
-				if (force)
-				{
-					controller.second->addTracker(tracker);
-				}
-				if (force || controller.second->hasUpdate(tracker))
-				{
-					auto updates = controller.second->getUpdates(tracker, force);
-					Poco::JSON::Object ui;
-					ui.set("name", controller.second->getConnectionName());
-					Poco::JSON::Array cUpdates;
-					for (auto controlUpdate : updates)
-					{
-						Poco::JSON::Object cUpdate;
-						cUpdate.set("element", controlUpdate.first);
-						cUpdate.set("controlString", controlUpdate.second);
-						cUpdates.add(cUpdate);
-					}
-
-					ui.set("updates", cUpdates);
-					uisJSON.add(ui);
-				}
+				Poco::JSON::Object cUpdate;
+				cUpdate.set("element", controlUpdate.first);
+				cUpdate.set("controlString", controlUpdate.second);
+				cUpdates.add(cUpdate);
 			}
 
-			if (uisJSON.size() != 0) {
-				std::stringstream uis;
-				uisJSON.stringify(uis);
-				out << uis.str();
-			}
-			else
-			{
-
-				out << "<null>";
-			}
-
-			resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-			out.flush();
-			return;
-		}
-		if (url.compare("/action") == 0)
-		{
-			std::string connection;
-			std::string control;
-			Poco::Net::HTMLForm form(req, req.stream());
-			KVMap map;
-			for (Poco::Net::NameValueCollection::ConstIterator i = form.begin(); i != form.end(); ++i)
-			{
-				map.emplace(i->first, i->second);
-			}
-			resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-			resp.send().flush();
-			parseKVMap(std::move(map));
+			ui.set("updates", cUpdates);
+			uisJSON.add(ui);
 		}
 	}
-	if (req.getMethod().compare("GET") == 0)
-	{
-		std::string uri = req.getURI();
-		if (uri == "/")
-		{
-			uri = "/index.html";
-		}
 
-		Poco::Path path(uri);
-		std::string extension = Poco::toLower(path.getExtension());
-		if (extension == "css") {
-			resp.setContentType("text/css");
-		}
-		else if (extension == "html")
-		{
-			resp.setContentType("text/html");
-		}
-		else if (extension == "js")
-		{
-			resp.setContentType("application/javascript");
-		}
-		else
-		{
-			resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
-			return;
-		}
-		resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-
-		Poco::Path root("html_files");
-		std::string reqFile = uri.substr(1);
-		root.append(reqFile);
-		std::ostream& out = resp.send();
-		std::ifstream file(root.toString());
-		if (file.is_open())
-		{
-			while (!file.eof())
-			{
-				std::string line;
-				std::getline(file, line);
-				out << line << std::endl;
-			}
-		}
-		file.close();
-		out.flush();
+	if (uisJSON.size() != 0) {
+		std::stringstream uis;
+		uisJSON.stringify(uis);
+		out << uis.str();
 	}
+	else
+	{
+
+		out << "<null>";
+	}
+
+	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+	out.flush();
+}
+
+void UxRequestHandler::handleNotificationUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+{
+	std::string url = req.getURI();
+	bool update = controllers->hasNotifications() || (url.find("force") != std::string::npos);
+	if (!update)
+	{
+		resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+		resp.send() << "<null>";
+		return;
+	}
+	auto ctrls = controllers->getControllers();
+	resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+	std::ostream& out = resp.send();
+	resp.setContentType("text/html");
+
+	std::stringstream stream;
+
+	for (auto it = ctrls.begin(); it != ctrls.end(); ++it)
+	{
+		if (update || it->second->hasNotifications())
+		{
+			stream << it->second->getNotifications();
+		}
+	}
+	out << stream.str();
 }
 
 void UxRequestHandler::handleNotification(KVMap&& map) const
@@ -323,4 +312,38 @@ void UxRequestHandler::handleToggle(KVMap&& map) const
 	}
 
 	toggle->toggle();
+}
+
+void UxRequestHandler::handleAction(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+{
+	std::string connection;
+	std::string control;
+	Poco::Net::HTMLForm form(req, req.stream());
+	KVMap map;
+	for (Poco::Net::NameValueCollection::ConstIterator i = form.begin(); i != form.end(); ++i)
+	{
+		map.emplace(i->first, i->second);
+	}
+	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+	resp.send().flush();
+	parseKVMap(std::move(map));
+}
+
+void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+{
+	std::string url = req.getURI();
+	if (url.find("/notification") == 0)
+	{
+		handleNotificationUpdate(req, resp);
+		return;
+	}
+	if (url.find("/update") == 0)
+	{
+		handleUpdate(req, resp);
+		return;
+	}
+	if (url.compare("/action") == 0)
+	{
+		handleAction(req,resp);
+	}
 }
