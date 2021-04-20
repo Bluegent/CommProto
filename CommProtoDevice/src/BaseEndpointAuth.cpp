@@ -31,7 +31,7 @@ namespace commproto
 		void BaseEndpointAuth::setup()
 		{			
 			serial = device.getStream(115200);
-			LOG_INFO();
+			LOG_INFO("");
 
 			device.initFs();
 			isAP = !device.readAPData();
