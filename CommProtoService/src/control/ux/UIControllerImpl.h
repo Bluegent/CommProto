@@ -16,6 +16,13 @@ namespace commproto
 	{
 		namespace ux
 		{
+
+			struct NotificationData
+			{
+				const std::string text;
+				const uint32_t controlId;
+			};
+
 			class UIControllerImpl : public UIController
 			{
 			public:
@@ -33,19 +40,19 @@ namespace commproto
 				void notifyUpdate(const uint32_t &controlId) override;
 				void addNotification(const NotificationHandle& notification) override;
 				NotificationHandle getNotification(const uint32_t id) const override;
-				void displayNotification(const uint32_t id) override;
-				bool hasNotifications() override;
-				std::string getNotifications() override;
-				void dismissNotification(const uint32_t id) override;
+				void displayNotification(const uint32_t id, const std::string & text, const uint32_t actionId) override;
+				bool hasNotifications(const std::string & tracker) override;
+				UpdateMap getNotifications(const std::string & tracker, const bool force) override;
+				void dismissNotification(const uint32_t id, const uint32_t actiondId) override;
 				void requestState() override;
 				TemplateEngineHandle getEngine() override;
 				void addTracker(const std::string& addr) override;
-				std::map<std::string, std::string> getUpdates(const std::string& addr, bool force) override;
+				UpdateMap getUpdates(const std::string& addr, bool force) override;
 				void startCheckingTrackers() override;
+				std::string getControlId(const uint32_t control, const std::string& controlType = std::string{}) const override;
 			private:
 
 				void checkTrackers();
-				std::string UIControllerImpl::getControlId(const uint32_t control) const;
 				
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;
@@ -54,12 +61,11 @@ namespace commproto
 				sockets::SocketHandle socket;
 				uint32_t connectionId;
 				std::mutex controlMutex;
-				std::atomic_bool update;
-				std::atomic_bool hasNotif;
-				std::vector<uint32_t> pendingNotifications;
+				std::map<uint32_t, NotificationData> pendingNotifications;
 				std::mutex notificationMutex;
 				TemplateEngineHandle engine;
 				std::map<std::string, UpdateTrackerHandle> trackers;
+				std::map<std::string, UpdateTrackerHandle> notifTrackers;
 				std::shared_ptr<std::thread> checkTrackersThread;
 				std::atomic_bool checkingTrackers;
 			};

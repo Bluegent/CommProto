@@ -22,8 +22,6 @@ namespace commproto
 				, provider{ mapper }
 				, socket{ socket_ }
 				, connectionId{ id }
-				, update{ true }
-				, hasNotif{ false }
 				, engine{ engine_ }
 				, checkingTrackers(false)
 			{
@@ -32,7 +30,6 @@ namespace commproto
 			void UIControllerImpl::addControl(const ControlHandle& control)
 			{
 				std::lock_guard<std::mutex> lock(controlMutex);
-				update = true;
 				const uint32_t id = control->getId();
 				if (controls.find(id) != controls.end())
 				{
@@ -52,14 +49,7 @@ namespace commproto
 
 			std::string UIControllerImpl::getUx()
 			{
-				std::stringstream stream;
-				std::lock_guard<std::mutex> lock(controlMutex);
-				for (auto it = controls.begin(); it != controls.end(); ++it)
-				{
-					stream << it->second->getUx();
-				}
-				update = false;
-				return stream.str();
+				return std::string{};
 			}
 
 			void UIControllerImpl::send(Message msg)
@@ -73,7 +63,7 @@ namespace commproto
 			{
 				controls.clear();
 				checkingTrackers = false;
-				if(checkTrackersThread)
+				if (checkTrackersThread)
 				{
 					checkTrackersThread->join();
 				}
@@ -102,7 +92,6 @@ namespace commproto
 
 			bool UIControllerImpl::hasUpdate(const std::string& tracker)
 			{
-
 				std::lock_guard<std::mutex> lock(controlMutex);
 				auto it = trackers.find(tracker);
 				if (it == trackers.end())
@@ -122,7 +111,7 @@ namespace commproto
 
 			void UIControllerImpl::notifyUpdate(const uint32_t &controlId)
 			{
-				std::lock_guard<std::mutex> lock(controlMutex); 
+				std::lock_guard<std::mutex> lock(controlMutex);
 				for (auto tracker : trackers)
 				{
 					tracker.second->setUpdate(controlId, true);
@@ -131,6 +120,7 @@ namespace commproto
 
 			void UIControllerImpl::addNotification(const NotificationHandle& notification)
 			{
+				std::lock_guard<std::mutex> lock(notificationMutex);
 				const uint32_t id = notification->getId();
 				if (notifications.find(id) != notifications.end())
 				{
@@ -149,50 +139,77 @@ namespace commproto
 				return it->second;
 			}
 
-			void UIControllerImpl::displayNotification(const uint32_t id)
+			void UIControllerImpl::displayNotification(const uint32_t controlId, const std::string & text, const uint32_t actionId)
 			{
-				auto it = notifications.find(id);
+				std::lock_guard<std::mutex> lock(notificationMutex);
+				auto it = notifications.find(controlId);
 				if (it == notifications.end())
 				{
 					return;
 				}
-				std::lock_guard<std::mutex> lock(notificationMutex);
-				pendingNotifications.push_back(id);
-				hasNotif = true;
-
-			}
-
-			bool UIControllerImpl::hasNotifications()
-			{
-				return hasNotif;
-			}
-
-			std::string UIControllerImpl::getNotifications()
-			{
-				std::stringstream stream;
-				std::lock_guard<std::mutex> lock(notificationMutex);
-				for (auto id : pendingNotifications)
+				NotificationData data = { text,controlId };
+				pendingNotifications.emplace(actionId, data);
+				for (auto tracker : notifTrackers)
 				{
-					auto it = notifications.find(id);
+					tracker.second->add(actionId);
+				}
+
+			}
+
+			bool UIControllerImpl::hasNotifications(const std::string & tracker)
+			{
+				std::lock_guard<std::mutex> lock(notificationMutex);
+				auto it = notifTrackers.find(tracker);
+				if (it == notifTrackers.end())
+				{
+					return false;
+				}
+				it->second->setAccessed();
+				return  it->second->hasUpdates();
+			}
+
+			UpdateMap UIControllerImpl::getNotifications(const std::string & tracker, const bool force)
+			{
+				UpdateMap updates;
+				std::lock_guard<std::mutex> lock(notificationMutex);
+
+				auto trackerIt = notifTrackers.find(tracker);
+				if (trackerIt == notifTrackers.end())
+				{
+					return updates;
+				}
+
+				if (!force && !trackerIt->second->hasUpdates())
+				{
+					return updates;
+				}
+
+				for (auto notification : pendingNotifications)
+				{
+					auto it = notifications.find(notification.second.controlId);
 					if (it == notifications.end())
 					{
 						continue;
 					}
-					stream << it->second->getUx();
+					if (!force && !trackerIt->second->hasUpdate(notification.first))
+					{
+						continue;
+					}
+					std::string notifString = it->second->getUx(notification.second.text, notification.first);
+					updates.emplace(getControlId(notification.first, "notif"), notifString);
+					trackerIt->second->setUpdate(notification.first, false);
 				}
-				hasNotif = false;
-				return stream.str();
+				return updates;
 			}
 
-			void UIControllerImpl::dismissNotification(const uint32_t id)
+			void UIControllerImpl::dismissNotification(const uint32_t id, const uint32_t actiondId)
 			{
 				std::lock_guard<std::mutex> lock(notificationMutex);
-				auto it = std::find(pendingNotifications.begin(), pendingNotifications.end(), id);
+				auto it = pendingNotifications.find(actiondId);
 				if (it == pendingNotifications.end())
 				{
 					return;
 				}
-
 				pendingNotifications.erase(it);
 			}
 
@@ -215,6 +232,7 @@ namespace commproto
 					return;
 				}
 				UpdateTrackerHandle tracker = std::make_shared<UpdateTracker>();
+
 				tracker->name = addr;
 				for (auto control : controls)
 				{
@@ -222,22 +240,37 @@ namespace commproto
 				}
 				trackers.emplace(addr, tracker);
 
+				UpdateTrackerHandle notification = std::make_shared<UpdateTracker>();
+				notification->name = addr;
+
+				for (auto notif : pendingNotifications)
+				{
+					tracker->add(notif.first);
+				}
+				notifTrackers.emplace(addr, notification);
+
 			}
 
-			std::string UIControllerImpl::getControlId(const uint32_t control) const
+			std::string UIControllerImpl::getControlId(const uint32_t control, const std::string & controlType) const
 			{
 				std::stringstream stream;
-				stream << getConnectionName() << "-" << control;
+				stream << getConnectionName();
+				if (!controlType.empty())
+				{
+					stream << "-" << controlType;
+				}
+				stream << "-" << control;
+
 				return stream.str();
 			}
 
-			std::map<std::string, std::string> UIControllerImpl::getUpdates(const std::string& addr, bool force)
+			UpdateMap UIControllerImpl::getUpdates(const std::string& addr, bool force)
 			{
 				std::lock_guard<std::mutex> lock(controlMutex);
-				
+
 				auto trackerIt = trackers.find(addr);
 
-				std::map<std::string, std::string> updates;
+				UpdateMap updates;
 				if (trackerIt == trackers.end())
 				{
 					return updates;
@@ -262,12 +295,12 @@ namespace commproto
 
 			void UIControllerImpl::startCheckingTrackers()
 			{
-				if(checkingTrackers)
+				if (checkingTrackers)
 				{
 					return;
 				}
 				checkingTrackers = true;
-				checkTrackersThread = std::make_shared<std::thread>([this]() 
+				checkTrackersThread = std::make_shared<std::thread>([this]()
 				{
 					uint32_t times = 0;
 					while (checkingTrackers) {

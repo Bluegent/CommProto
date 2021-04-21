@@ -27,12 +27,7 @@ namespace commproto
 				}
 				template <typename ControlType>
 				std::string generate(const ControlType& control) const;
-
-				template <typename ControlType>
-				std::string getControlId(const ControlType& control) const;
-
-				template <typename ControlType>
-				std::string getControlTypeId(const ControlType& control) const;
+				std::string generateNotification(const NotificationImpl& control, const std::string & text, const uint32_t actionId);
 
 				void send(Message && msg) const;
 				void notifyUpdate(const uint32_t id) const;
@@ -44,6 +39,26 @@ namespace commproto
 				UIController& manager;
 
 			};
+
+			inline std::string Generator::generateNotification(const NotificationImpl& control, const std::string& text, const uint32_t actionId)
+			{
+				std::stringstream buttons;
+				auto options = control.getOptions();
+				for (auto opt : options)
+				{
+					auto replacements = getBaseReplacements(control);
+					replacements.emplace("@option", opt);
+					replacements.emplace("@text", text);
+					replacements.emplace("@actionId", std::to_string(actionId));
+					replacements.emplace("@elemId", manager.getControlId(actionId,"notif"));
+					buttons << manager.getEngine()->getTemplateWithReplacements("notif_button", std::move(replacements));
+				}
+
+				auto replacements = getBaseReplacements(control);
+				replacements.emplace("@buttons", buttons.str());
+				replacements.emplace("@text", "pretend I implemented this :(");
+				return manager.getEngine()->getTemplateWithReplacements("notification", std::move(replacements));
+			}
 
 			inline void Generator::send(Message&& msg) const
 			{
@@ -61,7 +76,7 @@ namespace commproto
 				std::map<std::string, std::string>  replacements;
 				replacements.emplace("@name", control.getName());
 				replacements.emplace("@control_id", std::to_string(control.getId()));
-				replacements.emplace("@id", getControlId(control));
+				replacements.emplace("@id", manager.getControlId(control.getId()));
 				replacements.emplace("@connection_name", manager.getConnectionName());
 				return replacements;
 			}
@@ -71,39 +86,6 @@ namespace commproto
 			{
 				return "";
 			}
-
-			template <typename ControlType>
-			std::string Generator::getControlId(const ControlType& control) const
-			{
-				std::stringstream stream;
-
-				stream << manager.getConnectionName() << "-" << control.getId();
-				return stream.str();
-			}
-
-			template <typename ControlType>
-			std::string Generator::getControlTypeId(const ControlType& control) const
-			{
-				return std::string();
-			}
-
-			template <>
-			inline std::string Generator::getControlTypeId(const ToggleImpl& control) const
-			{
-				std::stringstream sstream;
-				sstream << manager.getConnectionName() << "-toggle-" << control.getId();
-				return sstream.str();
-			}
-
-
-			template <>
-			inline std::string Generator::getControlTypeId(const SliderImpl& control) const
-			{
-				std::stringstream sstream;
-				sstream << manager.getConnectionName() << "-slider-" << control.getId();
-				return sstream.str();
-			}
-
 
 			template <>
 			inline std::string Generator::generate(const ButtonImpl& control) const
@@ -127,7 +109,7 @@ namespace commproto
 				}
 
 				auto replacements = getBaseReplacements(control);
-				replacements.emplace("@toggle_id", getControlTypeId(control));
+				replacements.emplace("@toggle_id", manager.getControlId(control.getId(),"toggle"));
 				replacements.emplace("@checked", control.getState() ? "checked" : "");
 
 				return manager.getEngine()->getTemplateWithReplacements("toggle", std::move(replacements));
@@ -145,26 +127,6 @@ namespace commproto
 				replacements.emplace("@text", control.getText());
 				return manager.getEngine()->getTemplateWithReplacements("label", std::move(replacements));
 
-			}
-
-
-			template <>
-			inline std::string Generator::generate(const NotificationImpl& control) const
-			{
-
-				std::stringstream buttons;
-				auto options = control.getOptions();
-				for (auto opt : options)
-				{
-					auto replacements = getBaseReplacements(control);
-					replacements.emplace("@option", opt);
-					buttons << manager.getEngine()->getTemplateWithReplacements("notif_button", std::move(replacements));
-				}
-
-				auto replacements = getBaseReplacements(control);
-				replacements.emplace("@buttons", buttons.str());
-				replacements.emplace("@text", "pretend I implemented this :(");
-				return manager.getEngine()->getTemplateWithReplacements("notification", std::move(replacements));
 			}
 
 			inline std::string getString(const float value, const uint32_t precision = 3)
@@ -187,7 +149,7 @@ namespace commproto
 				control.getValues(left, right, value, step);
 
 				auto replacements = getBaseReplacements(control);
-				replacements.emplace("@slider_id", getControlTypeId(control));
+				replacements.emplace("@slider_id", manager.getControlId(control.getId(),"slider"));
 				replacements.emplace("@left", getString(left));
 				replacements.emplace("@right", getString(right));
 				replacements.emplace("@value", getString(value));

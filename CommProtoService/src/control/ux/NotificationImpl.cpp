@@ -6,7 +6,7 @@ namespace commproto
 {
 	namespace control
 	{
-		
+
 		namespace ux
 		{
 			void NotificationHandler::handle(messages::MessageBase&& data)
@@ -22,24 +22,29 @@ namespace commproto
 
 			void DisplayNotificationHandler::handle(messages::MessageBase&& data)
 			{
-				endpoint::DisplayNotificationMessage& msg = static_cast<endpoint::DisplayNotificationMessage&>(data);
-				controller->displayNotification(msg.prop);
+				endpoint::DisplayNotification& msg = static_cast<endpoint::DisplayNotification&>(data);
+				controller->displayNotification(msg.prop, msg.prop3, msg.prop2);
 			}
 
 			std::string NotificationImpl::getUx()
 			{
-				return generator->generate(*this);
+				return "";
 			}
 
-			void NotificationImpl::execute(const std::string& option)
+			void NotificationImpl::execute(const std::string& option, const uint32_t actionId)
 			{
-				Message msg = NotificationResponseSerializer::serialize(std::move(NotificationResponseMessage(executeId, id, option)));
+				Message msg = NotificationResponseSerializer::serialize(std::move(NotificationResponse(executeId, id, actionId, option)));
 				generator->send(std::move(msg));
 			}
 
 			std::vector<std::string> NotificationImpl::getOptions() const
 			{
 				return options;
+			}
+
+			std::string NotificationImpl::getUx(const std::string& text, const uint32_t action) const
+			{
+				return generator->generateNotification(*this, text, action);
 			}
 		}
 	}

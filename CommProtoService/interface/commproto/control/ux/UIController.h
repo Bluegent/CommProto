@@ -12,6 +12,7 @@ namespace commproto
 
 			class IdProvider;
 
+			using UpdateMap = std::map<std::string, std::string>;
 
 			class UIController : public Control, public ControlCollection
 			{
@@ -24,15 +25,16 @@ namespace commproto
 				virtual void send(Message msg) = 0;
 				virtual void addNotification(const NotificationHandle& notification) = 0;
 				virtual NotificationHandle getNotification(const uint32_t id) const = 0;
-				virtual void displayNotification(const uint32_t id) = 0;
-				virtual bool hasNotifications() = 0;
-				virtual std::string getNotifications() = 0;
-				virtual void dismissNotification(const uint32_t id) = 0;
+				virtual void displayNotification(const uint32_t id, const std::string & text, const uint32_t actionId) = 0;
+				virtual bool hasNotifications(const std::string & tracker) = 0;
+				virtual UpdateMap getNotifications(const std::string & tracker, const bool force) = 0;
+				virtual void dismissNotification(const uint32_t id, const uint32_t actiondId) = 0;
 				virtual void requestState() = 0;
 				virtual TemplateEngineHandle getEngine() = 0;
 				virtual void addTracker(const std::string & addr) = 0;
-				virtual std::map<std::string, std::string> getUpdates(const std::string & addr, bool force = false) = 0;
+				virtual UpdateMap getUpdates(const std::string & addr, bool force = false) = 0;
 				virtual void startCheckingTrackers() = 0;
+				virtual std::string getControlId(const uint32_t control, const std::string & controlType = std::string{}) const = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;

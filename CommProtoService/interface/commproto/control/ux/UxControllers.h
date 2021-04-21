@@ -22,8 +22,6 @@ namespace commproto
 				void removeController(const std::string & name);
 				UIControllerHandle getController(const std::string& name);
 				std::map<std::string, UIControllerHandle> getControllers();
-				bool hasUpdate(const std::string & tracker);
-				bool hasNotifications();
 
 			private:
 				std::map<std::string, UIControllerHandle> controllers;

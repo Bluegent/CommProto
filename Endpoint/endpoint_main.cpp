@@ -124,16 +124,18 @@ int main(int argc, const char * argv[])
 
 	auto notif = uiFactory->makeNotification("You just pressed the notification button.");
 	notif->addOption("Oh... okay?");
-	notif->setAction([](const std::string& option)
+
+	auto genericAction = [](const std::string& option)
 	{
 		LOG_INFO("Generic notification response with option :\"%s\"", option.c_str());
-	});
+	};
+
 	controller->addNotification(notif);
 
-	auto notifButton = uiFactory->makeButton("Send me a notification", [&direction, &controller, &notif]()
+	auto notifButton = uiFactory->makeButton("Send me a notification", [&direction, &controller, &notif, &genericAction]()
 	{
 		LOG_INFO("MyButton has been pressed");
-		controller->displayNotification(notif->getId());
+		controller->displayNotification(notif->getId(),"Yes this is a notification :)", genericAction);
 
 	});
 	controller->addControl(notifButton);

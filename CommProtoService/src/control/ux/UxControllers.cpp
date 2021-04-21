@@ -48,37 +48,6 @@ namespace commproto
 				std::lock_guard<std::mutex> lock(controllerMutex);
 				return controllers;
 	        }
-
-	        bool UxControllers::hasUpdate(const std::string & tracker)
-	        {
-				if(update)
-				{
-					update = false;
-					return true;
-				}
-				std::lock_guard<std::mutex> lock(controllerMutex);
-		        for (auto it : controllers)
-		        {
-			        if (it.second->hasUpdate(tracker))
-			        {
-				        return true;
-			        }
-		        }
-		        return false;
-	        }
-
-	        bool UxControllers::hasNotifications()
-	        {
-				std::lock_guard<std::mutex> lock(controllerMutex);
-				for (auto it : controllers)
-				{
-					if (it.second->hasNotifications())
-					{
-						return true;
-					}
-				}
-				return false;
-	        }
         }
     }
 }

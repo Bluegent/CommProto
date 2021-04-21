@@ -18,7 +18,7 @@ namespace commproto
 			{
 				parser::DelegatorUtils::addParserHandlerPair<ux::PressButtonParser, ux::PressButtonMessage>(delegator, std::make_shared<PressButtonHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<ux::ToggleParser, ux::ToggleMessage>(delegator, std::make_shared<ToggleHandler>(controller));
-				parser::DelegatorUtils::addParserHandlerPair<ux::NotificationResponseParser, ux::NotificationResponseMessage>(delegator, std::make_shared<NotificationResponseHandler>(controller));
+				parser::DelegatorUtils::addParserHandlerPair<ux::NotificationResponseParser, ux::NotificationResponse>(delegator, std::make_shared<NotificationResponseHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<ux::RequestControllerStateParser, ux::RequestControllerState>(delegator, std::make_shared<RequestStateHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<ux::SliderAdjustParser, ux::SliderAdjust>(delegator, std::make_shared<SliderAdjustHandler>(controller));
 			}

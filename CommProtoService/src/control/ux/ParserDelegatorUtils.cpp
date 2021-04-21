@@ -21,7 +21,7 @@ namespace commproto
 				parser::DelegatorUtils::addParserHandlerPair<endpoint::LabelUpdateParser, endpoint::LabelUpdateMessage>(delegator, std::make_shared<LabelUpdateHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<endpoint::SliderMessageParser, endpoint::SliderMessage>(delegator, std::make_shared<SliderHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<endpoint::NotificationParser, endpoint::NotificationMessage>(delegator, std::make_shared<NotificationHandler>(controller));
-				parser::DelegatorUtils::addParserHandlerPair<endpoint::DisplayNotificationParser, endpoint::DisplayNotificationMessage>(delegator, std::make_shared<DisplayNotificationHandler>(controller));
+				parser::DelegatorUtils::addParserHandlerPair<endpoint::DisplayNotificationParser, endpoint::DisplayNotification>(delegator, std::make_shared<DisplayNotificationHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<endpoint::ToggleControlEnabledStateParser, endpoint::ToggleControlEnabledState>(delegator, std::make_shared<ControlStateHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<endpoint::ToggleControlShownStateParser, endpoint::ToggleControlShownState>(delegator, std::make_shared<ControlShownHandler>(controller));
 			}

@@ -19,9 +19,9 @@ namespace commproto
 				{
 				}
 				virtual void addOption(const std::string & name) = 0;
-				virtual void setAction(const NotificationAction& action) = 0;
-				virtual void execute(const std::string & option) = 0;
-				virtual Message serializeDisplay() = 0;
+				virtual uint32_t addAction(const NotificationAction& action) = 0;
+				virtual void execute(const std::string & option, const uint32_t action) = 0;
+				virtual Message serializeDisplay(const std::string & text, const uint32_t action) = 0;
 			};
 
 			using NotificationHandle = std::shared_ptr<Notification>;

@@ -10,20 +10,20 @@ namespace commproto
 
 			void NotificationResponseHandler::handle(messages::MessageBase&& data)
 			{
-				ux::NotificationResponseMessage& msg = static_cast<ux::NotificationResponseMessage&>(data);
+				ux::NotificationResponse& msg = static_cast<ux::NotificationResponse&>(data);
 
 				NotificationHandle notification = controller->getNotification(msg.prop);
 				if (!notification)
 				{
 					return;
 				}
-				notification->execute(msg.prop2);
+				notification->execute(msg.prop3, msg.prop2);
 
 			}
 
 			Message NotificationImpl::serialize() const
 			{
-				return NotificationSerializer::serialize(std::move(NotificationMessage(notifId,id,name,options)));
+				return NotificationSerializer::serialize(std::move(NotificationMessage(notifId, id, name, options)));
 			}
 
 			void NotificationImpl::addOption(const std::string& name)
@@ -31,23 +31,27 @@ namespace commproto
 				options.push_back(name);
 			}
 
-			void NotificationImpl::setAction(const NotificationAction& action_)
+			uint32_t NotificationImpl::addAction(const NotificationAction& action_)
 			{
-				action = action_;
+				uint32_t id = actionCounter++;
+				actions.emplace(id, action_);
+				return id;
 			}
 
-			void NotificationImpl::execute(const std::string& option)
+			void NotificationImpl::execute(const std::string& option, const uint32_t actionId)
 			{
-				if(!action)
+				auto action = actions.find(actionId);
+				if (action == actions.end())
 				{
 					return;
 				}
-				action(option);
+				action->second(option);
+				actions.erase(action);
 			}
 
-			Message NotificationImpl::serializeDisplay()
+			Message NotificationImpl::serializeDisplay(const std::string & text, uint32_t action)
 			{
-				return DisplayNotificationSerializer::serialize(std::move(DisplayNotificationMessage(displayId, id)));
+				return DisplayNotificationSerializer::serialize(std::move(DisplayNotification(displayId, id, action, text)));
 			}
 		}
 	}

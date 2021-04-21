@@ -10,7 +10,8 @@ function invoke(event)
     {
         let elementId = event.target.getAttribute('elementId');
         let optionStr = event.target.getAttribute('optionStr');
-        window[nameOfFunction](conn,controlId,elementId,optionStr);
+        let actionStr = event.target.getAttribute('actionId');
+        window[nameOfFunction](conn,controlId,elementId,optionStr,actionStr);
     }
 }
 
@@ -35,17 +36,9 @@ function postButton(connection,button)
     data.append('controlId',button);
     http.open('POST', 'action', true);
     http.send(data);
-}
+} 
 
-var notificationURI = "notification";
-function forceNotifications()
-{
-    notificationURI = "notification-force";
-    getNotifications();
-    notificationURI = "notification";
-}  
-
-function postNotification(connection,id, elemId,optionStr)
+function postNotification(connection,id,elemId,optionStr,actionStr)
 {
     document.getElementById(elemId).remove();
     var http = new XMLHttpRequest();
@@ -54,6 +47,7 @@ function postNotification(connection,id, elemId,optionStr)
     data.append('controlType','notification');
     data.append('controlId',id);
     data.append('option',optionStr);
+    data.append('actionId',actionStr);
     http.open('POST', 'action', true);
     http.send(data);
 }
@@ -75,39 +69,11 @@ function postSlider(connection,id,value)
     http.send(data);
 }
 
-function getNotifications()
-{
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() 
-    {
-        if (this.readyState == 4)
-        {
-            if(this.status == 200)
-            {
-                if(xhttp.responseText == '<null>')
-                {
-                } 
-                else 
-                {
-                   console.log('updating notifications');
-                   document.getElementById('notifications').innerHTML = xhttp.responseText;
-                }
-            }
-        } 
-        
-    };
-    xhttp.open('POST', notificationURI, true);
-    xhttp.send();
-}
-
 function startUpdating()
 {
     forceUpdateUI();
-    forceNotifications();
 
     var updateUiId = setInterval(function() {updateUI();}, 1000);
-
-    var notificationsId = setInterval(function() {getNotifications();}, 1000);
 }
 
 startUpdating();

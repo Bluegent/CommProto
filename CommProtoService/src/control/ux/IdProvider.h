@@ -21,7 +21,7 @@ namespace commproto
 					: buttonId{ mapper->registerType<PressButtonMessage>() }
 					, toggleId{ mapper->registerType<ToggleMessage>() }
 					, sendToId{ mapper->registerType<service::SendToMessage>() }
-					, notificationResponseId{ mapper->registerType<NotificationResponseMessage>() }
+					, notificationResponseId{ mapper->registerType<NotificationResponse>() }
 					, requestStateId{ mapper->registerType<RequestControllerState>() }
 					, adjustSliderId{ mapper->registerType<SliderAdjust>() }
 				

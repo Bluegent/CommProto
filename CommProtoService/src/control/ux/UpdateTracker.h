@@ -5,29 +5,30 @@
 
 namespace commproto
 {
-    namespace control
-    {
-        namespace ux
-        {
-            			class UpdateTracker
+	namespace control
+	{
+		namespace ux
+		{
+			class UpdateTracker
 			{
 			public:
 				UpdateTracker();
+
 				void add(const uint32_t);
 				void remove(const uint32_t);
-				bool hasUpdates();
+				bool hasUpdates();   	
 				void setUpdate(const uint32_t controlId, const bool update);
 				bool hasUpdate(const uint32_t controlId);
 				void setAccessed();
 				uint32_t getTimeSinceLastAccess() const;
 				std::string name;
 			private:
-				std::map<uint32_t, bool> controlUpdates;
-				uint32_t lastAccesssed;				
+				std::map<uint32_t, bool> updates;
+				uint32_t lastAccesssed;
 			};
 			using UpdateTrackerHandle = std::shared_ptr<UpdateTracker>;
-        }
-    }
+		}
+	}
 }
 
 

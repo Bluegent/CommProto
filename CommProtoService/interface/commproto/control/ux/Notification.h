@@ -17,8 +17,9 @@ namespace commproto
 					: Control(name, id)
 				{
 				}
-				virtual void execute(const std::string & option) = 0;
+				virtual void execute(const std::string & option, const uint32_t actionId) = 0;
 				virtual std::vector<std::string> getOptions() const = 0;
+				virtual std::string getUx(const std::string & text, const uint32_t action)const = 0;
 			};
 
 			using NotificationHandle = std::shared_ptr<Notification>;

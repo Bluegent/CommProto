@@ -25,7 +25,6 @@ public:
 
 private:
 	void handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
-	void handleNotificationUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
 	void handleAction(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
 
 	void handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);

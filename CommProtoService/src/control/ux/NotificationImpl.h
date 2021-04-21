@@ -43,8 +43,9 @@ namespace commproto
 				}
 
 				std::string getUx() override;
-				void execute(const std::string& option) override;
+				void execute(const std::string& option,const uint32_t actionId) override;
 				std::vector<std::string> getOptions() const override;
+				std::string getUx(const std::string& text, const uint32_t action) const override;
 			private:
 				const uint32_t executeId;
 				const std::vector<std::string> options;

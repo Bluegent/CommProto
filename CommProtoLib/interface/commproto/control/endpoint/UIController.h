@@ -20,7 +20,7 @@ namespace commproto
 				virtual void send(Message msg) = 0;
 				virtual void addNotification(const NotificationHandle& notification) = 0;
 				virtual NotificationHandle getNotification(const uint32_t id) const = 0;
-				virtual void displayNotification(const uint32_t id) const = 0;
+				virtual void displayNotification(const uint32_t id, const std::string & text, const NotificationAction & action) const = 0;
 				virtual void sendState() = 0;
 			};
 

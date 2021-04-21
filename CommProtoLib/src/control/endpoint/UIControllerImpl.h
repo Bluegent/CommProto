@@ -25,7 +25,7 @@ namespace commproto
 				void send(Message msg) override;
 				void addNotification(const NotificationHandle& notification) override;
 				NotificationHandle getNotification(const uint32_t id) const override;
-				void displayNotification(const uint32_t id) const override;
+				void displayNotification(const uint32_t id, const std::string & text, const NotificationAction & action) const override;
 				void sendState() override;
 				void setControlState(const uint32_t id, const bool enabled) override;
 				void setControlShownState(const uint32_t id, const bool shown) override;

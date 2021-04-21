@@ -110,14 +110,15 @@ namespace commproto
 				return it->second;
 			}
 
-			void UIControllerImpl::displayNotification(const uint32_t id) const
+			void UIControllerImpl::displayNotification(const uint32_t id, const std::string & text, const NotificationAction & action) const
 			{
 				auto it = notifications.find(id);
 				if (it == notifications.end())
 				{
 					return;
 				}
-				socket->sendBytes(it->second->serializeDisplay());
+				uint32_t actionId = it->second->addAction(action);
+				socket->sendBytes(it->second->serializeDisplay(text,actionId));
 			}
 
 			void UIControllerImpl::sendState()

@@ -3,6 +3,7 @@
 #include <commproto/control/endpoint/Notification.h>
 #include <commproto/control/endpoint/UIController.h>
 #include <commproto/control/NotificationChains.h>
+#include <map>
 
 namespace commproto
 {
@@ -27,19 +28,21 @@ namespace commproto
 					: Notification(name, id)
 					, notifId{ notifId_ }
 					, displayId{ displayId_ }
+					, actionCounter(0)
 				{
 				}
 
 				Message serialize() const override;
 				void addOption(const std::string& name) override;
-				void setAction(const NotificationAction& action) override;
-				void execute(const std::string& option) override;
-				Message serializeDisplay() override;
+				uint32_t addAction(const NotificationAction& action) override;
+				void execute(const std::string& option, const uint32_t action) override;
+				Message serializeDisplay(const std::string & text, uint32_t action) override;
 			private:
 				const uint32_t notifId;
 				const uint32_t displayId;
 				std::vector<std::string> options;
-				NotificationAction action;
+				std::map<uint32_t, NotificationAction> actions;
+				uint32_t actionCounter;
 			};
 		}
 	}

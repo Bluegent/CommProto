@@ -34,7 +34,7 @@ void UxRequestHandler::handleGet(Poco::Net::HTTPServerRequest& req, Poco::Net::H
 	std::string extension = Poco::toLower(path.getExtension());
 
 	auto type = mimeTypes.find(extension);
-	if(type == mimeTypes.end())
+	if (type == mimeTypes.end())
 	{
 		resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
 		return;
@@ -165,8 +165,8 @@ void UxRequestHandler::parseKVMap(KVMap&& map) const
 	}
 }
 
-UxRequestHandler::UxRequestHandler(const commproto::control::ux::UxControllersHandle& controllers,const KVMap & mimeTypes_)
-	: controllers{controllers}
+UxRequestHandler::UxRequestHandler(const commproto::control::ux::UxControllersHandle& controllers, const KVMap & mimeTypes_)
+	: controllers{ controllers }
 	, mimeTypes(mimeTypes_)
 {
 }
@@ -197,14 +197,19 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 	resp.setContentType("application/json");
 
 	auto ctrls = controllers->getControllers();
+	Poco::JSON::Object updateJson;
 
+	//updates
 	Poco::JSON::Array uisJSON;
+	Poco::JSON::Array notifsJSON;
 	for (auto controller : ctrls)
 	{
 		if (force)
 		{
 			controller.second->addTracker(tracker);
-		}
+		}		
+
+		//updates
 		if (force || controller.second->hasUpdate(tracker))
 		{
 			auto updates = controller.second->getUpdates(tracker, force);
@@ -218,15 +223,34 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 				cUpdate.set("controlString", controlUpdate.second);
 				cUpdates.add(cUpdate);
 			}
-
 			ui.set("updates", cUpdates);
 			uisJSON.add(ui);
 		}
-	}
 
-	if (uisJSON.size() != 0) {
+		//notifications
+		if (force || controller.second->hasNotifications(tracker))
+		{
+			auto updates = controller.second->getNotifications(tracker, force);
+			for (auto notifUpdate : updates)
+			{
+				Poco::JSON::Object cUpdate;
+				cUpdate.set("name", notifUpdate.first);
+				cUpdate.set("notification", notifUpdate.second);
+				notifsJSON.add(cUpdate);
+			}
+		}
+	}
+	if (uisJSON.size() != 0)
+	{
+		updateJson.set("controllers", uisJSON);
+	}
+	if (notifsJSON.size() != 0)
+	{
+		updateJson.set("notifications", notifsJSON);
+	}
+	if (updateJson.size() != 0) {
 		std::stringstream uis;
-		uisJSON.stringify(uis);
+		updateJson.stringify(uis);
 		out << uis.str();
 	}
 	else
@@ -237,33 +261,6 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 
 	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 	out.flush();
-}
-
-void UxRequestHandler::handleNotificationUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
-{
-	std::string url = req.getURI();
-	bool update = controllers->hasNotifications() || (url.find("force") != std::string::npos);
-	if (!update)
-	{
-		resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-		resp.send() << "<null>";
-		return;
-	}
-	auto ctrls = controllers->getControllers();
-	resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-	std::ostream& out = resp.send();
-	resp.setContentType("text/html");
-
-	std::stringstream stream;
-
-	for (auto it = ctrls.begin(); it != ctrls.end(); ++it)
-	{
-		if (update || it->second->hasNotifications())
-		{
-			stream << it->second->getNotifications();
-		}
-	}
-	out << stream.str();
 }
 
 void UxRequestHandler::handleNotification(KVMap&& map) const
@@ -283,14 +280,32 @@ void UxRequestHandler::handleNotification(KVMap&& map) const
 		return;
 	}
 
+	auto it2 = map.find("actionId");
+
+	if (it2 == map.end())
+	{
+		return;
+	}
+
+	uint32_t actionId = -1;
+
+	try
+	{
+		actionId = std::stoi(it2->second);
+	}
+	catch (std::invalid_argument arg)
+	{
+		return;
+	}
+
 	commproto::control::ux::NotificationHandle notif = std::static_pointer_cast<commproto::control::ux::Notification>(controller->getNotification(controlId));
 	if (!notif)
 	{
 		return;
 	}
 
-	notif->execute(it->second);
-	controller->dismissNotification(controlId);
+	notif->execute(it->second, actionId);
+	controller->dismissNotification(controlId, actionId);
 
 }
 
@@ -332,11 +347,6 @@ void UxRequestHandler::handleAction(Poco::Net::HTTPServerRequest& req, Poco::Net
 void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
 {
 	std::string url = req.getURI();
-	if (url.find("/notification") == 0)
-	{
-		handleNotificationUpdate(req, resp);
-		return;
-	}
 	if (url.find("/update") == 0)
 	{
 		handleUpdate(req, resp);
@@ -344,6 +354,6 @@ void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::
 	}
 	if (url.compare("/action") == 0)
 	{
-		handleAction(req,resp);
+		handleAction(req, resp);
 	}
 }

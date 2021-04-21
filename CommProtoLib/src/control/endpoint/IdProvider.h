@@ -25,7 +25,7 @@ namespace commproto
 					, labelUpdateId{ mapper->registerType<LabelUpdateMessage>() }
 					, sliderId{ mapper->registerType<SliderMessage>() }
 					, notificationId{ mapper->registerType<NotificationMessage>() }
-					, displayNotificationId{ mapper->registerType<DisplayNotificationMessage>() }
+					, displayNotificationId{ mapper->registerType<DisplayNotification>() }
 					, toggleControlStateId{ mapper->registerType<ToggleControlEnabledState>() }
 					, toggleControlShownStateId{ mapper->registerType<ToggleControlShownState>() }
 				{

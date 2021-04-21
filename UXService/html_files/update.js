@@ -14,15 +14,16 @@ function forceUpdateUI()
     updateURI = "update";
 }    
 
-function parseUiUpdate(uiString)
-{            
-    var response = JSON.parse(uiString);
-    
-    for(var i = 0; i < response.length; ++i) {
-        var obj = response[i];
+
+function parseControllers(controllersJSON)
+{
+    for(var i = 0; i < controllersJSON.length; ++i) 
+    {
+        var obj = controllersJSON[i];
         var div = document.getElementById(obj["name"]);
-        if(!div){
-            document.getElementById("uis").innerHTML +='<div id="'+obj["name"]+'"</div>';
+        if(!div)
+        {
+            document.getElementById("controllers").innerHTML +='<div id="'+obj["name"]+'"</div>';
             div = document.getElementById(obj["name"]);
         }
         var updates = obj["updates"];
@@ -41,6 +42,30 @@ function parseUiUpdate(uiString)
     }
 }
 
+function parseNotifications(notificationsJSON)
+{
+    var notifDiv = document.getElementById("notifications");
+    for(var i = 0; i < notificationsJSON.length; ++i) 
+    {
+        var notifJSON = notificationsJSON[i];
+        console.log(notifJSON["name"]+"-"+notifJSON["notification"]);
+        notifDiv.innerHTML += '<div id="'+notifJSON["name"]+'">'+  notifJSON["notification"]+'</div>';
+    }
+}
+
+function parseUiUpdate(uiString)
+{            
+    var response = JSON.parse(uiString);
+    
+    var controllers = response["controllers"];
+    if(controllers != null)
+        parseControllers(controllers);
+        
+    var notifications = response["notifications"];  
+    if(notifications != null)
+        parseNotifications(notifications);
+}
+
 function updateUI()
 {
     var xhttp = new XMLHttpRequest();
@@ -57,7 +82,6 @@ function updateUI()
                 } 
                 else 
                 {
-                    console.log('updating UI');
                     parseUiUpdate(xhttp.responseText);
                 }
             }

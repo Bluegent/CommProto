@@ -14,26 +14,26 @@ namespace commproto
 
 			void UpdateTracker::add(const uint32_t id)
 			{
-				if (controlUpdates.find(id) != controlUpdates.end())
+				if (updates.find(id) != updates.end())
 				{
 					return;
 				}
-				controlUpdates.emplace(id, true);
+				updates.emplace(id, true);
 			}
 
 			void UpdateTracker::remove(const uint32_t id)
 			{
-				auto it = controlUpdates.find(id);
-				if (it == controlUpdates.end())
+				auto it = updates.find(id);
+				if (it == updates.end())
 				{
 					return;
 				}
-				controlUpdates.erase(it);
+				updates.erase(it);
 			}
 
 			bool UpdateTracker::hasUpdates()
 			{
-				for (auto update : controlUpdates)
+				for (auto update : updates)
 				{
 					if (update.second)
 					{
@@ -45,8 +45,8 @@ namespace commproto
 
 			void UpdateTracker::setUpdate(const uint32_t controlId, const bool update)
 			{
-				std::map<uint32_t, bool>::iterator it = controlUpdates.find(controlId);
-				if (it == controlUpdates.end())
+				std::map<uint32_t, bool>::iterator it = updates.find(controlId);
+				if (it == updates.end())
 				{
 					return;
 				}
@@ -55,8 +55,8 @@ namespace commproto
 
 			bool UpdateTracker::hasUpdate(const uint32_t controlId)
 			{
-				std::map<uint32_t, bool>::iterator it = controlUpdates.find(controlId);
-				if (it == controlUpdates.end())
+				std::map<uint32_t, bool>::iterator it = updates.find(controlId);
+				if (it == updates.end())
 				{
 					return false;
 				}
