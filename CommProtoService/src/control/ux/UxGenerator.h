@@ -47,8 +47,7 @@ namespace commproto
 				for (auto opt : options)
 				{
 					auto replacements = getBaseReplacements(control);
-					replacements.emplace("@option", opt);
-					replacements.emplace("@text", text);
+					replacements.emplace("@option", opt);				
 					replacements.emplace("@actionId", std::to_string(actionId));
 					replacements.emplace("@elemId", manager.getControlId(actionId,"notif"));
 					buttons << manager.getEngine()->getTemplateWithReplacements("notif_button", std::move(replacements));
@@ -56,7 +55,7 @@ namespace commproto
 
 				auto replacements = getBaseReplacements(control);
 				replacements.emplace("@buttons", buttons.str());
-				replacements.emplace("@text", "pretend I implemented this :(");
+				replacements.emplace("@text", text);
 				return manager.getEngine()->getTemplateWithReplacements("notification", std::move(replacements));
 			}
 

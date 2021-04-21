@@ -122,20 +122,43 @@ int main(int argc, const char * argv[])
 	});
 	controller->addControl(toggleIncrement);
 
-	auto notif = uiFactory->makeNotification("You just pressed the notification button.");
-	notif->addOption("Oh... okay?");
+	auto notif = uiFactory->makeNotification("Hello!");
+	std::string noOption = "No, I didn't!";
+	notif->addOption("Okay?");
+	notif->addOption(noOption);
 
-	auto genericAction = [](const std::string& option)
+
+	bool lastReplyWasOk = true;
+	auto genericAction = [&noOption, &lastReplyWasOk](const std::string& option)
 	{
-		LOG_INFO("Generic notification response with option :\"%s\"", option.c_str());
+		LOG_INFO("Response = \"%s\"", option.c_str());
+		if(option != noOption)
+		{
+			lastReplyWasOk = true;
+			LOG_INFO("Response was ok");
+		}
+		else
+		{
+			lastReplyWasOk = false;
+			LOG_INFO("RESPONDER IS A LIAR!!!");
+		}
+		
 	};
 
 	controller->addNotification(notif);
 
-	auto notifButton = uiFactory->makeButton("Send me a notification", [&direction, &controller, &notif, &genericAction]()
+
+
+	auto notifButton = uiFactory->makeButton("Send me a notification", [&direction, &controller, &notif, &genericAction, &lastReplyWasOk]()
 	{
-		LOG_INFO("MyButton has been pressed");
-		controller->displayNotification(notif->getId(),"Yes this is a notification :)", genericAction);
+		LOG_INFO("MyButton has been pressed, last reply good:%s",lastReplyWasOk?"True":"False");
+		if (lastReplyWasOk) {
+			controller->displayNotification(notif->getId(), "You just pressed the notification button", genericAction);
+		} 
+		else
+		{
+			controller->displayNotification(notif->getId(), "YOU ARE A LIAR! >:c", genericAction);
+		}
 
 	});
 	controller->addControl(notifButton);
