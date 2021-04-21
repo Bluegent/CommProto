@@ -1,4 +1,5 @@
 var sessionID;
+var selectedController="main";
 
 function generateSessionId()
 {
@@ -23,7 +24,7 @@ function parseControllers(controllersJSON)
         var div = document.getElementById(obj["name"]);
         if(!div)
         {
-            document.getElementById("controllers").innerHTML +='<div id="'+obj["name"]+'"</div>';
+            document.getElementById("controller-display").innerHTML +='<div class="d-flex flex-column" id="'+obj["name"]+'"</div>';
             div = document.getElementById(obj["name"]);
         }
         var updates = obj["updates"];
@@ -58,12 +59,15 @@ function parseUiUpdate(uiString)
     var response = JSON.parse(uiString);
     
     var controllers = response["controllers"];
-    if(controllers != null)
-        parseControllers(controllers);
+    
+    var ui = response["controllers"];
+    if(ui != null)
+        parseControllers(ui);
         
     var notifications = response["notifications"];  
     if(notifications != null)
         parseNotifications(notifications);
+           
 }
 
 function updateUI()
@@ -71,6 +75,7 @@ function updateUI()
     var xhttp = new XMLHttpRequest();
     var data = new FormData();
     data.append("session",sessionID);
+    data.append("selected",selectedController);
     xhttp.onreadystatechange = function() 
     {
         if (this.readyState == 4)

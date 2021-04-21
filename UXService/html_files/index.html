@@ -1,26 +1,56 @@
 <html>
-<title>my cool website 8D</title>
 <head>
-<link rel="stylesheet" href="style.css">
-<script src="update.js"></script>
-<script src="scripts.js"></script>
+    <title>my cool hot website 8D</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="update.js"></script>
+    <script src="scripts.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body>
 
-There should be some controls here if I did it right ... <br>
+<body class="bg-dark m-0 p-0 vw-100">
 
-<div id="controllers">
+<!-- Siderbar -->
+<div class="offcanvas offcanvas-start bg-gray text-light" tabindex="-1" id="offcanvasExample" data-bs-keyboard="false" data-bs-backdrop="false" aria-labelledby="offcanvasExampleLabel">
+   <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel"> Controllers </h5>
+      <button type="button" class="btn-close btn-close-white " data-bs-dismiss="offcanvas" aria-label="Close"></button>
+   </div>
+   <div class="offcanvas-body">
+      <div id="sidebar">
+         <div class="nav flex-column py-3" id="controllers-sidebar">
+            
+         </div>
+      </div>
+   </div>
 </div>
-<br>
-<br>
-<br>
-<br>
-Notifications:
-<div id="notifications">
+
+
+<!-- Navbar -->
+<nav class="navbar navbar-default bg-gray m-0 py-3">
+    <button type="button" class="btn btn-primary bg-dark mx-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+        <span class="btn-label"><i class="fa fa-bars"></i></span> Menu
+    </button>
+</nav>
+
+<div class="container-fluid">
+<div class="row">
+<!-- main content area -->
+<div  id="main-area" class="ol-xl-12 col-xxl-4 bg-dark text-light m-2">
+<div class="row"><div class="col" id="controller-display">
+
+
+
+</div></div>
+<!-- notifications -->
+<div id="notifications" class="row m-1">
+
 </div>
 
+</div>
 </body>
-
-
 </html>

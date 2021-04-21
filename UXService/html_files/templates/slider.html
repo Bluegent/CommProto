@@ -1,7 +1,15 @@
-<div class="container-slider">
-@name: <span id="@slider_id">@value</span>
-<div class="slidecontainer">
-<input type="range" class="slider" value="@value" min="@left" max="@right" step="@step" oninput="setSliderValue('@slider_id',this.value)" onmouseup="postSlider('@connection_name','@control_id',this.value)" onTouchEnd="postSlider('@connection_name','@control_id',this.value)">
-</div>
-@left ------- @right
+<div class="row bg-gray my-1">
+    <div class="col">
+    <div class ="row justify-content-center">
+        <span class="col-auto mx-2">@name</span>      
+        <span class="col-1 mx-2" id="@slider_id">@value</span>  
+    </div>
+    <div class="row mx-3 mt-1">
+        <input type="range" class="slider" value="@value" min="@left" max="@right" step="@step" oninput="setSliderValue('@slider_id',this.value)" onmouseup="postSlider('@connection_name','@control_id',this.value)" onTouchEnd="postSlider('@connection_name','@control_id',this.value)">
+     </div>   
+        <div class="row justify-content-between mb-1">
+            <span class="col-auto smalltext">@left</span>
+            <span class="col-auto smalltext">@right</span>
+        </div>  
+    </div>
 </div>
