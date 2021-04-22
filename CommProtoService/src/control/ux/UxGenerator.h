@@ -57,7 +57,7 @@ namespace commproto
 				auto replacements = getBaseReplacements(control);
 				replacements.emplace("@buttons", buttons.str());
 				replacements.emplace("@text", text);
-				replacements.emplace("@@elem_id", manager.getControlId(actionId, "notif"));
+				replacements.emplace("@elem_id", manager.getControlId(actionId, "notif"));
 				return manager.getEngine()->getTemplateWithReplacements("notification", std::move(replacements));
 			}
 

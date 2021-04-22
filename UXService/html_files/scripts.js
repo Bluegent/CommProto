@@ -12,9 +12,6 @@ function invoke(event)
     let nameOfFunction = event.target.getAttribute('name');
     let conn = event.target.getAttribute('connectionId');
     let controlId = event.target.getAttribute('controlId');
-    console.log(nameOfFunction);
-    console.log(conn);
-    console.log(controlId);
     if(nameOfFunction == "postNotification")
     {
         let elementId = event.target.getAttribute('elementId');
@@ -49,9 +46,23 @@ function postButton(connection,button)
     http.send(data);
 } 
 
+function remove(elemId)
+{
+    
+    setInterval(function()
+    {
+        var notifElem = document.getElementById(elemId);
+        if(notifElem!=null)
+        {
+            notifElem.remove()
+        }
+    }
+    , 1);
+    
+}
+
 function postNotification(connection,id,elemId,optionStr,actionStr)
 {
-    document.getElementById(elemId).remove();
     var http = new XMLHttpRequest();
     var data = new FormData();
     data.append('connection',connection);
@@ -62,6 +73,7 @@ function postNotification(connection,id,elemId,optionStr,actionStr)
     data.append("session",sessionID);
     http.open('POST', 'action', true);
     http.send(data);
+    remove(elemId);
 }
 
 function setSliderValue(sliderId, value)
@@ -87,6 +99,4 @@ function startUpdating()
     forceUpdateUI();
     var updateUiId = setInterval(function() {updateUI();}, 500);
 }
-
 startUpdating();
-

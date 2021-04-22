@@ -43,7 +43,7 @@ namespace commproto
 				void displayNotification(const uint32_t id, const std::string & text, const uint32_t actionId) override;
 				bool hasNotifications(const std::string & tracker) override;
 				UpdateMap getNotifications(const std::string & tracker, const bool force) override;
-				void dismissNotification(const uint32_t id, const uint32_t actiondId) override;
+				void dismissNotification(const std::string & tracker, const uint32_t actiondId) override;
 				void requestState() override;
 				TemplateEngineHandle getEngine() override;
 				void addTracker(const std::string& addr) override;
@@ -51,9 +51,9 @@ namespace commproto
 				void startCheckingTrackers() override;
 				std::string getControlId(const uint32_t control, const std::string& controlType = std::string{}) const override;
 				void notifyTrackerUpdate(const std::string& tracker, const uint32_t control) override;
+				Removals getRemovals(const std::string& tracker) override;
 
 			private:
-
 				void checkTrackers();
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;

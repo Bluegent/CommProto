@@ -10,6 +10,10 @@ function selectController(id)
 {
     selectedController = id;
     forceUpdateUI();
+       
+    var myOffcanvas = document.getElementById('controllers_bar');
+    var bsOffcanvas = bootstrap.Offcanvas.getInstance(myOffcanvas);
+    bsOffcanvas.hide();
 }
 
 var updateURI = "update";
@@ -45,6 +49,19 @@ function parseController(controllerJSON)
         control.innerHTML = update["controlString"];            
     }
     
+}
+
+function parseRemovals(removeJSON)
+{
+    console.log("Parsing removals");
+    for(var i = 0; i < removeJSON.length; ++i) 
+    {
+        console.log(removeJSON[i]);
+        var elementId = removeJSON[i];
+        var realElement = document.getElementById(elementId);
+        if(realElement !=null)
+            realElement.remove();
+    }
 }
 
 function parseNotifications(notificationsJSON)
@@ -121,6 +138,10 @@ function parseUiUpdate(uiString)
     var notifications = response["notifications"];  
     if(notifications != null)
         parseNotifications(notifications);
+        
+    var removals = response["removals"];  
+    if(removals != null)
+        parseRemovals(removals);
            
 }
 

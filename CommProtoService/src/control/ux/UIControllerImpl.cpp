@@ -202,7 +202,7 @@ namespace commproto
 				return updates;
 			}
 
-			void UIControllerImpl::dismissNotification(const uint32_t id, const uint32_t actiondId)
+			void UIControllerImpl::dismissNotification(const std::string & tracker, const uint32_t actiondId)
 			{
 				std::lock_guard<std::mutex> lock(notificationMutex);
 				auto it = pendingNotifications.find(actiondId);
@@ -211,6 +211,10 @@ namespace commproto
 					return;
 				}
 				pendingNotifications.erase(it);
+				for(auto trackerIt: notifTrackers)
+				{
+					trackerIt.second->remove(actiondId);
+				}
 			}
 
 			void UIControllerImpl::requestState()
@@ -274,6 +278,35 @@ namespace commproto
 						trackerIt.second->setUpdate(control,true);
 					}
 				}
+			}
+
+			Removals UIControllerImpl::getRemovals(const std::string& tracker)
+			{
+				Removals removals;
+				auto trackerIt = trackers.find(tracker);
+				if(trackerIt != trackers.end())
+				{
+					const auto & removalIds = trackerIt->second->getRemoved();
+					for(const auto & id : removalIds)
+					{
+						removals.emplace_back(getControlId(id));
+					}
+					trackerIt->second->clearRemoved();
+				}
+
+				auto notifIt = notifTrackers.find(tracker);
+				if (notifIt != notifTrackers.end())
+				{
+					const auto & removalIds = notifIt->second->getRemoved();
+					for (const auto & id : removalIds)
+					{
+						removals.emplace_back(getControlId(id,"notif"));
+					}
+					notifIt->second->clearRemoved();
+				}
+
+				return removals;
+
 			}
 
 			UpdateMap UIControllerImpl::getUpdates(const std::string& addr, bool force)

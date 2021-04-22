@@ -232,6 +232,7 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 	Poco::JSON::Object uiJSON;
 	Poco::JSON::Array notifsJSON;
 	Poco::JSON::Array controllerNames;
+	Poco::JSON::Array removals;
 
 	auto selectedController = controllers->getController(selected);
 	if (selectedController) {
@@ -275,6 +276,12 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 			controller.second->addTracker(tracker);
 		}
 
+		auto removalUpdates = controller.second->getRemovals(tracker);
+		for (auto removal : removalUpdates)
+		{
+			removals.add(removal);
+		}
+
 		//notifications
 		if (force || controller.second->hasNotifications(tracker))
 		{
@@ -295,6 +302,11 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 	if (notifsJSON.size() != 0)
 	{
 		updateJson.set("notifications", notifsJSON);
+	}
+
+	if(removals.size() !=0)
+	{
+		updateJson.set("removals", removals);
 	}
 	updateJson.set("controllers", controllerNames);
 
@@ -348,7 +360,7 @@ void UxRequestHandler::handleNotification(KVMap&& map) const
 	}
 
 	notif->execute(it->second, actionId);
-	controller->dismissNotification(data.controlId, actionId);
+	controller->dismissNotification(data.tracker, actionId);
 
 }
 

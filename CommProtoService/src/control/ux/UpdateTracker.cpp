@@ -1,5 +1,6 @@
 #include "UpdateTracker.h"
 #include <chrono>
+#include "commproto/logger/Logging.h"
 
 namespace commproto
 {
@@ -29,9 +30,15 @@ namespace commproto
 					return;
 				}
 				updates.erase(it);
+				removed.emplace_back(id);
 			}
 
-			bool UpdateTracker::hasUpdates()
+	        void UpdateTracker::clearRemoved()
+	        {
+				removed.clear();
+	        }
+
+	        bool UpdateTracker::hasUpdates()
 			{
 				for (auto update : updates)
 				{
@@ -73,6 +80,11 @@ namespace commproto
 				uint32_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 				return now - lastAccesssed;
 			}
+
+			const std::vector<uint32_t> & UpdateTracker::getRemoved() const
+	        {
+				return removed;
+	        }
         }
     }
 }
