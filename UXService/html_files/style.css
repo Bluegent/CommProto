@@ -32,6 +32,41 @@ html {
   border-radius: 3rem;
 }
 
+.list-group.list-group-tree {
+  padding: 0;
+}
+
+.list-group.list-group-tree .list-group {
+  margin-bottom: 0;
+}
+
+.list-group.list-group-tree > .list-group > .list-group-item {
+  padding-left: 30px;
+}
+.list-group.list-group-tree > .list-group > .list-group > .list-group-item {
+  padding-left: 45px;
+}
+.list-group.list-group-tree > .list-group > .list-group > .list-group-item > .list-group-item {
+  padding-left: 60px;
+}
+.list-group.list-group-tree > .list-group > .list-group > .list-group-item > .list-group-item > .list-group-item {
+  padding-left: 75px;
+}
+.list-group.list-group-tree > .list-group > .list-group > .list-group-item > .list-group-item > .list-group-item > .list-group-item {
+  padding-left: 90px;
+}
+
+.list-group-item .fa {
+  margin-right: 5px;
+}
+
+.fa-chevron:before {
+      content: "\f054"; /*right*/
+}
+.in > .fa-chevron:before {
+      content: "\f078"; /*down*/
+}
+
 html {
     -webkit-touch-callout: none;
     -webkit-user-select: none;

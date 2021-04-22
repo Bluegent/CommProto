@@ -1,3 +1,12 @@
+$(function() {
+$(".list-group-tree").on('click', "[data-toggle=collapse]", function(){
+  $(this).toggleClass('in')
+	$(this).next(".list-group.collapse").collapse('toggle');
+  return false;
+})
+
+});
+
 function invoke(event)
 {
     let nameOfFunction = event.target.getAttribute('name');
@@ -76,8 +85,7 @@ function postSlider(connection,id,value)
 function startUpdating()
 {
     forceUpdateUI();
-
-    var updateUiId = setInterval(function() {updateUI();}, 1000);
+    var updateUiId = setInterval(function() {updateUI();}, 500);
 }
 
 startUpdating();

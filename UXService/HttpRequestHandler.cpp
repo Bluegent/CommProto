@@ -202,6 +202,16 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 	}
 }
 
+std::string getWithoutCategory(const std::string & input)
+{
+	auto pos = input.find("::");
+	if (pos == std::string::npos)
+	{
+		return input;
+	}
+	return input.substr(pos + 2);
+}
+
 void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
 {
 	std::string url = req.getURI();
@@ -218,11 +228,11 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 
 	auto ctrls = controllers->getControllers();
 	Poco::JSON::Object updateJson;
-
 	//updates
 	Poco::JSON::Object uiJSON;
 	Poco::JSON::Array notifsJSON;
 	Poco::JSON::Array controllerNames;
+
 	auto selectedController = controllers->getController(selected);
 	if (selectedController) {
 		if (force)
@@ -233,7 +243,7 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 		if (force || selectedController->hasUpdate(tracker))
 		{
 			auto updates = selectedController->getUpdates(tracker, force);
-			
+
 			uiJSON.set("name", selectedController->getConnectionName());
 			Poco::JSON::Array cUpdates;
 			for (auto controlUpdate : updates)
@@ -247,8 +257,18 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 		}
 	}
 
-	//notifications from all controllers
+	//notifications and sidebar updates from all controllers
 	for (auto controller : ctrls) {
+
+		Poco::JSON::Object ctrl;
+		ctrl.set("name", controller.first);
+
+		KVMap replacements;
+		replacements.emplace("@sanitized", getWithoutCategory(controller.first));
+		replacements.emplace("@name", controller.first);
+
+		ctrl.set("control_string", controller.second->getEngine()->getTemplateWithReplacements("sidebar_item", std::move(replacements)));
+		controllerNames.add(ctrl);
 
 		if (force)
 		{
@@ -276,18 +296,11 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 	{
 		updateJson.set("notifications", notifsJSON);
 	}
-	if (updateJson.size() != 0) {
-		std::stringstream uis;
-		updateJson.stringify(uis);
-		out << uis.str();
-	}
-	else
-	{
+	updateJson.set("controllers", controllerNames);
 
-		out << "<null>";
-	}
-
-	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+	std::stringstream uis;
+	updateJson.stringify(uis);
+	out << uis.str();
 	out.flush();
 }
 
@@ -387,5 +400,6 @@ void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::
 	if (url.compare("/action") == 0)
 	{
 		handleAction(req, resp);
+		return;
 	}
 }

@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>my cool hot website 8D</title>
+    <title> CommProtoHub </title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
@@ -22,8 +22,25 @@
    </div>
    <div class="offcanvas-body">
       <div id="sidebar">
-         <div class="nav flex-column py-3" id="controllers-sidebar">
-            
+         <div class="nav flex-column py-3">
+         
+<!-- Tree view -->         
+<div class="list-group list-group-tree well">
+    <a  href="javascript:void(0);" class="list-group-item bg-dark text-light" data-toggle="collapse"><i class="fa fa-chevron"></i>
+        Services
+    </a>
+    <div class="list-group collapse" id="service_btns">
+    </div>
+    
+    <a href="javascript:void(0);" class="list-group-item bg-dark text-light" data-toggle="collapse"><i class="fa fa-chevron"></i>
+        Endpoints
+    </a>
+    <div class="list-group collapse" id="endpoint_btns">    
+    </div>
+</div>
+    
+    
+    
          </div>
       </div>
    </div>

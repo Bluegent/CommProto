@@ -6,6 +6,12 @@ function generateSessionId()
     sessionID = "session-" + Date.now()+ "-"+ Math.floor(Math.random()*25565);
 }
 
+function selectController(id)
+{
+    selectedController = id;
+    forceUpdateUI();
+}
+
 var updateURI = "update";
 function forceUpdateUI()
 {
@@ -16,7 +22,7 @@ function forceUpdateUI()
 }    
 
 
-function parseControllers(controllerJSON)
+function parseController(controllerJSON)
 {
     var controllerName = controllerJSON["name"];
     var div = document.getElementById(controllerName);
@@ -51,15 +57,66 @@ function parseNotifications(notificationsJSON)
     }
 }
 
+
+function removeNonContained(controllerButton, controllersJSON)
+{
+    for(var i=0;i<controllersJSON.length;++i)
+    {
+        
+        var buttonName = "btn-" + controllersJSON[i]["name"];
+        if( buttonName == controllerButton.id)
+        {
+            return;
+        }
+    }
+    controllerButton.remove();
+}
+    
+function getCategory(string)
+{
+    if(string.startsWith('Service'))
+    {
+        return 'service_btns';
+    }
+    if(string.startsWith('Endpoint'))
+    {
+        return 'endpoint_btns';
+    }
+    return 'endpoint_btns';
+}
+
+function parseControllers(controllersJSON)
+{
+    var controllers = document.getElementsByClassName("ctrl_selector");
+    for(var i=0;i<controllers.length;++i)
+    {
+        removeNonContained(controllers[i],controllersJSON);
+    }
+    
+    for(var i=0;i<controllersJSON.length;++i)
+    {
+        var name = "btn-"+controllersJSON[i]["name"];        
+        var ctrlBtn = document.getElementById(name);
+        if(ctrlBtn == null)
+        {
+            document.getElementById(getCategory(name)).innerHTML += controllersJSON[i]["control_string"];
+        }
+    }
+    
+    
+}
+
 function parseUiUpdate(uiString)
 {            
     var response = JSON.parse(uiString);
     
     var controllers = response["controllers"];
+    if(controllers !=null)
+        parseControllers(controllers);
     
     var ui = response["controller"];
     if(ui != null)
-        parseControllers(ui);
+        parseController(ui);
         
     var notifications = response["notifications"];  
     if(notifications != null)
@@ -79,13 +136,7 @@ function updateUI()
         {
             if(this.status == 200)
             {
-                if(xhttp.responseText == '<null>')
-                {
-                } 
-                else 
-                {
-                    parseUiUpdate(xhttp.responseText);
-                }
+                parseUiUpdate(xhttp.responseText);                
             }
         } 
         
