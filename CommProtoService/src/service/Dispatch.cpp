@@ -1,10 +1,11 @@
 #include <commproto/service/Dispatch.h>
 #include <commproto/logger/Logging.h>
+#include <sstream>
 
 namespace commproto {
 	namespace service {
 		Dispatch::Dispatch()
-			: idCounter{1}
+			: idCounter{ 1 }
 			, checkAlive(true)
 		{
 		}
@@ -13,14 +14,14 @@ namespace commproto {
 		{
 			std::lock_guard<std::mutex> lock(connectionMutex);
 			const uint32_t id = getId(name);
-			sendToNoLock(sender,id, msg);
-			
+			sendToNoLock(sender, id, msg);
+
 		}
 
 		void Dispatch::sendTo(const uint32_t sender, const uint32_t id, const commproto::Message& msg)
 		{
 			std::lock_guard<std::mutex> lock(connectionMutex);
-			sendToNoLock(sender,id, msg);
+			sendToNoLock(sender, id, msg);
 		}
 
 		void Dispatch::sendAll(const Message& msg)
@@ -41,7 +42,7 @@ namespace commproto {
 		}
 
 		void Dispatch::removeConnection(const uint32_t id)
-		{	
+		{
 			auto it = connections.find(id);
 
 			if (it == connections.end())
@@ -58,14 +59,25 @@ namespace commproto {
 		void Dispatch::registerChannel(const uint32_t id, const std::string& name)
 		{
 			LOG_INFO("Registering channel name %s for %d", name.c_str(), id);
+			std::string finalName = name;
+			std::lock_guard<std::mutex> lock(connectionMutex);
 			auto connection = connections.find(id);
-			if(connectionMapping.find(name) != connectionMapping.end() || connection == connections.end())
+			if (connection == connections.end())
 			{
 				return;
 			}
-
-			connectionMapping.insert({ name,id });
-			connection->second->setName(name);
+			auto nameIt = connectionMapping.find(finalName);
+			if (nameIt != connectionMapping.end()) {
+				std::stringstream stream(finalName);
+				uint32_t attempt = 1;
+				do {
+					stream << "#" << attempt;
+					nameIt = connectionMapping.find(stream.str());
+				} while (nameIt != connectionMapping.end());
+				finalName = stream.str();
+			}
+			connectionMapping.insert({ finalName,id });
+			connection->second->setName(finalName);
 			subscribeToNewConnection(connection->second);
 		}
 
@@ -108,9 +120,9 @@ namespace commproto {
 		Dispatch::~Dispatch()
 		{
 			checkAlive = false;
-            if(checkAliveThread){
-                checkAliveThread->join();
-            }
+			if (checkAliveThread) {
+				checkAliveThread->join();
+			}
 			for (auto connection : connections)
 			{
 				connection.second->stop();
@@ -131,9 +143,9 @@ namespace commproto {
 
 		void Dispatch::addToAllAsSubscriber(const ConnectionHandle& connection)
 		{
-			for(auto it = connections.begin();it != connections.end(); ++it)
+			for (auto it = connections.begin(); it != connections.end(); ++it)
 			{
-				if(it->second == connection)
+				if (it->second == connection)
 				{
 					continue;
 				}
@@ -151,7 +163,7 @@ namespace commproto {
 
 		void Dispatch::subscribeToNewConnection(const ConnectionHandle& connection)
 		{
-			for(auto subscriber : subscribedToAll)
+			for (auto subscriber : subscribedToAll)
 			{
 				subscriber->subscribe(connection->getName());
 			}
@@ -176,18 +188,18 @@ namespace commproto {
 		void Dispatch::checkActiveConnections()
 		{
 			std::lock_guard<std::mutex> lock(connectionMutex);
-			
+
 			std::vector<uint32_t> deadConnections;
 
-			for(auto it = connections.begin(); it != connections.end();++it)
+			for (auto it = connections.begin(); it != connections.end(); ++it)
 			{
-				if(!it->second->isRunning())
+				if (!it->second->isRunning())
 				{
 					deadConnections.push_back(it->first);
 				}
 			}
 
-			for(auto id : deadConnections)
+			for (auto id : deadConnections)
 			{
 				removeConnection(id);
 			}
@@ -195,7 +207,7 @@ namespace commproto {
 
 		void Dispatch::startCheckingConnections()
 		{
-            checkAliveThread = std::make_shared<std::thread>([this]() {
+			checkAliveThread = std::make_shared<std::thread>([this]() {
 				while (checkAlive) {
 					this->checkActiveConnections();
 					std::this_thread::sleep_for(std::chrono::milliseconds(100));

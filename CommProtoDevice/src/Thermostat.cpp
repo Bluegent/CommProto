@@ -70,7 +70,7 @@ namespace commproto
 			//intital setup
 			dep.client->sendByte(sizeof(void*));
 			device.delayT(100);
-			SenderMapping::InitializeName("CPEP::Thermostat");
+			SenderMapping::InitializeName("Endpoint::Thermostat");
 			dep.mapper = messages::TypeMapperFactory::build(dep.client);
 
 			//ui stuff

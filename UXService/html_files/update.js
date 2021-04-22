@@ -1,5 +1,5 @@
 var sessionID;
-var selectedController="main";
+var selectedController="Service::Diagnosis";
 
 function generateSessionId()
 {
@@ -16,31 +16,29 @@ function forceUpdateUI()
 }    
 
 
-function parseControllers(controllersJSON)
+function parseControllers(controllerJSON)
 {
-    for(var i = 0; i < controllersJSON.length; ++i) 
+    var controllerName = controllerJSON["name"];
+    var div = document.getElementById(controllerName);
+    if(!div)
     {
-        var obj = controllersJSON[i];
-        var div = document.getElementById(obj["name"]);
-        if(!div)
-        {
-            document.getElementById("controller-display").innerHTML +='<div class="d-flex flex-column" id="'+obj["name"]+'"</div>';
-            div = document.getElementById(obj["name"]);
-        }
-        var updates = obj["updates"];
-        
-        for(var j =0; j < updates.length;++j)
-        {
-            var update = updates[j];
-            var control = document.getElementById(update["element"]);      
-            if(!control)
-            {
-                div.innerHTML+='<div id="'+update["element"]+'"</div>';
-                control = document.getElementById(update["element"]);
-            }
-            control.innerHTML = update["controlString"];            
-        }
+        document.getElementById("controller-display").innerHTML ='<div class="col" id="'+controllerName+'"</div>';
+        div = document.getElementById(controllerName);
     }
+    var updates = controllerJSON["updates"];
+    
+    for(var j =0; j < updates.length;++j)
+    {
+        var update = updates[j];
+        var control = document.getElementById(update["element"]);      
+        if(!control)
+        {
+            div.innerHTML+='<div id="'+update["element"]+'"</div>';
+            control = document.getElementById(update["element"]);
+        }
+        control.innerHTML = update["controlString"];            
+    }
+    
 }
 
 function parseNotifications(notificationsJSON)
@@ -59,7 +57,7 @@ function parseUiUpdate(uiString)
     
     var controllers = response["controllers"];
     
-    var ui = response["controllers"];
+    var ui = response["controller"];
     if(ui != null)
         parseControllers(ui);
         

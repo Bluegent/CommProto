@@ -68,7 +68,7 @@ ActionData UxRequestHandler::parseBase(const KVMap& map) const
 		result.connection = conn->second;
 	}
 	auto tracker = map.find("session");
-	if(tracker !=map.end())
+	if (tracker != map.end())
 	{
 		result.tracker = tracker->second;
 	}
@@ -209,6 +209,8 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 
 	Poco::Net::HTMLForm form(req, req.stream());
 	std::string tracker = form["session"];
+	std::string selected = form["selected"];
+
 	std::ostream& out = resp.send();
 
 	resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
@@ -218,21 +220,21 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 	Poco::JSON::Object updateJson;
 
 	//updates
-	Poco::JSON::Array uisJSON;
+	Poco::JSON::Object uiJSON;
 	Poco::JSON::Array notifsJSON;
-	for (auto controller : ctrls)
-	{
+	Poco::JSON::Array controllerNames;
+	auto selectedController = controllers->getController(selected);
+	if (selectedController) {
 		if (force)
 		{
-			controller.second->addTracker(tracker);
-		}		
-
+			selectedController->addTracker(tracker);
+		}
 		//updates
-		if (force || controller.second->hasUpdate(tracker))
+		if (force || selectedController->hasUpdate(tracker))
 		{
-			auto updates = controller.second->getUpdates(tracker, force);
-			Poco::JSON::Object ui;
-			ui.set("name", controller.second->getConnectionName());
+			auto updates = selectedController->getUpdates(tracker, force);
+			
+			uiJSON.set("name", selectedController->getConnectionName());
 			Poco::JSON::Array cUpdates;
 			for (auto controlUpdate : updates)
 			{
@@ -241,8 +243,16 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 				cUpdate.set("controlString", controlUpdate.second);
 				cUpdates.add(cUpdate);
 			}
-			ui.set("updates", cUpdates);
-			uisJSON.add(ui);
+			uiJSON.set("updates", cUpdates);
+		}
+	}
+
+	//notifications from all controllers
+	for (auto controller : ctrls) {
+
+		if (force)
+		{
+			controller.second->addTracker(tracker);
 		}
 
 		//notifications
@@ -258,9 +268,9 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 			}
 		}
 	}
-	if (uisJSON.size() != 0)
+	if (uiJSON.size() != 0)
 	{
-		updateJson.set("controllers", uisJSON);
+		updateJson.set("controller", uiJSON);
 	}
 	if (notifsJSON.size() != 0)
 	{
