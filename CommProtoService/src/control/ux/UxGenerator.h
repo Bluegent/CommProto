@@ -153,6 +153,7 @@ namespace commproto
 				replacements.emplace("@slider_id", manager.getControlId(control.getId(),"slider"));
 				replacements.emplace("@left", getString(left));
 				replacements.emplace("@right", getString(right));
+				replacements.emplace("@mid", getString((right+left)/2.f));
 				replacements.emplace("@value", getString(value));
 				replacements.emplace("@step", getString(step));
 

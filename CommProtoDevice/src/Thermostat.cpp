@@ -43,6 +43,8 @@ namespace commproto
 			control::endpoint::UIControllerHandle controller;
 		};
 
+		const uint32_t Thermostat::totalMem = 520*1024;
+
 
 		Thermostat::Thermostat(endpointdevice::BaseEndpointWrapper& wrapper, const endpointdevice::DeviceDetails& details, ThermostateWrapper& thermo)
 			: BaseEndpointAuth(wrapper, details)
@@ -177,6 +179,7 @@ namespace commproto
 			{
 				notLogged = false;
 				LOG_INFO("Disconnected :(");
+				device.reboot();
 			}
 
 		}

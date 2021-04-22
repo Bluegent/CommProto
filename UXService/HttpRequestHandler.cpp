@@ -55,38 +55,53 @@ void UxRequestHandler::handleGet(Poco::Net::HTTPServerRequest& req, Poco::Net::H
 	out.flush();
 }
 
-void UxRequestHandler::handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const
+
+
+
+ActionData UxRequestHandler::parseBase(const KVMap& map) const
 {
+
+	ActionData result{};
 	auto conn = map.find("connection");
 	if (conn != map.end())
 	{
-		connection = conn->second;
+		result.connection = conn->second;
+	}
+	auto tracker = map.find("session");
+	if(tracker !=map.end())
+	{
+		result.tracker = tracker->second;
 	}
 	auto id = map.find("controlId");
 	if (id != map.end())
 	{
 		try
 		{
-			controlId = std::stoi(id->second);
+			result.controlId = std::stoi(id->second);
 		}
 		catch (std::invalid_argument arg)
 		{
 			//do nothing
 		}
 	}
+	return result;
 }
 
 void UxRequestHandler::handleButton(KVMap&& map) const
 {
-	std::string connection = "";
-	uint32_t controlId = 0;
-	handleBase(map, connection, controlId);
-	auto controller = controllers->getController(connection);
+	ActionData data = parseBase(map);
+	if (!data.controlId)
+	{
+		return;
+	}
+
+	auto controller = controllers->getController(data.connection);
+
 	if (!controller)
 	{
 		return;
 	}
-	commproto::control::ux::ButtonHandle button = std::static_pointer_cast<commproto::control::ux::Button>(controller->getControl(controlId));
+	commproto::control::ux::ButtonHandle button = std::static_pointer_cast<commproto::control::ux::Button>(controller->getControl(data.controlId));
 
 	if (!button)
 	{
@@ -98,10 +113,13 @@ void UxRequestHandler::handleButton(KVMap&& map) const
 
 void UxRequestHandler::handleSlider(KVMap&& map) const
 {
-	std::string connection = "";
-	uint32_t controlId = 0;
-	handleBase(map, connection, controlId);
-	auto controller = controllers->getController(connection);
+	ActionData data = parseBase(map);
+	if (!data.controlId)
+	{
+		return;
+	}
+
+	auto controller = controllers->getController(data.connection);
 	if (!controller)
 	{
 		return;
@@ -121,13 +139,13 @@ void UxRequestHandler::handleSlider(KVMap&& map) const
 	{
 		return;
 	}
-	commproto::control::ux::SliderHandle slider = std::static_pointer_cast<commproto::control::ux::Slider>(controller->getControl(controlId));
+	commproto::control::ux::SliderHandle slider = std::static_pointer_cast<commproto::control::ux::Slider>(controller->getControl(data.controlId));
 
 	if (!slider)
 	{
 		return;
 	}
-
+	controller->notifyTrackerUpdate(data.tracker, data.controlId);
 	slider->setValue(value);
 
 }
@@ -265,10 +283,12 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 
 void UxRequestHandler::handleNotification(KVMap&& map) const
 {
-	std::string connection = "";
-	uint32_t controlId = 0;
-	handleBase(map, connection, controlId);
-	auto controller = controllers->getController(connection);
+	ActionData data = parseBase(map);
+	if (!data.controlId)
+	{
+		return;
+	}
+	auto controller = controllers->getController(data.connection);
 	if (!controller)
 	{
 		return;
@@ -298,34 +318,36 @@ void UxRequestHandler::handleNotification(KVMap&& map) const
 		return;
 	}
 
-	commproto::control::ux::NotificationHandle notif = std::static_pointer_cast<commproto::control::ux::Notification>(controller->getNotification(controlId));
+	commproto::control::ux::NotificationHandle notif = std::static_pointer_cast<commproto::control::ux::Notification>(controller->getNotification(data.controlId));
 	if (!notif)
 	{
 		return;
 	}
 
 	notif->execute(it->second, actionId);
-	controller->dismissNotification(controlId, actionId);
+	controller->dismissNotification(data.controlId, actionId);
 
 }
 
 void UxRequestHandler::handleToggle(KVMap&& map) const
 {
-	std::string connection = "";
-	uint32_t controlId = 0;
-	handleBase(map, connection, controlId);
-	auto controller = controllers->getController(connection);
+	ActionData data = parseBase(map);
+	if (!data.controlId)
+	{
+		return;
+	}
+	auto controller = controllers->getController(data.connection);
 	if (!controller)
 	{
 		return;
 	}
-	commproto::control::ux::ToggleHandle toggle = std::static_pointer_cast<commproto::control::ux::Toggle>(controller->getControl(controlId));
+	commproto::control::ux::ToggleHandle toggle = std::static_pointer_cast<commproto::control::ux::Toggle>(controller->getControl(data.controlId));
 
 	if (!toggle)
 	{
 		return;
 	}
-
+	controller->notifyTrackerUpdate(data.tracker, data.controlId);
 	toggle->toggle();
 }
 

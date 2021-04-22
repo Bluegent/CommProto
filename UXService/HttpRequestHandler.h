@@ -15,6 +15,13 @@ enum class ControlType : uint8_t
 	Notification
 };
 
+struct ActionData
+{
+	std::string tracker;
+	std::string connection;
+	uint32_t controlId;
+};
+
 using KVMap = std::map<std::string, std::string>;
 
 class UxRequestHandler : public Poco::Net::HTTPRequestHandler
@@ -30,7 +37,7 @@ private:
 	void handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
 	void handleGet(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
 
-	void handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const;
+	ActionData parseBase(const KVMap& map) const;
 	void handleButton(KVMap&& map) const;
 	void handleToggle(KVMap&& map) const;
 	void handleNotification(KVMap && map) const;

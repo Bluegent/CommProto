@@ -26,7 +26,11 @@ namespace commproto
 		class BaseAuthWrapperImpl : public BaseEndpointWrapper
 		{
 		public:
-                
+             
+            uint32_t getFreeMem()
+            {
+                return ESP.getFreeHeap();
+            }
             void initFs() override
             {
                 

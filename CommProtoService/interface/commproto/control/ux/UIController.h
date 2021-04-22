@@ -35,6 +35,7 @@ namespace commproto
 				virtual UpdateMap getUpdates(const std::string & addr, bool force = false) = 0;
 				virtual void startCheckingTrackers() = 0;
 				virtual std::string getControlId(const uint32_t control, const std::string & controlType = std::string{}) const = 0;
+				virtual void notifyTrackerUpdate(const std::string & tracker, const uint32_t control) = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;

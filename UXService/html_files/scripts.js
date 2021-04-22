@@ -1,23 +1,3 @@
-$('input[type="range"]').on('input', function() {
-
-  var control = $(this),
-    controlMin = control.attr('min'),
-    controlMax = control.attr('max'),
-    controlVal = control.val(),
-    controlThumbWidth = control.data('thumbwidth');
-
-  var range = controlMax - controlMin;
-  
-  var position = ((controlVal - controlMin) / range) * 100;
-  var positionOffset = Math.round(controlThumbWidth * position / 100) - (controlThumbWidth / 2);
-  var output = control.next('output');
-  
-  output
-    .css('left', 'calc(' + position + '% - ' + positionOffset + 'px)')
-    .text(controlVal);
-
-});
-
 function invoke(event)
 {
     let nameOfFunction = event.target.getAttribute('name');
@@ -43,6 +23,7 @@ function postToggle(toggle, connection, id)
     data.append('connection',connection);
     data.append('controlType','toggle');
     data.append('controlId',id);
+    data.append("session",sessionID);
     http.open('POST', 'action', true);
     http.send(data);
 }
@@ -54,6 +35,7 @@ function postButton(connection,button)
     data.append('connection',connection);
     data.append('controlType','button');
     data.append('controlId',button);
+    data.append("session",sessionID);
     http.open('POST', 'action', true);
     http.send(data);
 } 
@@ -68,6 +50,7 @@ function postNotification(connection,id,elemId,optionStr,actionStr)
     data.append('controlId',id);
     data.append('option',optionStr);
     data.append('actionId',actionStr);
+    data.append("session",sessionID);
     http.open('POST', 'action', true);
     http.send(data);
 }
@@ -85,6 +68,7 @@ function postSlider(connection,id,value)
     data.append('controlType','slider');
     data.append('controlId',id);
     data.append('value',value);
+    data.append("session",sessionID);
     http.open('POST', 'action', true);
     http.send(data);
 }
@@ -94,12 +78,6 @@ function startUpdating()
     forceUpdateUI();
 
     var updateUiId = setInterval(function() {updateUI();}, 1000);
-}
-
-
-function testfunc()
-{
-    console.log("you pressed thing");
 }
 
 startUpdating();

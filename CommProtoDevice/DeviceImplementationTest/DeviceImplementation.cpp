@@ -53,6 +53,8 @@ public:
 		client->initClient(data.addr, data.port);
 		return client;
 	}
+
+	uint32_t getFreeMem() override { return 0; }
 };
 
 class WindowsThermo : public commproto::thermo::ThermostateWrapper

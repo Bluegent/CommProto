@@ -24,6 +24,7 @@ namespace commproto
 			virtual void reboot() = 0;
 			virtual bool readAPData() = 0;
 			virtual void initFs() = 0;
+			virtual uint32_t getFreeMem() = 0;
 		};
 	}
 }

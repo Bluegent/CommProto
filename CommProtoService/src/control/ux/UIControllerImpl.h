@@ -50,10 +50,11 @@ namespace commproto
 				UpdateMap getUpdates(const std::string& addr, bool force) override;
 				void startCheckingTrackers() override;
 				std::string getControlId(const uint32_t control, const std::string& controlType = std::string{}) const override;
+				void notifyTrackerUpdate(const std::string& tracker, const uint32_t control) override;
+
 			private:
 
 				void checkTrackers();
-				
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;
 				const std::string connectionName;

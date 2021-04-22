@@ -264,6 +264,18 @@ namespace commproto
 				return stream.str();
 			}
 
+			void UIControllerImpl::notifyTrackerUpdate(const std::string& tracker, const uint32_t control)
+			{
+				std::lock_guard<std::mutex> lock(controlMutex);
+				for(auto trackerIt : trackers)
+				{
+					if(trackerIt.first != tracker)
+					{
+						trackerIt.second->setUpdate(control,true);
+					}
+				}
+			}
+
 			UpdateMap UIControllerImpl::getUpdates(const std::string& addr, bool force)
 			{
 				std::lock_guard<std::mutex> lock(controlMutex);
