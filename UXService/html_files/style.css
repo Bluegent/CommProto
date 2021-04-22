@@ -67,6 +67,11 @@ html {
       content: "\f078"; /*down*/
 }
 
+.text-faded
+{
+    color:rgb(150,151,152);
+}
+
 html {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
