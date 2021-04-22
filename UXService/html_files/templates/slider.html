@@ -1,13 +1,13 @@
 <div class="row bg-gray my-1">
     <div class="col mt-2">
     <div class ="row my-1 justify-content-between">
-        <div class="col-auto mx-2"> @name</div>      
-        <div class="col-2 mx-2" id="@slider_id">@value</div>  
+        <div class="col-auto"> @name</div>      
+        <div class="col-auto" id="@slider_id">@value</div>  
     </div>
     <div class="mt-1 mb-3 d-flex justify-content-between">
-        <div class="smalltext text-faded px-2">@left</div>
+        <div class="smalltext text-faded pe-2">@left</div>
         <input type="range" class="slider flex-fill" value="@value" min="@left" max="@right" step="@step" oninput="setSliderValue('@slider_id',this.value)" onmouseup="postSlider('@connection_name','@control_id',this.value)" onTouchEnd="postSlider('@connection_name','@control_id',this.value)">
-        <div class="smalltext text-faded px-2">@right</div>
+        <div class="smalltext text-faded ps-2">@right</div>
     </div> 
     </div>
 </div>
