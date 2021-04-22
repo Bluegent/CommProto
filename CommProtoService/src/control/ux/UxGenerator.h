@@ -44,18 +44,20 @@ namespace commproto
 			{
 				std::stringstream buttons;
 				auto options = control.getOptions();
+				std::string elementId = manager.getControlId(actionId, "notif");
 				for (auto opt : options)
 				{
 					auto replacements = getBaseReplacements(control);
 					replacements.emplace("@option", opt);				
 					replacements.emplace("@actionId", std::to_string(actionId));
-					replacements.emplace("@elemId", manager.getControlId(actionId,"notif"));
+					replacements.emplace("@@elem_id", manager.getControlId(actionId,"notif"));
 					buttons << manager.getEngine()->getTemplateWithReplacements("notif_button", std::move(replacements));
 				}
 
 				auto replacements = getBaseReplacements(control);
 				replacements.emplace("@buttons", buttons.str());
 				replacements.emplace("@text", text);
+				replacements.emplace("@@elem_id", manager.getControlId(actionId, "notif"));
 				return manager.getEngine()->getTemplateWithReplacements("notification", std::move(replacements));
 			}
 

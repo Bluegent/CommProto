@@ -49,8 +49,7 @@ function parseNotifications(notificationsJSON)
     for(var i = 0; i < notificationsJSON.length; ++i) 
     {
         var notifJSON = notificationsJSON[i];
-        console.log(notifJSON["name"]+"-"+notifJSON["notification"]);
-        notifDiv.innerHTML += '<div id="'+notifJSON["name"]+'">'+  notifJSON["notification"]+'</div>';
+        notifDiv.innerHTML += notifJSON["notification"];
     }
 }
 
