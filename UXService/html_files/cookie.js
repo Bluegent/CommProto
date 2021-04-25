@@ -1,6 +1,11 @@
 
 var badToken='';
 
+
+function clearCookie()
+{
+}
+
 function saveToken(response)
 {
    

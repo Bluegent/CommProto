@@ -29,6 +29,13 @@ struct UserDetails
 	std::string username;
 	std::string passwordHash;
 };
+
+struct TokenData
+{
+	std::string token;
+	uint64_t expiryDate;
+};
+
 class JSONLoginHandler : public LoginHandler
 {
 public:
@@ -45,9 +52,10 @@ public:
 	bool validateSerial(const std::string& serial) override;
 
 private:
+	void removeMoldyCookies();
 	void setupKey();
 
-	std::vector<std::string> authTokens;
+	std::vector<TokenData> authTokens;
 	std::string filePath;
 	UserDetails user;
 	bool isSetup;

@@ -13,6 +13,14 @@ function checkPassword()
     return isAlphaNumeric($("#password").val()) && $("#password").val().length >= 8; 
 }
 
+
+
+function showModal(message)
+{
+    $('#invalid_input_text').html(message);
+    $('#invalid_input').modal('show');
+}
+
 function submitForm(evt)
 {
     evt.preventDefault();
@@ -32,7 +40,7 @@ function submitForm(evt)
           success: function(response){               
                 console.log('saving token ="'+response+'"');
                 saveToken(response);
-                //window.location.replace("/hub.html");
+                window.location.replace("/hub.html");
           },
           error: function(response){
                 showModal("Wrong username or password, try again.");
@@ -69,6 +77,7 @@ $(document).ready(function()
           },
           error: function(response){
                 console.log("invalid token, oops");
+                saveToken('');
                 $("#login_form_container").show();
           }
         });

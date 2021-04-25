@@ -9,13 +9,18 @@
 #include <poco/Crypto/RSAKey.h>
 #include <poco/Crypto/Cipher.h>
 #include <poco/Crypto/CipherKey.h>
+#include <chrono>
 
 struct ConfigNames
 {
 	static constexpr const char * userKey = "username";
 	static constexpr const char * passKey = "hash";
 	static constexpr const char * tokenKey = "tokens";
+	static constexpr const char * tokenStrKey = "token";
+	static constexpr const char * expiry = "expiry";
+	static constexpr const uint64_t tenDaysMs = 10 * 24 * 60 * 60 * 1000;
 };
+
 
 
 JSONLoginHandler::JSONLoginHandler(const std::string& dbPath, const std::string& serial_)
@@ -33,7 +38,15 @@ bool JSONLoginHandler::validate(const std::string& username, const std::string& 
 
 bool JSONLoginHandler::validateToken(const std::string& token)
 {
-	return std::find(authTokens.begin(), authTokens.end(), token) != authTokens.end();
+	removeMoldyCookies();
+	for (const auto & tok : authTokens)
+	{
+		if (tok.token == token)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 std::string JSONLoginHandler::generateToken()
@@ -72,12 +85,24 @@ bool JSONLoginHandler::load()
 	}
 
 	auto tokens = root->getArray(ConfigNames::tokenKey);
-	for (const auto & token : *tokens)
+	for (uint32_t index = 0; index < root->size(); ++index)
 	{
-		if (token.isString()) {
-			authTokens.emplace_back(token.toString());
+		if (!tokens->isObject(index))
+		{
+			continue;
 		}
+		auto tokenObj = tokens->getObject(index);
+		if (!tokenObj->has(ConfigNames::expiry) || !tokenObj->has(ConfigNames::tokenStrKey))
+		{
+			continue;
+		}
+
+		TokenData data;
+		data.token = tokenObj->get(ConfigNames::tokenStrKey).toString();
+		data.expiryDate = tokenObj->get(ConfigNames::expiry).extract<uint64_t>();
 	}
+	removeMoldyCookies();
+	save();
 	return true;
 
 }
@@ -105,7 +130,10 @@ bool JSONLoginHandler::save()
 	Poco::JSON::Array tokens;
 	for (const auto & token : authTokens)
 	{
-		tokens.add(token);
+		Poco::JSON::Object tok;
+		tok.set(ConfigNames::tokenStrKey, token.token);
+		tok.set(ConfigNames::expiry, token.expiryDate);
+		tokens.add(tok);
 	}
 	root.set(ConfigNames::tokenKey, tokens);
 
@@ -121,7 +149,10 @@ JSONLoginHandler::~JSONLoginHandler()
 
 void JSONLoginHandler::saveToken(const std::string& token)
 {
-	authTokens.emplace_back(token);
+	TokenData data;
+	data.token = token;
+	data.expiryDate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + ConfigNames::tenDaysMs;
+	authTokens.emplace_back(data);
 	save();
 }
 
@@ -136,6 +167,23 @@ void JSONLoginHandler::saveUserDetails(const std::string& name, const std::strin
 bool JSONLoginHandler::validateSerial(const std::string& serial_)
 {
 	return serial == serial_;
+}
+
+void JSONLoginHandler::removeMoldyCookies()
+{
+	uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+	for (auto it = authTokens.begin(); it != authTokens.end();)
+	{
+		if (it->expiryDate < now)
+		{
+			it = authTokens.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
 }
 
 void JSONLoginHandler::setupKey()
