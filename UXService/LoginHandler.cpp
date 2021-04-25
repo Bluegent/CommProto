@@ -121,7 +121,7 @@ JSONLoginHandler::~JSONLoginHandler()
 
 void JSONLoginHandler::saveToken(const std::string& token)
 {
-	authTokens.emplace_back(cipher->encryptString(token, Poco::Crypto::Cipher::ENC_BASE64));
+	authTokens.emplace_back(token);
 	save();
 }
 

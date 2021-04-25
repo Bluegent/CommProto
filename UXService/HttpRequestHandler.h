@@ -31,8 +31,8 @@ public:
 	void handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp) override;
 
 private:
-	void handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
-	void handleAction(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
+	void handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp, KVMap & map);
+	void handleAction(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp, KVMap & map);
 	void handleLogin(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
 	void handleSetup(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp);
 
@@ -41,6 +41,7 @@ private:
 
 	void badRequest(Poco::Net::HTTPServerResponse& resp);
 
+	bool hasValidToken(const KVMap & map);
 
 	KVMap parseRequest(Poco::Net::HTTPServerRequest& req);
 

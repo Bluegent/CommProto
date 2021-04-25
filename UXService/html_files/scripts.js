@@ -26,6 +26,7 @@ function postToggle(toggle, connection, id)
 {
     var http = new XMLHttpRequest();
     var data = new FormData();
+    addToken(data);
     data.append('connection',connection);
     data.append('controlType','toggle');
     data.append('controlId',id);
@@ -38,6 +39,7 @@ function postButton(connection,button)
 {
     var http = new XMLHttpRequest();
     var data = new FormData();
+    addToken(data);
     data.append('connection',connection);
     data.append('controlType','button');
     data.append('controlId',button);
@@ -65,6 +67,7 @@ function postNotification(connection,id,elemId,optionStr,actionStr)
 {
     var http = new XMLHttpRequest();
     var data = new FormData();
+    addToken(data);
     data.append('connection',connection);
     data.append('controlType','notification');
     data.append('controlId',id);
@@ -85,6 +88,7 @@ function postSlider(connection,id,value)
 {
     var http = new XMLHttpRequest();
     var data = new FormData();
+    addToken(data);
     data.append('connection',connection);
     data.append('controlType','slider');
     data.append('controlId',id);
@@ -97,14 +101,19 @@ function postSlider(connection,id,value)
 function startUpdating()
 {
     forceUpdateUI();
-    var updateUiId = setInterval(function() {updateUI();}, 500);
-    updateNotifCounter
+    updateNotifCounter();
 }
 
 
 
 
 $(document).ready(function(){
+    var token = getToken();
+    console.log("hub token = "+token);
+    if(token == '')
+    {
+        window.location.replace("/login.html");
+    }
     startUpdating();
     updateNotifCounter();
     

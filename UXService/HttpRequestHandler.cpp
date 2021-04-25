@@ -68,6 +68,17 @@ void UxRequestHandler::badRequest(Poco::Net::HTTPServerResponse& resp)
 	resp.send().flush();
 }
 
+bool UxRequestHandler::hasValidToken(const KVMap& map)
+{
+	auto it = map.find("token");
+	if(it == map.end())
+	{
+		return false;
+	}
+
+	return handler->validateToken(it->second);
+}
+
 KVMap UxRequestHandler::parseRequest(Poco::Net::HTTPServerRequest& req)
 {
 	Poco::Net::HTMLForm form(req, req.stream());
@@ -235,14 +246,14 @@ std::string getWithoutCategory(const std::string & input)
 	return input.substr(pos + 2);
 }
 
-void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp, KVMap & map)
 {
 	std::string url = req.getURI();
 	bool force = url.find("force") != std::string::npos;
 
-	Poco::Net::HTMLForm form(req, req.stream());
-	std::string tracker = form["session"];
-	std::string selected = form["selected"];
+	std::string tracker = map["session"];
+	std::string selected = map["selected"];
+
 
 	std::ostream& out = resp.send();
 
@@ -409,9 +420,8 @@ void UxRequestHandler::handleToggle(KVMap&& map) const
 	toggle->toggle();
 }
 
-void UxRequestHandler::handleAction(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+void UxRequestHandler::handleAction(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp, KVMap & map)
 {
-	KVMap map = parseRequest(req);
 	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 	resp.send().flush();
 	parseKVMap(std::move(map));
@@ -441,7 +451,9 @@ void UxRequestHandler::handleLogin(Poco::Net::HTTPServerRequest& req, Poco::Net:
 			badRequest(resp);
 			return;
 		}
-
+		resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+		resp.send().flush();
+		return;
 
 	}
 
@@ -510,16 +522,7 @@ void UxRequestHandler::handleSetup(Poco::Net::HTTPServerRequest& req, Poco::Net:
 void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
 {
 	std::string url = req.getURI();
-	if (url.find("/update") == 0)
-	{
-		handleUpdate(req, resp);
-		return;
-	}
-	if (url.compare("/action") == 0)
-	{
-		handleAction(req, resp);
-		return;
-	}
+
 	if (url.compare("/login") == 0)
 	{
 		handleLogin(req, resp);
@@ -530,5 +533,24 @@ void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::
 		handleSetup(req, resp);
 		return;
 	}
+
+	KVMap map = parseRequest(req);
+	if(!hasValidToken(map))
+	{
+		badRequest(resp);
+		return;
+	}
+
+	if (url.find("/update") == 0)
+	{
+		handleUpdate(req, resp,map);
+		return;
+	}
+	if (url.compare("/action") == 0)
+	{
+		handleAction(req, resp,map);
+		return;
+	}
+
 
 }

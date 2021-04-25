@@ -9,14 +9,14 @@
     <script src="jquery.min.js"></script>
     <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
     
-     
-   <script
-  src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-  crossorigin="anonymous"></script>
+    <script src="js.cookie.js"></script>
     
-    <script src="update.js"></script>
-    <script src="scripts.js"></script>
+    
+     
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    
+    <script src="cookie.js"></script>
+    <script src="login.js"></script>
       
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -24,61 +24,17 @@
 
 <body class="bg-dark m-0 p-0 vw-100">
 
-<!-- Controllers view -->
-<div class="offcanvas offcanvas-start bg-gray text-light" tabindex="-1" id="controllers_bar" data-bs-keyboard="false" data-bs-backdrop="false" aria-labelledby="offcanvasExampleLabel">
-   <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel"> Controllers </h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-   </div>
-   <div class="offcanvas-body">
-      <div id="sidebar">
-         <div class="nav flex-column py-3">
-         
-<!-- Tree view -->         
-<div class="list-group list-group-tree well">
-    <a  href="javascript:void(0);" class="list-group-item bg-dark text-light" data-toggle="collapse"><i class="fa fa-chevron"></i>
-        Services
-    </a>
-    <div class="list-group collapse" id="service_btns">
-    </div>
-    
-    <a href="javascript:void(0);" class="list-group-item bg-dark text-light" data-toggle="collapse"><i class="fa fa-chevron"></i>
-        Endpoints
-    </a>
-    <div class="list-group collapse" id="endpoint_btns">  
-    </div>
-</div>   
-
-         </div>
-      </div>
-   </div>
-</div>
-
-<!-- Notifications -->
-<div class="offcanvas offcanvas-end bg-gray text-light" tabindex="-1" id="notifications_bar" data-bs-keyboard="false" data-bs-backdrop="false" aria-labelledby="notif_bar_label">
-   <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="notif_bar_label"> <span><i class="fa fa-bell"></i></span> Notifications</h5>
-      <button type="button" class="btn-close btn-close-white " data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-    <!-- notifications -->
-    <div class="p-2 d-flex flex-column" id="notifications">  
-    <div class="py-2 d-flex flex-column notifi" id="@elem_id">
-    </div>
-    </div>
-</div>
-</div>
 
 
 <!-- Navbar -->
 <nav class="navbar navbar-default bg-gray m-0 py-3 d-flex justify-content-left">
 
-    <button type="button" class="btn btn-primary  bg-dark mx-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#controllers_bar" aria-controls="controllers_bar">
+    <button disabled type="button" class="btn btn-primary  bg-dark mx-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#controllers_bar" aria-controls="controllers_bar">
         <i class="fa fa-bars"></i> Controllers
     </button>
     <div class="flex-fill"></div>
-    <i type="button" class="fa fa-cog btn btn-primary bg-dark pull-right mx-3 my-1 disabled" type="button"></i>
-    <div><i type="button" class="fa fa-bell btn btn-primary bg-dark pull-right mx-3 my-1" type="button"  data-bs-toggle="offcanvas" data-bs-target="#notifications_bar" aria-controls="notifications_bar"> </i><b class="badge bg-danger text-light counter" id="notif_counter"></b></div>
+    <i type="button" class="disabled fa fa-cog btn btn-primary bg-dark pull-right mx-3 my-1 disabled" type="button"></i>
+    <div><i type="button" class="disabled fa fa-bell btn btn-primary bg-dark pull-right mx-3 my-1" type="button"  data-bs-toggle="offcanvas" data-bs-target="#notifications_bar" aria-controls="notifications_bar"> </i><b class="badge bg-danger text-light counter" id="notif_counter"></b></div>
 
 </nav>
 
@@ -86,9 +42,50 @@
 <div class="row">
 
 <!-- main content area -->
-<div  id="main-area" class="col-xs-12 col-md-12 col-lg-12 col-xxl-3 bg-dark text-light ms-xxl-3">
-<div class="row px-3" id="controller-display">
+<div  class="container-fluid text-light">
+<div class="row justify-content-center">
+<div class="col-xs-5 col-xxl-2">
 
+    <div class="container" id="login_form_container">
+    <div class="row">
+    <form class="col" action="/login" method="POST" id="signup_form">
+    <div class="row justify-content-center"><b class="text-center">Username</b></div>
+    <div class="row justify-content-right">
+        <input class="col" type="text" placeholder="Enter Username" name="username" id="username">
+    </div>
+    <div class="row justify-content-center"><b class="text-center">Password</b></div>
+    <div class="row justify-content-center">
+        <input class="col" type="password" placeholder="Enter Password" name="password" id="password">
+    </div>
+    
+   <div class="row justify-content-center m-3">
+        <div class="col-auto justify-content-center" >  <input class="mx-3" type=checkbox name="remember_me" id="remember_me"> Remember me</div>
+    </div>
+    <div class="row justify-content-center m-3">
+        <button class="btn btn-primary col-auto" type="submit">Login</button>
+    </div>
+    </form>
+    </div>
+    </div>
+</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" id="invalid_input">
+  <div class="modal-dialog text-light" role="document">
+    <div class="bg-dark modal-content">
+      <div class="bg-gray modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" aria-label="Close" onclick="closeModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="invalid_input_text">
+        ...
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
 </div>
 
 

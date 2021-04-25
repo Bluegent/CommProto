@@ -6,6 +6,12 @@ function generateSessionId()
     sessionID = "session-" + Date.now()+ "-"+ Math.floor(Math.random()*25565);
 }
 
+
+function addToken(formData)
+{
+    formData.append('token',getToken());
+}
+
 function shakeNotif()
 {
      var notifAmount = $(".notif_container").length;
@@ -177,20 +183,25 @@ function parseUiUpdate(uiString)
            
 }
 
+var interval;
+
 function updateUI()
 {
     var xhttp = new XMLHttpRequest();
     var data = new FormData();
     data.append("session",sessionID);
     data.append("selected",selectedController);
+    addToken(data);
     xhttp.onreadystatechange = function() 
     {
         if (this.readyState == 4)
         {
             if(this.status == 200)
             {
-                parseUiUpdate(xhttp.responseText);                
+                parseUiUpdate(xhttp.responseText);
+                              
             }
+            setTimeout( updateUI, 500);
         } 
         
     };  
