@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
     <title>CommProtoHub </title>
@@ -5,84 +6,93 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     
+    
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
     <script src="jquery.min.js"></script>
     <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="update.js"></script>
-    <script src="scripts.js"></script>
+    <script src="setup.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 
 <body class="bg-dark m-0 p-0 vw-100">
-
-<!-- Controllers view -->
-<div class="offcanvas offcanvas-start bg-gray text-light" tabindex="-1" id="controllers_bar" data-bs-keyboard="false" data-bs-backdrop="false" aria-labelledby="offcanvasExampleLabel">
-   <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel"> Controllers </h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-   </div>
-   <div class="offcanvas-body">
-      <div id="sidebar">
-         <div class="nav flex-column py-3">
-         
-<!-- Tree view -->         
-<div class="list-group list-group-tree well">
-    <a  href="javascript:void(0);" class="list-group-item bg-dark text-light" data-toggle="collapse"><i class="fa fa-chevron"></i>
-        Services
-    </a>
-    <div class="list-group collapse" id="service_btns">
-    </div>
-    
-    <a href="javascript:void(0);" class="list-group-item bg-dark text-light" data-toggle="collapse"><i class="fa fa-chevron"></i>
-        Endpoints
-    </a>
-    <div class="list-group collapse" id="endpoint_btns">  
-    </div>
-</div>   
-
-         </div>
-      </div>
-   </div>
-</div>
-
-<!-- Notifications -->
-<div class="offcanvas offcanvas-end bg-gray text-light" tabindex="-1" id="notifications_bar" data-bs-keyboard="false" data-bs-backdrop="false" aria-labelledby="notif_bar_label">
-   <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="notif_bar_label"> <span><i class="fa fa-bell"></i></span> Notifications</h5>
-      <button type="button" class="btn-close btn-close-white " data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-    <!-- notifications -->
-    <div class="p-2 d-flex flex-column" id="notifications">  
-    
-    </div>
-    </div>
-</div>
-
-
 <!-- Navbar -->
 <nav class="navbar navbar-default bg-gray m-0 py-3 d-flex justify-content-left">
 
-    <button type="button" class="btn btn-primary  bg-dark mx-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#controllers_bar" aria-controls="controllers_bar">
+    <button type="button" class="btn btn-primary  bg-dark mx-3" disabled type="button" data-bs-toggle="offcanvas" data-bs-target="#controllers_bar" aria-controls="controllers_bar">
         <i class="fa fa-bars"></i> Controllers
     </button>
     <div class="flex-fill"></div>
     
-    <i type="button" class="fa fa-bell btn btn-primary bg-dark pull-right mx-3 my-1" type="button"  data-bs-toggle="offcanvas" data-bs-target="#notifications_bar" aria-controls="notifications_bar" >
+    <i type="button" class="fa fa-bell btn btn-primary disabled bg-dark pull-right mx-3 my-1" type="button"  disabled>
     </i>
 </nav>
 
-<div class="container-fluid py-3">
-<div class="row">
 
 <!-- main content area -->
-<div  id="main-area" class="col-xs-12 col-md-12 col-lg-12 col-xxl-3 bg-dark text-light ms-xxl-3">
-<div class="row px-3" id="controller-display">
+<div  class="container-fluid text-light">
+<div class="row justify-content-center">
+<div class="col-xs-6 col-xxl-3">
 
+    <div class="mt-3" id="setup_text">
+    <div class="text-center"> Wellcome to the CommprotoHub initial setup <br>
+ We were unable to find any previous user account configuration, so one must be created by providing a username and a password. This configuration will be used in the future to access the hub features.<br>
+Your username must contain at least 4 alphanumerical characters and your password must contain at least 8 alphanumerical characters. The Hub serial code can be found on the device itself.</div><br>
+    </div>
+    <div class="container">
+    <div class="row">
+    <form class="col" action="/login" method="POST" id="signup_form">
+    <div class="row justify-content-center"><b class="text-center">Username</b></div>
+    <div class="row justify-content-right">
+        <div class="m-2 col-1"></div>
+        <input class="col" type="text" placeholder="Enter Username" name="username" id="username">
+        <div class="m-2 col-1"><i class="text-invis fa fa-check" id="uname_check"></i></div>
+    </div>
+    <div class="row justify-content-center"><b class="text-center">Password</b></div>
+    <div class="row justify-content-center">
+        <div class="m-2 col-1"></div>
+        <input class="col" type="password" placeholder="Enter Password" name="password" id="password">
+        <div class="m-2 col-1"><i class="text-invis fa fa-check" id="pw_check"></i></div>
+    </div>
+    <div class="row justify-content-center"><b class="text-center">Repeat password</b></div>
+    <div class="row justify-content-center">
+        <div class="m-2 col-1"></div>
+        <input class="col" type="password" placeholder="Repeat Password" name="password_repeat" id="password_repeat">
+        <div class="m-2 col-1"><i class="text-invis fa fa-check" id="pw_repeat_check"></i></div>
+    </div>
+    <div class="row justify-content-center"><b class="text-center">Hub serial</b></div>
+    <div class="row justify-content-right">
+        <div class="m-2 col-1"></div>
+        <input class="col" type="text" placeholder="Enter Serial" name="serial" id="serial">
+        <div class="m-2 col-1"><i class="text-invis fa fa-check" id="uname_check"></i></div>
+    </div>
+    
+    <div class="row justify-content-center m-3"><button class="btn btn-primary col-6" type="submit">Login</button></div>
+    </form>
+    </div>
+    </div>
+</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" id="invalid_input">
+  <div class="modal-dialog text-light" role="document">
+    <div class="bg-dark modal-content">
+      <div class="bg-gray modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" aria-label="Close" onclick="closeModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="invalid_input_text">
+        ...
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
 </div>
 
 
-</div>
-</div>
 </body>
 </html>
