@@ -27,7 +27,14 @@ void UxRequestHandler::handleGet(Poco::Net::HTTPServerRequest& req, Poco::Net::H
 	std::string uri = req.getURI();
 	if (uri == "/")
 	{
-		uri = "/index.html";
+		if (handler->hasSetup())
+		{
+			uri = "/login.html";
+		}
+		else
+		{
+			uri = "/setup.html";
+		}
 	}
 
 	Poco::Path path(uri);
@@ -55,7 +62,22 @@ void UxRequestHandler::handleGet(Poco::Net::HTTPServerRequest& req, Poco::Net::H
 	out.flush();
 }
 
+void UxRequestHandler::badRequest(Poco::Net::HTTPServerResponse& resp)
+{
+	resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+	resp.send().flush();
+}
 
+KVMap UxRequestHandler::parseRequest(Poco::Net::HTTPServerRequest& req)
+{
+	Poco::Net::HTMLForm form(req, req.stream());
+	KVMap map;
+	for (Poco::Net::NameValueCollection::ConstIterator i = form.begin(); i != form.end(); ++i)
+	{
+		map.emplace(i->first, i->second);
+	};
+	return map;
+}
 
 
 ActionData UxRequestHandler::parseBase(const KVMap& map) const
@@ -183,9 +205,10 @@ void UxRequestHandler::parseKVMap(KVMap&& map) const
 	}
 }
 
-UxRequestHandler::UxRequestHandler(const commproto::control::ux::UxControllersHandle& controllers, const KVMap & mimeTypes_)
+UxRequestHandler::UxRequestHandler(const commproto::control::ux::UxControllersHandle& controllers, const KVMap & mimeTypes_, const LoginHandlerHandle & handler_)
 	: controllers{ controllers }
 	, mimeTypes(mimeTypes_)
+	, handler{ handler_ }
 {
 }
 
@@ -304,7 +327,7 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 		updateJson.set("notifications", notifsJSON);
 	}
 
-	if(removals.size() !=0)
+	if (removals.size() != 0)
 	{
 		updateJson.set("removals", removals);
 	}
@@ -388,17 +411,100 @@ void UxRequestHandler::handleToggle(KVMap&& map) const
 
 void UxRequestHandler::handleAction(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
 {
-	std::string connection;
-	std::string control;
-	Poco::Net::HTMLForm form(req, req.stream());
-	KVMap map;
-	for (Poco::Net::NameValueCollection::ConstIterator i = form.begin(); i != form.end(); ++i)
-	{
-		map.emplace(i->first, i->second);
-	}
+	KVMap map = parseRequest(req);
 	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 	resp.send().flush();
 	parseKVMap(std::move(map));
+}
+
+void UxRequestHandler::handleLogin(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+{
+	KVMap map = parseRequest(req);
+
+	auto name = map.find("username");
+	auto pwd = map.find("password");
+	auto token = map.find("token");
+	bool hasReq = name != map.end() && pwd != map.end() || token != map.end();
+
+	if (!hasReq)
+	{
+		badRequest(resp);
+		return;
+		//how did you even get here?
+	}
+
+	if (token != map.end())
+	{
+		bool recognized = handler->validateToken(token->second);
+		if (!recognized)
+		{
+			badRequest(resp);
+			return;
+		}
+
+
+	}
+
+	if (!handler->hasSetup())
+	{
+		badRequest(resp);
+		return;
+	}
+
+	bool recognized = handler->validate(name->second, pwd->second);
+	if (!recognized)
+	{
+		badRequest(resp);
+		return;
+	}
+
+	std::string newtoken = handler->generateToken();
+	handler->saveToken(newtoken);
+	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+	std::ostream& out = resp.send();
+	out << newtoken;
+	out.flush();
+}
+
+void UxRequestHandler::handleSetup(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+{
+	KVMap map = parseRequest(req);
+	auto name = map.find("username");
+	auto pwd = map.find("password");
+	auto serial = map.find("serial");
+	bool hasReq = name != map.end() && pwd != map.end() || serial != map.end();
+
+	if (!hasReq)
+	{
+		badRequest(resp);
+		return;
+		//how did you even get here?
+	}
+
+
+	if (handler->hasSetup())
+	{
+		badRequest(resp);
+		return;
+	}
+
+	if (serial == map.end())
+	{
+		badRequest(resp);
+		return;
+	}
+
+	bool goodSerial = handler->validateSerial(serial->second);
+	if (!goodSerial)
+	{
+		badRequest(resp);
+		return;
+	}
+
+	handler->saveUserDetails(name->second, pwd->second);
+	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+	std::ostream& out = resp.send();
+	out.flush();
 }
 
 void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
@@ -414,4 +520,15 @@ void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::
 		handleAction(req, resp);
 		return;
 	}
+	if (url.compare("/login") == 0)
+	{
+		handleLogin(req, resp);
+		return;
+	}
+	if (url.compare("/setup") == 0)
+	{
+		handleSetup(req, resp);
+		return;
+	}
+
 }

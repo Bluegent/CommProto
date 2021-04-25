@@ -85,3 +85,9 @@ html {
     -ms-user-select: none;
     user-select: none;
 }
+
+.counter {
+  position: absolute;
+  top: 38px;
+  right: 3px;
+}

@@ -6,6 +6,30 @@ function generateSessionId()
     sessionID = "session-" + Date.now()+ "-"+ Math.floor(Math.random()*25565);
 }
 
+function shakeNotif()
+{
+     var notifAmount = $(".notif_container").length;
+     if(notifAmount !=0)
+     {
+        $("#notif_counter").effect('shake',{direction:'left', distance:3,times:1}, 200);
+     }
+}
+
+function updateNotifCounter()
+{
+    var notifAmount = $(".notif_container").length;
+    var counter = $("#notif_counter");
+    counter.html(notifAmount);
+    if(notifAmount !=0)
+    {
+        counter.show();
+    }
+    else
+    {
+        counter.hide();
+    }
+}
+
 function selectController(id)
 {
     selectedController = id;
@@ -62,15 +86,23 @@ function parseRemovals(removeJSON)
         if(realElement !=null)
             realElement.remove();
     }
+    updateNotifCounter();
 }
 
 function parseNotifications(notificationsJSON)
 {
     var notifDiv = document.getElementById("notifications");
+    var added =0;
     for(var i = 0; i < notificationsJSON.length; ++i) 
     {
+        ++added;
         var notifJSON = notificationsJSON[i];
         notifDiv.innerHTML += notifJSON["notification"];
+    }
+    updateNotifCounter();
+    if(added!=0)
+    {
+        shakeNotif()
     }
 }
 
@@ -165,3 +197,4 @@ function updateUI()
     xhttp.open('POST', updateURI, true);
     xhttp.send(data);
 }
+

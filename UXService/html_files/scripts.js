@@ -98,4 +98,14 @@ function startUpdating()
 {
     forceUpdateUI();
     var updateUiId = setInterval(function() {updateUI();}, 500);
+    updateNotifCounter
 }
+
+
+
+
+$(document).ready(function(){
+    startUpdating();
+    updateNotifCounter();
+    
+});

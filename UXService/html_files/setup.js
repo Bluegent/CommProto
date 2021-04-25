@@ -85,17 +85,17 @@ function submitForm(evt)
           type: 'POST',
           success: function(response){
                 
-                console.log(response);
+                /*console.log(response);
                 var d = new Date();
                 var expDays = 10;
                 d.setTime(d.getTime() + (expDays*24*60*60*1000));
                 var expires = "expires="+ d.toUTCString();
                 document.cookie =  "token=" + response + ";" + expires + ";path=/";
-                
-                window.location.replace("/hub.html");
+                */
+                window.location.replace("/login.html");
           },
           error: function(response){
-                showModal("Serial code unrecognized.");
+                showModal("Serial code unrecognized or setup was already performed.");
           }
         });
     }

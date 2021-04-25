@@ -1,8 +1,7 @@
 project(UXService)
 
-
-MESSAGE("**************POCO DIR : ${Poco_DIR}")
-find_package(Poco "1.10.1" REQUIRED COMPONENTS Net Util)
+find_package(Poco "1.10.1" REQUIRED COMPONENTS Net Util Crypto)
+find_package(OpenSSL REQUIRED)
 
 include (${CMAKE_SOURCE_DIR}/cmake/utility.cmake)
 
@@ -14,9 +13,10 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 
-target_link_libraries(${PROJECT_NAME} CommProtoService Poco::Net Poco::Util)
+target_link_libraries(${PROJECT_NAME} CommProtoService Poco::Net Poco::Util Poco::Crypto OpenSSL::SSL)
 
 include_directories(.)
+
 
 set(INSTALL_DIR "${CMAKE_BINARY_DIR}/../install")
 
@@ -34,6 +34,7 @@ message("win32 TYPE=${CMAKE_BUILD_TYPE}")
 			"${Poco_DIR}/../bin/PocoFoundationd.dll"   
 			"${Poco_DIR}/../bin/PocoJSONd.dll"   
 			"${Poco_DIR}/../bin/PocoXMLd.dll"   
+			"${Poco_DIR}/../bin/PocoCryptod.dll"   
 		  DESTINATION 
 			"${INSTALL_DIR}")
 else()
