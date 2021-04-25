@@ -99,4 +99,3 @@ function startUpdating()
     forceUpdateUI();
     var updateUiId = setInterval(function() {updateUI();}, 500);
 }
-startUpdating();
