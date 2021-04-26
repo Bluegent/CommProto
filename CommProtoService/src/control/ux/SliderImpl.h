@@ -22,12 +22,15 @@ namespace commproto
 				void setValue(const float) override;
 				void setValues(const float left_, const float right_, const float value_, const float step_) override;
 				void getValues(float & left_, float & right_, float & value_, float & step_) const;
+				std::string getUnitOfMeasure() const override { return unitOfMeasure; }
+				void setUnitOfMeasure(const std::string& unit) override { unitOfMeasure = unit; }
 			private:
 				float left, right;
 				float value;
 				float step;
 				const uint32_t sliderAdjustId;
 				GeneratorHandle generator;
+				std::string unitOfMeasure;
 			};
 
 

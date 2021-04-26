@@ -100,7 +100,8 @@ bool JSONLoginHandler::load()
 
 		TokenData data;
 		data.token = tokenObj->get(ConfigNames::tokenStrKey).toString();
-		data.expiryDate = tokenObj->get(ConfigNames::expiry).extract<uint64_t>();
+		data.expiryDate = tokenObj->get(ConfigNames::expiry).extract<int64_t>();
+		authTokens.push_back(data);
 	}
 	removeMoldyCookies();
 	save();

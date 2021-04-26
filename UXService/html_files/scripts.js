@@ -114,7 +114,26 @@ $(document).ready(function(){
     {
         window.location.replace("/login.html");
     }
-    startUpdating();
-    updateNotifCounter();
+    else
+    {
+        var data = new FormData();
+        data.append('token',token);
+        $.ajax({
+          url: '/check_token',
+          data: data,
+          processData: false,
+          contentType: false,
+          type: 'POST',
+          success : function(response)
+          {
+                startUpdating();
+                updateNotifCounter();
+          },
+          error: function(response){
+                window.location.replace("/login.html");
+          }
+        });
+    }
+    
     
 });

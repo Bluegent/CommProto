@@ -162,6 +162,7 @@ namespace commproto
 				replacements.emplace("@mid", getString((right+left)/2.f));
 				replacements.emplace("@value", getString(value));
 				replacements.emplace("@step", getString(step));
+				replacements.emplace("@unit", control.getUnitOfMeasure());
 
 				return manager.getEngine()->getTemplateWithReplacements("slider", std::move(replacements));
 			}

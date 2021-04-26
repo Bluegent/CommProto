@@ -15,7 +15,7 @@ namespace commproto
 			class SliderImpl : public Slider
 			{
 			public:
-				SliderImpl(const std::string& name, uint32_t id, const uint32_t sliderId_, const SliderAction& action_);
+				SliderImpl(const std::string& name, uint32_t id, const uint32_t sliderId_, const SliderAction& action_, const std::string & unit_ = {});
 
 				Message serialize() const override;
 				float getValue() const override;
@@ -29,6 +29,7 @@ namespace commproto
 				float step;
 				const uint32_t sliderId;
 				SliderAction action;
+				std::string unit;
 
 			};
 

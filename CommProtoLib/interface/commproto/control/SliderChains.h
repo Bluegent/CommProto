@@ -11,7 +11,7 @@ namespace commproto
 		{
 			//float order;
 			//left limit, right limit, initial value, step
-			MAKE_TRIPLE_PROP_CHAIN(SliderMessage, uint32_t, std::string, std::vector<float>);
+			MAKE_TRIPLE_PROP_CHAIN(SliderMessage, uint32_t, std::vector<std::string>, std::vector<float>);
 		}
 		namespace ux
 		{

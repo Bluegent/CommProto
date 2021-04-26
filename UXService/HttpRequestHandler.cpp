@@ -540,11 +540,26 @@ void UxRequestHandler::handlePost(Poco::Net::HTTPServerRequest& req, Poco::Net::
 	}
 
 	KVMap map = parseRequest(req);
+
+	if (url.find("/check_token") ==0)
+	{
+		if (!hasValidToken(map))
+		{
+			badRequest(resp);
+			return;
+		}
+		resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+		resp.send().flush();
+		return;
+	}
+
+
 	if(!hasValidToken(map))
 	{
 		badRequest(resp);
 		return;
 	}
+
 
 	if (url.find("/update") == 0)
 	{

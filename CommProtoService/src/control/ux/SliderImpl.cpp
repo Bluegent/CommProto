@@ -57,17 +57,24 @@ namespace commproto
 			{
 				endpoint::SliderMessage& msg = static_cast<endpoint::SliderMessage&>(data);
 
+				if (msg.prop2.size() != 2)
+				{
+					LOG_ERROR("Insufficient slider parameters for slider \"%d\"",msg.prop);
+					return;
+				}
+
 				if (msg.prop3.size() != 4)
 				{
-					LOG_ERROR("Insufficient slider parameters for slider \"%s\"", msg.prop2.c_str());
+					LOG_ERROR("Insufficient slider parameters for slider \"%s\"", msg.prop2[0].c_str());
 					return;
 				}
 				float left = msg.prop3[0];
 				float right = msg.prop3[1];
 				float value = msg.prop3[2];
 				float step = msg.prop3[3];
-				SliderHandle slider = std::make_shared<SliderImpl>(msg.prop2, msg.prop, controller->getIdProvider().adjustSliderId, std::make_shared<Generator>(*controller));
+				SliderHandle slider = std::make_shared<SliderImpl>(msg.prop2[0], msg.prop, controller->getIdProvider().adjustSliderId, std::make_shared<Generator>(*controller));
 				slider->setValues(left, right, value, step);
+				slider->setUnitOfMeasure(msg.prop2[1]);
 				controller->addControl(slider);
 
 			}

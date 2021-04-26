@@ -167,7 +167,7 @@ int main(int argc, const char * argv[])
 	{
 		LOG_INFO("Desired temp: %.2f", value);
 	};
-	auto slider = uiFactory->makeSlider("Desired temperature", slAction);
+	auto slider = uiFactory->makeSlider("Desired temperature", slAction," *C");
 	slider->setLimits(5.f, 40.f);
 	slider->setStep(0.5f);
 	slider->setInitialValue(24.f);

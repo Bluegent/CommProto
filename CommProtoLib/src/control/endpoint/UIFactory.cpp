@@ -25,9 +25,9 @@ namespace commproto
 				return button;
 			}
 
-			SliderHandle UIFactory::makeSlider(const std::string& name, const SliderAction& action) const
+			SliderHandle UIFactory::makeSlider(const std::string& name, const SliderAction& action, const std::string & unitOfMeasure) const
 			{
-				return std::make_shared<SliderImpl>(name, controller->reserveId(), controller->getIdProvider().sliderId, action);
+				return std::make_shared<SliderImpl>(name, controller->reserveId(), controller->getIdProvider().sliderId, action,unitOfMeasure);
 			}
 
 			ToggleHandle UIFactory::makeToggle(const std::string& name, const ToggleAction& action, const bool defaultState) const

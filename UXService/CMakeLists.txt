@@ -17,6 +17,9 @@ target_link_libraries(${PROJECT_NAME} CommProtoService Poco::Net Poco::Util Poco
 
 include_directories(.)
 
+if(WIN32)
+target_link_directories(${PROJECT_NAME} PUBLIC ${SSL_Lib})
+endif()
 
 set(INSTALL_DIR "${CMAKE_BINARY_DIR}/../install")
 

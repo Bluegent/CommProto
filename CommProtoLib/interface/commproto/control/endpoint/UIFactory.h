@@ -19,7 +19,7 @@ namespace commproto
 			public:
 				UIFactory(const std::string & name, const messages::TypeMapperHandle& mapper , const sockets::SocketHandle& socket);
 				ButtonHandle makeButton(const std::string& name, const ButtonAction& action) const;
-				SliderHandle makeSlider(const std::string& name, const SliderAction& action) const;
+				SliderHandle makeSlider(const std::string& name, const SliderAction& action, const std::string & unitOfMeasure = std::string{}) const;
 				ToggleHandle makeToggle(const std::string& name, const ToggleAction & action, const bool defaultState = false) const;
 				LabelHandle makeLabel(const std::string& name, const std::string & text) const;
 				NotificationHandle makeNotification(const std::string& name) const;

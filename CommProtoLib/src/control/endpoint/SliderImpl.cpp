@@ -8,7 +8,7 @@ namespace commproto
 	{
 		namespace endpoint
 		{
-			SliderImpl::SliderImpl(const std::string& name, uint32_t id, const uint32_t sliderId_, const SliderAction& action_)
+			SliderImpl::SliderImpl(const std::string& name, uint32_t id, const uint32_t sliderId_, const SliderAction& action_, const std::string & unit_)
 				: Slider(name, id)
 				, left{ 0.f }
 				, right{ 1.f }
@@ -16,17 +16,21 @@ namespace commproto
 				, step{ 0.f }
 				, sliderId{ sliderId_ }
 				, action{ action_ }
+				, unit{ unit_ }
 			{
 			}
 
 			Message SliderImpl::serialize() const
 			{
+				std::vector<std::string> stringProps;
+				stringProps.push_back(name);
+				stringProps.push_back(unit);
 				std::vector<float> props;
 				props.push_back(left);
 				props.push_back(right);
 				props.push_back(value);
 				props.push_back(step);
-				return SliderMessageSerializer::serialize(std::move(SliderMessage(sliderId, id, name, props)));
+				return SliderMessageSerializer::serialize(std::move(SliderMessage(sliderId, id, stringProps, props)));
 			}
 
 			float SliderImpl::getValue() const
@@ -65,7 +69,7 @@ namespace commproto
 
 			void SliderImpl::setStep(const float step_)
 			{
-				if (step > (right - left)/2.f || step < 0.f)
+				if (step > (right - left) / 2.f || step < 0.f)
 				{
 					return;
 				}
