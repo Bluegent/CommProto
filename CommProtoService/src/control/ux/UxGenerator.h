@@ -9,8 +9,8 @@
 #include "LabelImpl.h"
 #include "NotificationImpl.h"
 #include "SliderImpl.h"
-#include <commproto/utils/Math.h>
-#include "commproto/utils/String.h"
+#include "ProgressBarImpl.h"
+#include <commproto/utils/String.h>
 
 namespace commproto
 {
@@ -40,6 +40,24 @@ namespace commproto
 				UIController& manager;
 
 			};
+
+			inline void encode(std::string& data) {
+				std::string buffer;
+				buffer.reserve(data.size()*1.1);
+				for (size_t pos = 0; pos != data.size(); ++pos) {
+					switch (data[pos]) {
+					case '&':  buffer.append("&amp;");       break;
+					case '\"': buffer.append("&quot;");      break;
+					case '\'': buffer.append("&apos;");      break;
+					case '<':  buffer.append("&lt;");        break;
+					case '>':  buffer.append("&gt;");        break;
+					default:   buffer.append(&data[pos], 1); break;
+					}
+				}
+				data.swap(buffer);
+			}
+
+
 
 			inline std::string Generator::generateNotification(const NotificationImpl& control, const std::string& text, const uint32_t actionId)
 			{
@@ -136,6 +154,14 @@ namespace commproto
 
 			}
 
+
+			inline std::string getString(const uint32_t number)
+			{
+				std::stringstream stream;
+				stream << number;
+				return stream.str();
+			}
+
 			inline std::string getString(const float value, const uint32_t precision = 3)
 			{
 				std::stringstream stream;
@@ -165,6 +191,20 @@ namespace commproto
 				replacements.emplace("@unit", control.getUnitOfMeasure());
 
 				return manager.getEngine()->getTemplateWithReplacements("slider", std::move(replacements));
+			}
+
+			template <>
+			inline std::string Generator::generate(const ProgressBarImpl& control) const
+			{
+				if (!control.isVisible())
+				{
+					return std::string();
+				}
+
+				auto replacements = getBaseReplacements(control);
+				replacements.emplace("@value", getString(control.getProgress()));
+
+				return manager.getEngine()->getTemplateWithReplacements("progress_bar", std::move(replacements));
 			}
 
 

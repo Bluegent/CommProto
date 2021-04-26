@@ -122,6 +122,9 @@ int main(int argc, const char * argv[])
 	});
 	controller->addControl(toggleIncrement);
 
+
+
+
 	auto notif = uiFactory->makeNotification("Hello!");
 	std::string noOption = "No, I didn't!";
 	notif->addOption("Okay?");
@@ -163,17 +166,51 @@ int main(int argc, const char * argv[])
 	});
 	controller->addControl(notifButton);
 
+	control::endpoint::SliderAction doNothing = [](float value)
+	{
+	};
+
+	auto disablableSlider = uiFactory->makeSlider("Disableable slider", doNothing);
+	disablableSlider->setLimits(0.f, 100.f);
+	disablableSlider->setStep(0.5f);
+	controller->addControl(disablableSlider);
+
+
+	auto toggleSlider = uiFactory->makeToggle("Disable slider", [&controller,&disablableSlider](bool state)
+	{
+		controller->setControlState(disablableSlider->getId(), state);
+	});
+	controller->addControl(toggleSlider);
+
+
+	auto progressBar = uiFactory->makeProgresBar("Pointlessness");
+	controller->addControl(progressBar);
+
+	LOG_INFO("Testing \370 symbol");
+	std::string test = "\370 yas?";
+	LOG_INFO("Testing \370 inside string %s", test.c_str());
+	parser::ByteStream stream;
+	stream.write(test);
+
+
+	parser::ByteStream readStream(stream.getStream());
+
+	std::string output;
+	readStream.read(output);
+	LOG_INFO("Testing \370 inside parsed string %s", output.c_str());
+
 	control::endpoint::SliderAction slAction = [](float value)
 	{
 		LOG_INFO("Desired temp: %.2f", value);
 	};
+	
 	auto slider = uiFactory->makeSlider("Desired temperature", slAction," *C");
 	slider->setLimits(5.f, 40.f);
 	slider->setStep(0.5f);
 	slider->setInitialValue(24.f);
 	controller->addControl(slider);
 
-	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 C");
+	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 *C");
 	controller->addControl(tempLabel);
 
 	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper, controller);
@@ -213,6 +250,13 @@ int main(int argc, const char * argv[])
 			tempStr << temp << " C";
 			tempLabel->setText(tempStr.str());
 			counter = 0;
+
+			uint32_t progress = progressBar->getProgress()+1;
+			if(progress>100)
+			{
+				progress = 0;
+			}
+			progressBar->setProgress(progress);
 		}
 	}
     socket->shutdown();

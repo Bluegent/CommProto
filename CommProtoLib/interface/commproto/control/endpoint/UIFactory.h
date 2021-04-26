@@ -7,6 +7,7 @@
 #include <commproto/control/endpoint/Toggle.h>
 #include <commproto/control/endpoint/Label.h>
 #include <commproto/control/endpoint/Slider.h>
+#include <commproto/control/endpoint/ProgressBar.h>
 
 namespace commproto
 {
@@ -22,6 +23,7 @@ namespace commproto
 				SliderHandle makeSlider(const std::string& name, const SliderAction& action, const std::string & unitOfMeasure = std::string{}) const;
 				ToggleHandle makeToggle(const std::string& name, const ToggleAction & action, const bool defaultState = false) const;
 				LabelHandle makeLabel(const std::string& name, const std::string & text) const;
+				ProgressBarHandle makeProgresBar(const std::string& name, const uint32_t progress = 0 ) const;
 				NotificationHandle makeNotification(const std::string& name) const;
 				UIControllerHandle makeController() const;
 			private:

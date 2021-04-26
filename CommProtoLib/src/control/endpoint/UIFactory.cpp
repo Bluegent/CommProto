@@ -6,6 +6,7 @@
 #include "LabelImpl.h"
 #include "ToggleImpl.h"
 #include "SliderImpl.h"
+#include "ProgressBarImpl.h"
 
 namespace commproto
 {
@@ -38,6 +39,11 @@ namespace commproto
 			LabelHandle UIFactory::makeLabel(const std::string& name, const std::string& text) const
 			{
 				return std::make_shared<LabelImpl>(name, controller->reserveId(), controller->getIdProvider().labelId, controller->getIdProvider().labelUpdateId, text, controller);
+			}
+
+			ProgressBarHandle UIFactory::makeProgresBar(const std::string& name, const uint32_t progress) const
+			{
+				return std::make_shared<ProgressBarImpl>(name, controller->reserveId(), controller, controller->getIdProvider().progressBarId, controller->getIdProvider().progressBarUpdateId,progress);
 			}
 
 			NotificationHandle UIFactory::makeNotification(const std::string& name) const

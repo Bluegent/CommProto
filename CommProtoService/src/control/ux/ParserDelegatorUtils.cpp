@@ -6,6 +6,7 @@
 #include "NotificationImpl.h"
 #include "UIControllerImpl.h"
 #include "SliderImpl.h"
+#include "ProgressBarImpl.h"
 
 namespace commproto
 {
@@ -24,6 +25,8 @@ namespace commproto
 				parser::DelegatorUtils::addParserHandlerPair<endpoint::DisplayNotificationParser, endpoint::DisplayNotification>(delegator, std::make_shared<DisplayNotificationHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<endpoint::ToggleControlEnabledStateParser, endpoint::ToggleControlEnabledState>(delegator, std::make_shared<ControlStateHandler>(controller));
 				parser::DelegatorUtils::addParserHandlerPair<endpoint::ToggleControlShownStateParser, endpoint::ToggleControlShownState>(delegator, std::make_shared<ControlShownHandler>(controller));
+				parser::DelegatorUtils::addParserHandlerPair<endpoint::ProgressBarMessageParser, endpoint::ProgressBarMessage>(delegator, std::make_shared<ProgressBarHandler>(controller));
+				parser::DelegatorUtils::addParserHandlerPair<endpoint::ProgressBarUpdateParser, endpoint::ProgressBarUpdate>(delegator, std::make_shared<ProgressBarUpdateHandler>(controller));
 			}
 		}
 	}

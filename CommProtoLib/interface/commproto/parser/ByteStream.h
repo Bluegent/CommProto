@@ -16,7 +16,7 @@ namespace commproto
 		public:
 			ByteStream() : position(0) {}
 
-			ByteStream(const Message & stream_) : position(0), stream(stream_) {}
+			ByteStream(const Message & stream_) : stream(stream_), position(0) {}
 
 			template <typename T>
 			bool read(T& value);
@@ -103,7 +103,11 @@ namespace commproto
 		//read and write raw arrays
 		inline bool ByteStream::read(void* buf, const uint32_t size)
 		{
-			if (!size || !buf || position + size > stream.size())
+			if(!size)
+			{
+				return true;
+			}
+			if (!buf || position + size > stream.size())
 			{
 				return false;
 			}
