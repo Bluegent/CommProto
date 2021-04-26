@@ -92,7 +92,7 @@ namespace commproto
 			{
 				device.reboot();
 			}
-			
+
 			sendPing();
 			if (builder)
 			{
@@ -239,48 +239,63 @@ namespace commproto
 			keepAliveOn = true;
 		}
 
-
+		// list wifi networks
+		// connect to ones that start with "CPEP" - password is "COMPROTO"
+		// connect to 192.168.1.10 
+		// read name, manufacturer, description of device
+		// send device a message containing rpi SSID, password, dispatch server ip and port
 		void AuthDevice::scanNetworks()
 		{
 			LOG_INFO("Scanning networks");
 			disableKeepAlive();
-			std::vector<std::string> networks = device.listNetworks();
-			for (auto name : networks)
+			std::vector<std::string> allNetworks = device.listNetworks();
+
+			std::vector<std::string> networks;
+			for (auto network : allNetworks)
 			{
-				// list wifi networks
-				// connect to ones that start with "CPEP" - password is "COMPROTO"
-				// connect to 192.168.1.10 
-				// read name, manufacturer, description of device
-				// send device a message containing rpi SSID, password, dispatch server ip and port
-
-
-				if (!alreadyScanned(name) && name.find("CPEP::") == 0)
+				if (!alreadyScanned(network) && network.find("CPEP::") == 0)
 				{
-					finishedReading = false;
-					targetDevice.reset();
-					ConnectionData data = ConnectionData::defaultData;
-					data.ssid = name;
-					sockets::SocketHandle connection = device.connectTo(data);
-					if (!connection)
-					{
-						LOG_WARNING("Could not connect to network %s", name.c_str());
-						return;
-					}
-					connection->sendByte(sizeof(void*));
-
-					parser::ParserDelegatorHandle delegator = buildDeviceDelegator(*this, name);
-					parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(connection, delegator);
-
-					LOG_INFO("Waiting for device details...");
-					while (!finishedReading)
-					{
-						builder->pollAndReadTimes(100);
-						device.delayT(1);
-					}
-					LOG_INFO("Device details received, closing connection");
-					previouslyScanned.push_back(name);
-					connection->shutdown();
+					networks.push_back(network);
 				}
+			}
+
+			serial->sendBytes(device::ScanStartedSerializer::serialize(device::ScanStarted(provider->scanStartId, networks.size())));
+
+			for (uint32_t index = 0; index < networks.size();++index )
+			{
+				const std::string & name = networks[index];
+				finishedReading = false;
+				targetDevice.reset();
+				ConnectionData data = ConnectionData::defaultData;
+				data.ssid = name;
+				sockets::SocketHandle connection = device.connectTo(data);
+				if (!connection)
+				{
+					LOG_WARNING("Could not connect to network %s", name.c_str());
+					return;
+				}
+				connection->sendByte(sizeof(void*));
+
+				parser::ParserDelegatorHandle delegator = buildDeviceDelegator(*this, name);
+				parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(connection, delegator);
+
+				LOG_INFO("Waiting for device details...");
+
+				uint32_t attempts = 0;
+				while (!finishedReading && attempts < 100)
+				{
+					++attempts;
+					builder->pollAndReadTimes(100);
+					device.delayT(100);
+				}
+				if (finishedReading) {
+					LOG_INFO("Device details received, closing connection");
+				}
+				serial->sendBytes(device::ScanProgressSerializer::serialize(device::ScanProgress(provider->scanProgresId, index)));
+				previouslyScanned.push_back(name);
+
+				connection->shutdown();
+
 			}
 			serial->sendBytes(device::ScanFinishedSerializer::serialize(std::move(device::ScanFinished(provider->finishScanId))));
 			enableKeepAlive();

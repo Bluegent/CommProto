@@ -119,6 +119,7 @@ namespace commproto
 				return;
 
 			}
+
 			case BaseAuthState::WaitForReconnect:
 			{
 				sockets::SocketHandle reconnect = socket->acceptNext();

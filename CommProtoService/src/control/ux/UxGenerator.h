@@ -10,6 +10,7 @@
 #include "NotificationImpl.h"
 #include "SliderImpl.h"
 #include <commproto/utils/Math.h>
+#include "commproto/utils/String.h"
 
 namespace commproto
 {
@@ -125,7 +126,9 @@ namespace commproto
 					return std::string();
 				}
 				auto replacements = getBaseReplacements(control);
-				replacements.emplace("@text", control.getText());
+				std::string text = control.getText();
+				utils::replaceAll(text, "\\n", "<br>");
+				replacements.emplace("@text", text);
 				return manager.getEngine()->getTemplateWithReplacements("label", std::move(replacements));
 
 			}

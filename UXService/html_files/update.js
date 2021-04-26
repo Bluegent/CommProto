@@ -116,13 +116,17 @@ function parseNotifications(notificationsJSON)
 function removeNonContained(controllerButton, controllersJSON)
 {
     for(var i=0;i<controllersJSON.length;++i)
-    {
-        
+    {        
         var buttonName = "btn-" + controllersJSON[i]["name"];
         if( buttonName == controllerButton.id)
         {
             return;
         }
+    }
+    
+    if("btn-"+selectedController == controllerButton.id)
+    {
+        document.getElementById("controller-display").innerHTML = 0;
     }
     controllerButton.remove();
 }

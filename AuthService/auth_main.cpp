@@ -13,6 +13,9 @@
 #include <commproto/device/AuthChains.h>
 #include <chrono>
 
+#include "AuthServiceImpl.h"
+#include "AuthServiceHandlers.h"
+
 #ifdef _WIN32
 #define SPEED CBR_115200
 
@@ -35,149 +38,6 @@ namespace ConfigValues
 	static constexpr const bool logToConsoleDefault = true;
 };
 
-struct APData
-{
-	std::string ssid;
-	std::string name;
-	std::string manufacturer;
-	std::string description;
-};
-
-class AuthService
-{
-public:
-
-
-	AuthService(const commproto::stream::StreamHandle stream_)
-		: stream{ stream_ }
-		, mapper{ commproto::messages::TypeMapperFactory::build(stream) }
-		, scanning{ false }
-		, scanId{ mapper->registerType<commproto::device::ScanForNetworksMessage>() }
-		, authorizeId{ mapper->registerType<commproto::device::DeviceAuthAccept>() }
-		, rejectId{ mapper->registerType<commproto::device::DeviceAuthReject>() }
-		, keepAliveId{ mapper->registerType<commproto::device::KeepAlive>() }
-	{
-
-	}
-	void scan()
-	{
-		if (scanning)
-		{
-			return;
-		}
-		scanning = true;
-		commproto::Message scan = commproto::device::ScanForNetworksSerializer::serialize(std::move(commproto::device::ScanForNetworksMessage(scanId)));
-		stream->sendBytes(scan);
-
-	}
-
-	void setScanFinished()
-	{
-		scanning = false;
-	}
-
-	void handleRequest(const APData& data)
-	{
-		LOG_INFO("Name: \"%s\" (ssid:%s)", data.name.c_str(),data.ssid.c_str());
-		LOG_INFO("Manufacturer: \"%s\"", data.manufacturer.c_str());
-		LOG_INFO("Description: \"%s\"", data.description.c_str());
-		accept(data.ssid);
-	}
-
-	void accept(const std::string & name)
-	{
-		std::vector<std::string> props;
-		props.push_back("EstiNebun"); //ssid of hub
-		props.push_back("01LMS222"); //password for hub
-		props.push_back("192.168.1.2"); //dispatch address
-		uint32_t port = 25565; //dispatch port
-		commproto::Message accept = commproto::device::DeviceAuthAcceptSerializer::serialize(std::move(commproto::device::DeviceAuthAccept(authorizeId,name,props,port)));
-		stream->sendBytes(accept);
-	}
-	void reject(const std::string & name)
-	{
-		commproto::Message reject = commproto::device::DeviceAuthRejectSerializer::serialize(std::move(commproto::device::DeviceAuthReject(rejectId,name)));
-		stream->sendBytes(reject);
-	}
-	void sendPong()
-	{
-		commproto::Message reject = commproto::device::KeepAliveSerializer::serialize(std::move(commproto::device::KeepAlive(keepAliveId)));
-		stream->sendBytes(reject);
-	}
-
-
-private:
-	commproto::stream::StreamHandle stream;
-	commproto::messages::TypeMapperHandle mapper;
-	bool scanning;
-	uint32_t scanId;
-	uint32_t authorizeId;
-	uint32_t rejectId;
-	uint32_t keepAliveId;
-};
-using AuthServiceHandle = std::shared_ptr<AuthService>;
-
-class DeviceReqHandler : public commproto::parser::Handler
-{
-public:
-	DeviceReqHandler(const AuthServiceHandle & service_) : service{ service_ } {}
-	void handle(commproto::messages::MessageBase&& data) override;
-private:
-	AuthServiceHandle service;
-};
-
-void DeviceReqHandler::handle(commproto::messages::MessageBase&& data)
-{
-	commproto::device::DeviceAuthRequestMessage& msg = static_cast<commproto::device::DeviceAuthRequestMessage&>(data);
-	if (msg.prop.size() != 4)
-	{
-		LOG_ERROR("Incomplete amount of request parameters");
-	}
-	APData ap {msg.prop[0],msg.prop[1],msg.prop[2],msg.prop[3]};
-	service->handleRequest(ap);
-}
-
-
-
-class ScanFinishedHandler : public commproto::parser::Handler
-{
-public:
-	ScanFinishedHandler(const AuthServiceHandle & service_)
-		:service{ service_ }
-	{
-
-	}
-	void handle(commproto::messages::MessageBase&& data) override;
-private:
-	AuthServiceHandle service;
-};
-
-void ScanFinishedHandler::handle(commproto::messages::MessageBase&& data)
-{
-	service->setScanFinished();
-}
-
-class KeepAliveHandler : public commproto::parser::Handler
-{
-public:
-	KeepAliveHandler(const AuthServiceHandle & service_)
-		:service{ service_ }
-	{
-
-	}
-	void handle(commproto::messages::MessageBase&& data) override
-	{
-		if(!service)
-		{
-			return;
-		}
-		service->sendPong();
-	}
-	private:
-		AuthServiceHandle service;
-};
-
-
 commproto::parser::ParserDelegatorHandle build(const AuthServiceHandle & service)
 {
 	commproto::parser::ParserDelegatorHandle delegator = std::make_shared<commproto::parser::ParserDelegator>();
@@ -186,6 +46,8 @@ commproto::parser::ParserDelegatorHandle build(const AuthServiceHandle & service
 	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::DeviceAuthRequestParser, commproto::device::DeviceAuthRequestMessage>(delegator, std::make_shared<DeviceReqHandler>(service));
 	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::ScanFinishedParser, commproto::device::ScanFinished>(delegator, std::make_shared<ScanFinishedHandler>(service));
 	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::KeepAliveParser, commproto::device::KeepAlive>(delegator, std::make_shared<KeepAliveHandler>(service));
+	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::ScanProgressParser, commproto::device::ScanProgress>(delegator, std::make_shared<ScanProgressHandler>(service));
+	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::ScanStartedParser, commproto::device::ScanStarted>(delegator, std::make_shared<ScanStartHandler>(service));
 
 	return delegator;
 }
@@ -232,7 +94,7 @@ int main(int argc, const char * argv[]) {
 	{
 		LOG_ERROR("An issue occurred when sending sizeof pointer on host system");
 	}
-	auto service = std::make_shared<AuthService>(serial);
+	auto service = std::make_shared<AuthServiceImpl>(serial);
 	auto delegator = build(service);
 	auto builder = std::make_shared<commproto::parser::MessageBuilder>(serial, delegator);
 

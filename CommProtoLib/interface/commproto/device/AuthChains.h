@@ -36,6 +36,9 @@ namespace commproto
 
 		MAKE_EMPTY_CHAIN(KeepAlive);
 
+		MAKE_SINGLE_PROP_CHAIN(ScanStarted,uint32_t); //number of matching ssid-s
+		MAKE_SINGLE_PROP_CHAIN(ScanProgress,uint32_t); //received info from this id
+
 	}
 
 	DEFINE_DATA_TYPE(device::DeviceDataMessage);
@@ -47,6 +50,8 @@ namespace commproto
 	DEFINE_DATA_TYPE(device::DeviceAuthReject);
 	DEFINE_DATA_TYPE(device::ScanFinished);
 	DEFINE_DATA_TYPE(device::KeepAlive);
+	DEFINE_DATA_TYPE(device::ScanStarted);
+	DEFINE_DATA_TYPE(device::ScanProgress);
 }
 
 

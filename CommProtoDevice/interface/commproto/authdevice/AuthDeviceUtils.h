@@ -18,11 +18,15 @@ namespace commproto
 				: deviceAuthId{ mapper->registerType<device::DeviceAuthRequestMessage>() }
 				, finishScanId{ mapper->registerType<device::ScanFinished>() }
 				, keepAliveId{ mapper->registerType<device::KeepAlive>() }
+				, scanStartId{ mapper->registerType<device::ScanStarted>() }
+				, scanProgresId{ mapper->registerType<device::ScanProgress>() }
 			{
 			}
 			const uint32_t deviceAuthId;
 			const uint32_t finishScanId;
 			const uint32_t keepAliveId;
+			const uint32_t scanStartId;
+			const uint32_t scanProgresId;
 		};
 
 		using ProviderHandle = std::shared_ptr<IdProvider>;
