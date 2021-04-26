@@ -6,7 +6,7 @@
     </div>
     <div class="mt-1 mb-3 d-flex justify-content-between">
         <div class="smalltext text-faded pe-2">@left</div>
-        <input type="range" class="slider flex-fill" value="@value" min="@left" max="@right" step="@step" oninput="setSliderValue('@slider_id',this.value)" onmouseup="postSlider('@connection_name','@control_id',this.value)" onTouchEnd="postSlider('@connection_name','@control_id',this.value)">
+        <input type="range" class="slider flex-fill" value="@value" min="@left" max="@right" step="@step" oninput="setSliderValue('@slider_id',this.value)" onmouseup="postSlider('@connection_name','@control_id',this.value)" onTouchEnd="postSlider('@connection_name','@control_id',this.value)" @disabled>
         <div class="smalltext text-faded ps-2">@right</div>
     </div> 
     </div>

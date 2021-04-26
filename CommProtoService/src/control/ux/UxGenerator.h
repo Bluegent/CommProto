@@ -80,6 +80,9 @@ namespace commproto
 				replacements.emplace("@control_id", std::to_string(control.getId()));
 				replacements.emplace("@id", manager.getControlId(control.getId()));
 				replacements.emplace("@connection_name", manager.getConnectionName());
+
+				std::string disabledStr = control.isEnabled() ? "" : "disabled";
+				replacements.emplace("@disabled", disabledStr);
 				return replacements;
 			}
 

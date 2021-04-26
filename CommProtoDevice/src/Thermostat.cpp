@@ -43,7 +43,7 @@ namespace commproto
 			control::endpoint::UIControllerHandle controller;
 		};
 
-		const uint32_t Thermostat::totalMem = 520*1024;
+		const uint32_t Thermostat::totalMem = 520 * 1024;
 
 
 		Thermostat::Thermostat(endpointdevice::BaseEndpointWrapper& wrapper, const endpointdevice::DeviceDetails& details, ThermostateWrapper& thermo)
@@ -52,6 +52,7 @@ namespace commproto
 			, tempTime(0)
 			, then(0)
 			, now(0)
+			, adjustState(0)
 		{
 		}
 
@@ -143,14 +144,14 @@ namespace commproto
 				LOG_INFO("Something went wrong during device setup, please reset.");
 				return;
 			}
-			
-			
+
+
 			now = thermo.getMs();
 			uint32_t diff = now - then;
 			if (diff > 5000) {
 				thermo.loop();
 				then = now;
-				
+
 				tempTime = 0;
 				float temp = thermo.getTemp();
 				float humidity = thermo.getHumidity();
@@ -166,7 +167,7 @@ namespace commproto
 				humStr << humidity << " %";
 				ui.humLabel->setText(humStr.str());
 			}
-			
+
 			if (dep.builder)
 			{
 				uint32_t bytes = dep.client->available();
@@ -189,8 +190,12 @@ namespace commproto
 			LOG_INFO("Setting auto temperature adjustment %s", on ? "on" : "off");
 			thermo.toggleAutoTempAdjust(on);
 
-			dep.controller->setControlShownState(ui.desiredTempSlider->getId(), on);
-			dep.controller->setControlShownState(ui.intensitySlider->getId(), !on);
+			dep.controller->setControlState(ui.desiredTempSlider->getId(), on);
+			dep.controller->setControlState(ui.intensitySlider->getId(), !on);
+			if(!on)
+			{
+				thermo.toggleTempAdjust(adjustState);
+			}
 			thermo.loop();
 
 		}
@@ -204,9 +209,10 @@ namespace commproto
 
 		void Thermostat::setAdjustIntensity(const float temp)
 		{
+			adjustState = static_cast<uint32_t>(temp);
 			LOG_INFO("Temperature adjust set to %.0f", temp);
 			thermo.toggleAutoTempAdjust(false);
-			thermo.toggleTempAdjust(temp);			
+			
 		}
 	}
 }

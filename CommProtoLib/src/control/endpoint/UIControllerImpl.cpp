@@ -30,17 +30,22 @@ namespace commproto
 			Message UIControllerImpl::serialize() const
 			{
 				Message result;
+
 				for (auto it = controls.begin(); it != controls.end(); ++it)
 				{
 					Message controlSerialized = it->second->serialize();
 					result.insert(result.end(), controlSerialized.begin(), controlSerialized.end());
-					if(!it->second->isEnabled())
+					if (!it->second->isEnabled())
 					{
 						Message state = ToggleControlEnabledStateSerializer::serialize(ToggleControlEnabledState(provider.toggleControlStateId, it->first, false));
 						result.insert(result.end(), state.begin(), state.end());
 					}
+					if (!it->second->isVisible())
+					{
+						Message state = ToggleControlShownStateSerializer::serialize(ToggleControlShownState(provider.toggleControlStateId, it->first, false));
+						result.insert(result.end(), state.begin(), state.end());
+					}
 				}
-
 
 				for (auto it = notifications.begin(); it != notifications.end(); ++it)
 				{
