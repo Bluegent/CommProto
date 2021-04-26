@@ -469,9 +469,14 @@ void UxRequestHandler::handleLogin(Poco::Net::HTTPServerRequest& req, Poco::Net:
 		badRequest(resp);
 		return;
 	}
-
+	auto remember = map.find("remember");
+	bool longterm = false;
+	if(remember != map.end())
+	{
+		longterm = remember->second == "t";
+	}
 	std::string newtoken = handler->generateToken();
-	handler->saveToken(newtoken);
+	handler->saveToken(newtoken,longterm);
 	resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 	std::ostream& out = resp.send();
 	out << newtoken;

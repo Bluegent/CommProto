@@ -19,6 +19,7 @@ struct ConfigNames
 	static constexpr const char * tokenStrKey = "token";
 	static constexpr const char * expiry = "expiry";
 	static constexpr const uint64_t tenDaysMs = 10 * 24 * 60 * 60 * 1000;
+	static constexpr const uint64_t halfADay = 12 * 60 * 60 * 1000;
 };
 
 
@@ -147,11 +148,18 @@ JSONLoginHandler::~JSONLoginHandler()
 	JSONLoginHandler::save();
 }
 
-void JSONLoginHandler::saveToken(const std::string& token)
+void JSONLoginHandler::saveToken(const std::string& token, const bool longterm)
 {
 	TokenData data;
 	data.token = token;
-	data.expiryDate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + ConfigNames::tenDaysMs;
+	if (longterm) 
+	{
+		data.expiryDate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + ConfigNames::tenDaysMs;
+	}
+	else
+	{
+		data.expiryDate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + ConfigNames::halfADay;
+	}
 	authTokens.emplace_back(data);
 	save();
 }

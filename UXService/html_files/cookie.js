@@ -1,9 +1,6 @@
-
-var badToken='';
-
-
 function clearCookie()
 {
+    Cookies.remove("auth_token");
 }
 
 function saveToken(response)
@@ -11,8 +8,7 @@ function saveToken(response)
    
     if(!$("#remember_me").val())
     {
-        console.log("saving to local variable");
-        badToken = response;
+         Cookies.set("auth_token",response);
         return;
     }
     

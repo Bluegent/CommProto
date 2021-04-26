@@ -31,6 +31,11 @@ function submitForm(evt)
         var data = new FormData();
         data.append("username",$("#username").val());
         data.append("password",$("#password").val());
+        if($("#password").val()){
+            data.append("remember","t");
+        }else{
+            data.append("remember","f");
+        }
         $.ajax({
           url: '/login',
           data: data,

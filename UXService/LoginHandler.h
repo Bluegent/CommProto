@@ -13,7 +13,7 @@ public:
 	virtual bool validate(const std::string& user, const std::string & password) = 0;
 	virtual bool validateToken(const std::string & token) = 0;
 	virtual std::string generateToken() = 0;
-	virtual void saveToken(const std::string & token) = 0;
+	virtual void saveToken(const std::string & token, const bool longterm) = 0;
 	virtual void saveUserDetails(const std::string & name, const std::string & pass) = 0;
 	virtual bool validateSerial(const std::string & serial) = 0;
 	virtual bool load() = 0;
@@ -47,7 +47,7 @@ public:
 	bool hasSetup() override;
 	bool save() override;
 	~JSONLoginHandler() override;
-	void saveToken(const std::string& token) override;
+	void saveToken(const std::string& token, const bool longterm) override;
 	void saveUserDetails(const std::string & name, const std::string & pass) override;
 	bool validateSerial(const std::string& serial) override;
 
