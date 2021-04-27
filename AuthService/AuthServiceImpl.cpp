@@ -4,6 +4,7 @@
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/logger/LoggingMessage.h>
 #include <thread>
+#include <sstream>
 #include <commproto/control/endpoint/ParserDelegatorUtils.h>
 #include <commproto/endpoint/DelegatorProvider.h>
 #include <commproto/service/ServiceChains.h>
@@ -92,6 +93,10 @@ void AuthServiceImpl::scan()
 void AuthServiceImpl::setScanFinished()
 {
 	scanning = false;
+	if(ui)
+	{
+		ui->scanFinished();
+	}
 }
 
 void AuthServiceImpl::handleRequest(const APData& data)
@@ -99,7 +104,18 @@ void AuthServiceImpl::handleRequest(const APData& data)
 	LOG_INFO("Name: \"%s\" (ssid:%s)", data.name.c_str(), data.ssid.c_str());
 	LOG_INFO("Manufacturer: \"%s\"", data.manufacturer.c_str());
 	LOG_INFO("Description: \"%s\"", data.description.c_str());
-	accept(data.ssid);
+	if(!ui)
+	{
+		return;
+	}
+	std::stringstream stream;
+	stream << "The following device was found." << std::endl;
+	stream << "Name:\"" << data.name <<"\"" << std::endl;
+	stream << "Manufacturer:\"" << data.manufacturer <<"\"" << std::endl;
+	stream << "Description:\"" << data.description <<"\"" << std::endl;
+	stream << "Accept?";
+
+	ui->notifyAuthRequest(stream.str(), data.ssid);
 }
 
 void AuthServiceImpl::accept(const std::string& name)
@@ -109,11 +125,10 @@ void AuthServiceImpl::accept(const std::string& name)
 		return;
 	}
 	std::vector<std::string> props;
-	props.push_back("EstiNebun"); //ssid of hub
-	props.push_back("01LMS222"); //password for hub
-	props.push_back("192.168.1.2"); //dispatch address
-	uint32_t port = 25565; //dispatch port
-	commproto::Message accept = commproto::device::DeviceAuthAcceptSerializer::serialize(std::move(commproto::device::DeviceAuthAccept(provider->authorizeId, name, props, port)));
+	props.push_back(dispatch.ssid); //ssid of hub
+	props.push_back(dispatch.password); //password for hub
+	props.push_back(dispatch.addr); //dispatch address
+	commproto::Message accept = commproto::device::DeviceAuthAcceptSerializer::serialize(std::move(commproto::device::DeviceAuthAccept(provider->authorizeId, name, props, dispatch.port)));
 	stream->sendBytes(accept);
 }
 
@@ -192,13 +207,8 @@ void AuthServiceImpl::initializeDispatch()
 		return;
 	}
 
-
-
-
 	commproto::SenderMapping::InitializeName("Service::Authentification");
 	socket->sendByte(sizeof(void*));
-
-
 
 	dispatchMapper = commproto::messages::TypeMapperFactory::build(socket);
 
@@ -222,6 +232,11 @@ void AuthServiceImpl::initializeDispatch()
 		dispatchBuilder->pollAndReadTimes(100);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	} while (commproto::SenderMapping::getId() == 0);
+}
+
+void AuthServiceImpl::setDispatchInfo(const DispatchData& data)
+{
+	dispatch = data;
 }
 
 void AuthServiceImpl::loopBlocking()

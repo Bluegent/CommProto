@@ -42,6 +42,15 @@ namespace ConfigValues
 
 	static constexpr const char * const serverAddress = "serverAddress";
 	static constexpr const char * const serverAddressDefault = "127.0.0.1";
+
+	static constexpr const char * const dispatchSSID = "dispatchSSID";
+	static constexpr const char * const dispatchSSIDDefault = "CPEP::Hub";
+
+	static constexpr const char * const dispatchPassword = "dispatchPassword";
+	static constexpr const char * const dispatchPasswordDefault = "ComProto";
+
+	static constexpr const char * const dispatchAddr = "dispatchAddress";
+	static constexpr const char * const dispatchAddrDefault = "127.0.0.1";
 };
 
 
@@ -63,6 +72,8 @@ int main(int argc, const char * argv[]) {
 	const int32_t baud = commproto::config::getValueOrDefault(doc, ConfigValues::baudRate, ConfigValues::defaultBaudRate);
 	bool logToConsole = commproto::config::getValueOrDefault(doc, ConfigValues::logToConsole, ConfigValues::logToConsoleDefault);
 	const char * const device = commproto::config::getValueOrDefault(doc, ConfigValues::device, ConfigValues::defaultDevice);
+	const char * const ssid = commproto::config::getValueOrDefault(doc, ConfigValues::dispatchSSID, ConfigValues::dispatchSSIDDefault);
+	const char * const pwd = commproto::config::getValueOrDefault(doc, ConfigValues::dispatchPassword, ConfigValues::dispatchPasswordDefault);
 
 
 	commproto::logger::FileLogger logger("auth_log_" + commproto::logger::FileLogger::getTimestamp() + ".txt");
@@ -74,6 +85,14 @@ int main(int argc, const char * argv[]) {
 
 	const int32_t port = commproto::config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
 	const char * const address = commproto::config::getValueOrDefault(doc, ConfigValues::serverAddress, ConfigValues::serverAddressDefault);
+	const char * const dispoatchAddress = commproto::config::getValueOrDefault(doc, ConfigValues::dispatchAddr, ConfigValues::dispatchAddrDefault);
+
+
+	DispatchData data;
+	data.ssid = ssid;
+	data.password = pwd;
+	data.addr = dispoatchAddress;
+	data.port = port;
 
 	LOG_INFO("Authentification service attempting to connect to %s:%d", address, port);
 	commproto::sockets::SocketHandle socket = std::make_shared<commproto::sockets::SocketImpl>();
@@ -96,6 +115,7 @@ int main(int argc, const char * argv[]) {
 
 	LOG_INFO("Authentification service started");
 	AuthServiceHandle service = std::make_shared<AuthServiceImpl>(serial,socket);
+	service->setDispatchInfo(data);
 
 	service->initializeDispatch();
 

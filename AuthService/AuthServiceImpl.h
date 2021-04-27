@@ -41,6 +41,7 @@ public:
 	void initializeDevice() override;
 	void loopBlocking() override;
 	void initializeDispatch() override;
+	void setDispatchInfo(const DispatchData& data) override;
 
 private:
 	commproto::stream::StreamHandle stream;
@@ -55,6 +56,8 @@ private:
 	bool scanning;
 	UIHandle ui;
 	Provider provider;
+
+	DispatchData dispatch;
 };
 
 #endif //AUTH_SERVICE_IMPL_H

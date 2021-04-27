@@ -1,0 +1,6 @@
+1. ce dispozitiv sa implementez
+    - ghiveciul
+    - altceva?
+2. focus pe localizare (traducere a string-urilor)?
+3. ce lipseste/se poate imbunatatii?
+4. ce sa prezint?

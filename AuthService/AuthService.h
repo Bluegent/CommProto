@@ -3,6 +3,14 @@
 #include <memory>
 #include <string>
 
+struct DispatchData
+{
+	std::string ssid;
+	std::string password;
+	std::string addr;
+	uint32_t port;
+};
+
 struct APData
 {
 	std::string ssid;
@@ -27,6 +35,7 @@ public:
 	virtual void scanStarted(const uint32_t scanAmount) = 0;
 	virtual void scanProgress(const uint32_t complete) = 0;
 	virtual bool isScanning() = 0;
+	virtual void setDispatchInfo(const DispatchData & data) = 0;
 };
 
 using AuthServiceHandle = std::shared_ptr<AuthService>;

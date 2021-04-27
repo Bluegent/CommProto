@@ -18,6 +18,8 @@ public:
 	void startScan(const uint32_t total) override;
 	commproto::control::endpoint::UIControllerHandle build() override;
 	void scanFinished() override;
+	void notifyAuthRequest(const std::string& text, const std::string& name) override;
+	void response(const std::string& name, const bool accept) override;
 private:
 	commproto::sockets::SocketHandle socket;
 	commproto::messages::TypeMapperHandle mapper;
@@ -26,6 +28,10 @@ private:
 	commproto::control::endpoint::ProgressBarHandle bar;
 	commproto::control::endpoint::NotificationHandle scanInProgress;
 	commproto::control::endpoint::ButtonHandle button;
+	commproto::control::endpoint::NotificationHandle authorizeEndpoint;
+	uint32_t currentTotal;
+	static const std::string & yesString;
+	static const std::string & noString;
 };
 
 #endif //AUTH_SERVICE_UI_IMPL_H
