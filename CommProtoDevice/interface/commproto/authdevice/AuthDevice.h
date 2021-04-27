@@ -44,6 +44,7 @@ namespace commproto
 			std::vector<std::string> previouslyScanned;
 			uint32_t lastPing;
 			uint32_t lastPong;
+			uint32_t lastCheck;
 			bool keepAliveOn;
 		};
 	}

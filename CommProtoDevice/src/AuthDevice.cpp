@@ -46,6 +46,7 @@ namespace commproto
 			, shouldScan(false)
 			, lastPing(0)
 			, lastPong(0)
+			, lastCheck(device.getMs())
 		{
 		}
 
@@ -88,9 +89,17 @@ namespace commproto
 				shouldScan = false;
 			}
 
-			if (lastPing - lastPong > 5000)
-			{
-				device.reboot();
+
+			uint32_t now = device.getMs();
+			if (now - lastCheck > 5000) {
+				lastCheck = now;
+				int64_t ping = lastPing;
+				int64_t pong = lastPong;
+				if ( abs(ping-pong)> 5000)
+				{
+					LOG_DEBUG("Rebooting because service timed out %d %d", lastPing, lastPong);
+					device.reboot();
+				}
 			}
 
 			sendPing();
@@ -227,6 +236,7 @@ namespace commproto
 
 		void AuthDevice::disableKeepAlive()
 		{
+			LOG_DEBUG("Disabling keep alive");
 			lastPing = 0;
 			lastPong = 0;
 			keepAliveOn = false;
@@ -234,6 +244,7 @@ namespace commproto
 
 		void AuthDevice::enableKeepAlive()
 		{
+			LOG_DEBUG("Enabling keep alive");
 			lastPing = 0;
 			lastPong = 0;
 			keepAliveOn = true;

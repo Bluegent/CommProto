@@ -36,21 +36,14 @@ namespace ConfigValues
 
 	static constexpr const char * const logToConsole = "logToConsole";
 	static constexpr const bool logToConsoleDefault = true;
+
+	static constexpr const char * const serverPort = "serverPort";
+	static constexpr const int32_t defaultServerPort = 25565;
+
+	static constexpr const char * const serverAddress = "serverAddress";
+	static constexpr const char * const serverAddressDefault = "127.0.0.1";
 };
 
-commproto::parser::ParserDelegatorHandle build(const AuthServiceHandle & service)
-{
-	commproto::parser::ParserDelegatorHandle delegator = std::make_shared<commproto::parser::ParserDelegator>();
-	commproto::parser::DelegatorUtils::buildBase(delegator);
-	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::logger::LogParser, commproto::logger::LogMessage>(delegator, std::make_shared<commproto::logger::LogHandler>());
-	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::DeviceAuthRequestParser, commproto::device::DeviceAuthRequestMessage>(delegator, std::make_shared<DeviceReqHandler>(service));
-	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::ScanFinishedParser, commproto::device::ScanFinished>(delegator, std::make_shared<ScanFinishedHandler>(service));
-	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::KeepAliveParser, commproto::device::KeepAlive>(delegator, std::make_shared<KeepAliveHandler>(service));
-	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::ScanProgressParser, commproto::device::ScanProgress>(delegator, std::make_shared<ScanProgressHandler>(service));
-	commproto::parser::DelegatorUtils::addParserHandlerPair<commproto::device::ScanStartedParser, commproto::device::ScanStarted>(delegator, std::make_shared<ScanStartHandler>(service));
-
-	return delegator;
-}
 
 
 int main(int argc, const char * argv[]) {
@@ -79,6 +72,19 @@ int main(int argc, const char * argv[]) {
 		commproto::logger::setLoggable(&logger);
 	}
 
+	const int32_t port = commproto::config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
+	const char * const address = commproto::config::getValueOrDefault(doc, ConfigValues::serverAddress, ConfigValues::serverAddressDefault);
+
+	LOG_INFO("Authentification service attempting to connect to %s:%d", address, port);
+	commproto::sockets::SocketHandle socket = std::make_shared<commproto::sockets::SocketImpl>();
+	if (!socket->initClient(address, port))
+	{
+		LOG_ERROR("A problem occurred while starting service, shutting down...");
+		return 1;
+	}
+
+	LOG_INFO("Endpoint started...");
+
 	commproto::serial::SerialHandle serial = std::make_shared<commproto::serial::SerialInterface>();
 
 	LOG_INFO("Authentification service connecting to device %s on baudrate %d...", device, baud);
@@ -89,38 +95,13 @@ int main(int argc, const char * argv[]) {
 	}
 
 	LOG_INFO("Authentification service started");
-	int res = serial->sendByte(sizeof(void*));
-	if (res != 1)
-	{
-		LOG_ERROR("An issue occurred when sending sizeof pointer on host system");
-	}
-	auto service = std::make_shared<AuthServiceImpl>(serial);
-	auto delegator = build(service);
-	auto builder = std::make_shared<commproto::parser::MessageBuilder>(serial, delegator);
+	AuthServiceHandle service = std::make_shared<AuthServiceImpl>(serial,socket);
 
-	do
-	{
-		builder->pollAndReadTimes(100);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	} while (!delegator->hasMapping<commproto::logger::LogMessage>());
+	service->initializeDispatch();
 
-	auto now = std::chrono::system_clock::now();
-	auto then = std::chrono::system_clock::now();
-	service->scan();
-	const uint32_t periodicScan = 120000;
-	while (true)
-	{
-		builder->pollAndReadTimes(100);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	service->initializeDevice();
 
-		then = std::chrono::system_clock::now();
-		auto diff = then - now;
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(diff).count() >= periodicScan)
-		{
-			service->scan();
-			now = then;
-		}
+	service->loopBlocking();
 
-	}
 	return 0;
 }

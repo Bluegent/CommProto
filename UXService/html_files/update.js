@@ -158,7 +158,7 @@ function parseControllers(controllersJSON)
         var ctrlBtn = document.getElementById(name);
         if(ctrlBtn == null)
         {
-            document.getElementById(getCategory(name)).innerHTML += controllersJSON[i]["control_string"];
+            document.getElementById(getCategory(controllersJSON[i]["name"])).innerHTML += controllersJSON[i]["control_string"];
         }
     }
     

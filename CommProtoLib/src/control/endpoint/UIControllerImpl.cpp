@@ -42,7 +42,7 @@ namespace commproto
 					}
 					if (!it->second->isVisible())
 					{
-						Message state = ToggleControlShownStateSerializer::serialize(ToggleControlShownState(provider.toggleControlStateId, it->first, false));
+						Message state = ToggleControlShownStateSerializer::serialize(ToggleControlShownState(provider.toggleControlShownStateId, it->first, false));
 						result.insert(result.end(), state.begin(), state.end());
 					}
 				}
