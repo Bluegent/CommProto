@@ -186,31 +186,18 @@ int main(int argc, const char * argv[])
 	auto progressBar = uiFactory->makeProgresBar("Pointlessness");
 	controller->addControl(progressBar);
 
-	LOG_INFO("Testing \370 symbol");
-	std::string test = "\370 yas?";
-	LOG_INFO("Testing \370 inside string %s", test.c_str());
-	parser::ByteStream stream;
-	stream.write(test);
-
-
-	parser::ByteStream readStream(stream.getStream());
-
-	std::string output;
-	readStream.read(output);
-	LOG_INFO("Testing \370 inside parsed string %s", output.c_str());
-
 	control::endpoint::SliderAction slAction = [](float value)
 	{
 		LOG_INFO("Desired temp: %.2f", value);
 	};
 	
-	auto slider = uiFactory->makeSlider("Desired temperature", slAction," *C");
+	auto slider = uiFactory->makeSlider("Desired temperature", slAction," \370C");
 	slider->setLimits(5.f, 40.f);
 	slider->setStep(0.5f);
 	slider->setInitialValue(24.f);
 	controller->addControl(slider);
 
-	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 *C");
+	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 \370C");
 	controller->addControl(tempLabel);
 
 	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper, controller);
@@ -247,7 +234,7 @@ int main(int argc, const char * argv[])
 			
 			std::stringstream tempStr;
 			tempStr.precision(3);
-			tempStr << temp << " C";
+			tempStr << temp << "\370C";
 			tempLabel->setText(tempStr.str());
 			counter = 0;
 

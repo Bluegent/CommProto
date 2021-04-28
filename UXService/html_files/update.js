@@ -126,7 +126,7 @@ function removeNonContained(controllerButton, controllersJSON)
     
     if("btn-"+selectedController == controllerButton.id)
     {
-        document.getElementById("controller-display").innerHTML =;
+        document.getElementById("controller-display").innerHTML ="";
     }
     controllerButton.remove();
 }
@@ -188,7 +188,7 @@ function parseUiUpdate(uiString)
 }
 
 var interval;
-
+var reconnectingShown = false;
 function updateUI()
 {
     var xhttp = new XMLHttpRequest();
@@ -202,8 +202,19 @@ function updateUI()
         {
             if(this.status == 200)
             {
+                if(reconnectingShown){
+                    $("#connection_lost").modal('hide');
+                    reconnectingShown = false;
+                }
                 parseUiUpdate(xhttp.responseText);
                               
+            }
+            else
+            {
+                if(!reconnectingShown){
+                    $("#connection_lost").modal('show');
+                    reconnectingShown = true;
+                }
             }
             setTimeout( updateUI, 500);
         } 

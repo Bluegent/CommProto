@@ -17,8 +17,17 @@ namespace commproto
 		namespace ux
 		{
 
+			class Generator;
+			using GeneratorHandle = std::shared_ptr<Generator>;
+
 			struct NotificationData
 			{
+				NotificationData(const std::string& text, uint32_t control_id)
+					: text(text)
+					, controlId(control_id)
+				{
+				}
+
 				const std::string text;
 				const uint32_t controlId;
 			};
@@ -69,6 +78,7 @@ namespace commproto
 				std::map<std::string, UpdateTrackerHandle> notifTrackers;
 				std::shared_ptr<std::thread> checkTrackersThread;
 				std::atomic_bool checkingTrackers;
+				GeneratorHandle generator;
 			};
 
 

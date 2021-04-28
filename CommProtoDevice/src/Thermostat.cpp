@@ -77,7 +77,7 @@ namespace commproto
 			auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", dep.mapper, dep.client);
 			dep.controller = uiFactory->makeController();
 
-			ui.tempLabel = uiFactory->makeLabel("Temperature", "0.00 *C");
+			ui.tempLabel = uiFactory->makeLabel("Temperature", "0.00 \370C");
 			ui.humLabel = uiFactory->makeLabel("Humidity", "0.00 %");
 			dep.controller->addControl(ui.tempLabel);
 			dep.controller->addControl(ui.humLabel);
@@ -96,7 +96,7 @@ namespace commproto
 			dep.controller->addControl(ui.intensitySlider);
 
 			control::endpoint::SliderAction desiredtempAction = std::bind(&Thermostat::setDesiredTemp, this, std::placeholders::_1);
-			ui.desiredTempSlider = uiFactory->makeSlider("Desired Temperature:", desiredtempAction," *C");
+			ui.desiredTempSlider = uiFactory->makeSlider("Desired Temperature:", desiredtempAction," \370C");
 			ui.desiredTempSlider->setInitialValue(25.f);
 			ui.desiredTempSlider->setLimits(5.f, 38.f);
 			ui.desiredTempSlider->setStep(0.5f);
@@ -163,7 +163,7 @@ namespace commproto
 
 				std::stringstream tempStr;
 				tempStr.precision(3);
-				tempStr << temp << " C";
+				tempStr << temp << " \370C";
 				ui.tempLabel->setText(tempStr.str());
 
 				std::stringstream humStr;

@@ -12,7 +12,7 @@ namespace commproto
 
 			class IdProvider;
 
-			using UpdateMap = std::map<std::string, std::string>;
+			using UpdateMap = std::vector<std::pair<std::string, std::string>>;
 			using Removals = std::vector<std::string>;
 
 			class UIController : public Control, public ControlCollection

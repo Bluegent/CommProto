@@ -92,10 +92,37 @@
 <div class="row px-3" id="controller-display">
 
 </div>
+</div>
 
 
 </div>
 </div>
 </div>
+
+<!-- connection lost modal -->
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" id="connection_lost">
+<div class="modal-dialog text-light" role="document">
+<div class="bg-dark modal-content">
+
+<div class="bg-gray modal-header">
+<h5 class="modal-title text-center" id="exampleModalLabel">Connection lost</h5>
+</div>
+
+<div class="modal-body row" id="invalid_input_text">
+    <div class="col">
+        <div class="row justify-content-center">
+            <div class="col text-center mb-3"> Connection to the UX Service has been lost.<br> Attempting to re-establish... </div>
+        </div>
+        <div class ="row justify-content-center">
+            <div class="spinner-border col-3" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+
 </body>
 </html>

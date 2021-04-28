@@ -81,7 +81,8 @@ function postNotification(connection,id,elemId,optionStr,actionStr)
 
 function setSliderValue(sliderId, value)
 {
-    document.getElementById(sliderId).innerHTML = value;
+    var num = parseFloat(value,10);
+    document.getElementById(sliderId).innerHTML = num.toFixed(1);
 }    
     
 function postSlider(connection,id,value)
@@ -108,6 +109,12 @@ function startUpdating()
 
 
 $(document).ready(function(){
+    
+    $('#connection_lost').modal({
+        backdrop: 'static',
+        keyboard: false
+    })
+    
     var token = getToken();
     console.log("hub token = "+token);
     if(token == '')

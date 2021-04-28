@@ -8,7 +8,7 @@ function saveToken(response)
    
     if(!$("#remember_me").val())
     {
-         Cookies.set("auth_token",response);
+        Cookies.set("auth_token",response);
         return;
     }
     
@@ -29,7 +29,7 @@ function getToken()
     {
         
         console.log("defaulting to local variable");
-        return badToken;
+        return "";
     }
     return cookieToken;
 }

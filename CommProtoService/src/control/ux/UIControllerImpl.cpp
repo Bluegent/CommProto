@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <commproto/control/ControllerChains.h>
 
+#include "UxGenerator.h"
+
 namespace commproto
 {
 	namespace control {
@@ -24,6 +26,7 @@ namespace commproto
 				, connectionId{ id }
 				, engine{ engine_ }
 				, checkingTrackers(false)
+				, generator{ std::make_shared<Generator>(*this) }
 			{
 			}
 
@@ -196,7 +199,7 @@ namespace commproto
 						continue;
 					}
 					std::string notifString = it->second->getUx(notification.second.text, notification.first);
-					updates.emplace(getControlId(notification.first, "notif"), notifString);
+					updates.emplace_back(std::make_pair(getControlId(notification.first, "notif"), notifString));
 					trackerIt->second->setUpdate(notification.first, false);
 				}
 				return updates;
@@ -211,7 +214,7 @@ namespace commproto
 					return;
 				}
 				pendingNotifications.erase(it);
-				for(auto trackerIt: notifTrackers)
+				for (auto trackerIt : notifTrackers)
 				{
 					trackerIt.second->remove(actiondId);
 				}
@@ -271,11 +274,11 @@ namespace commproto
 			void UIControllerImpl::notifyTrackerUpdate(const std::string& tracker, const uint32_t control)
 			{
 				std::lock_guard<std::mutex> lock(controlMutex);
-				for(auto trackerIt : trackers)
+				for (auto trackerIt : trackers)
 				{
-					if(trackerIt.first != tracker)
+					if (trackerIt.first != tracker)
 					{
-						trackerIt.second->setUpdate(control,true);
+						trackerIt.second->setUpdate(control, true);
 					}
 				}
 			}
@@ -324,6 +327,10 @@ namespace commproto
 				{
 					return updates;
 				}
+				if(force)
+				{
+					updates.emplace_back(std::make_pair("controller_name",generator->generateText(connectionName)));
+				}
 
 				if (!force && !trackerIt->second->hasUpdates())
 				{
@@ -336,7 +343,7 @@ namespace commproto
 					{
 						continue;
 					}
-					updates.emplace(getControlId(control.first), control.second->getUx());
+					updates.emplace_back(std::make_pair(getControlId(control.first), control.second->getUx()));
 					trackerIt->second->setUpdate(control.first, false);
 				}
 				return updates;
