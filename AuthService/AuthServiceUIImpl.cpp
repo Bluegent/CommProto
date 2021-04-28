@@ -108,7 +108,7 @@ void AuthServiceUIImpl::notifyAuthRequest(const std::string& text, const std::st
 		return;
 	}
 
-	controller->displayNotification(authorizeEndpoint->getId(), text, [&name, this](const std::string& option)
+	controller->displayNotification(authorizeEndpoint->getId(), text, [name, this](const std::string& option)
 	{
 		if (option == yesString)
 		{

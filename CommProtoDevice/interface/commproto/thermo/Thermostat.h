@@ -56,7 +56,7 @@ namespace commproto
 			uint32_t then;
 			uint32_t now;
 			static const uint32_t totalMem;
-			uint32_t adjustState;
+			int32_t adjustState;
 			
 
 		};

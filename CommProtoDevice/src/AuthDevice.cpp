@@ -81,6 +81,7 @@ namespace commproto
 
 					return;
 				}
+				device.delayT(100);
 				return;
 			}
 			if (shouldScan)
@@ -108,7 +109,7 @@ namespace commproto
 				builder->pollAndReadTimes(100);
 			}
 
-			device.delayT(1000);
+			device.delayT(100);
 		}
 
 		void AuthDevice::finishReading(const EndpointData& data, const std::string & name)
@@ -187,6 +188,7 @@ namespace commproto
 		void AuthDevice::responseDeny(const std::string& name)
 		{
 			LOG_INFO("Rejected device \"%s\", sending message", name.c_str());
+			disableKeepAlive();
 			ConnectionData data = ConnectionData::defaultData;
 			data.ssid = name;
 			sockets::SocketHandle connection = device.connectTo(data);
@@ -209,8 +211,11 @@ namespace commproto
 
 			Message  msg = device::ConnectionRejectedSerializer::serialize(device::ConnectionRejectedMessage(id));
 			sendMessage(connection, msg);
-			device.delayT(500);
+			auto it = std::find(previouslyScanned.begin(), previouslyScanned.end(), name);
+			previouslyScanned.erase(it);
+			device.delayT(100);
 			connection->shutdown();
+			enableKeepAlive();
 		}
 
 		void AuthDevice::reboot()
@@ -240,6 +245,7 @@ namespace commproto
 			lastPing = 0;
 			lastPong = 0;
 			keepAliveOn = false;
+			lastCheck = device.getMs();
 		}
 
 		void AuthDevice::enableKeepAlive()
@@ -248,6 +254,7 @@ namespace commproto
 			lastPing = 0;
 			lastPong = 0;
 			keepAliveOn = true;
+			lastCheck = device.getMs();
 		}
 
 		// list wifi networks
@@ -260,22 +267,24 @@ namespace commproto
 			LOG_INFO("Scanning networks");
 			disableKeepAlive();
 			std::vector<std::string> allNetworks = device.listNetworks();
-
+			LOG_DEBUG("Found %d total networks",allNetworks.size());
 			std::vector<std::string> networks;
 			for (auto network : allNetworks)
 			{
+				LOG_DEBUG("Trying network %s", network.c_str());
 				if (!alreadyScanned(network) && network.find("CPEP::") == 0)
 				{
 					networks.push_back(network);
 				}
 			}
-
+			LOG_DEBUG("Found %d potential devices", networks.size());
 			serial->sendBytes(device::ScanStartedSerializer::serialize(device::ScanStarted(provider->scanStartId, networks.size())));
 
 			for (uint32_t index = 0; index < networks.size();++index )
 			{
 				const std::string & name = networks[index];
-				finishedReading = false;
+				LOG_DEBUG("Trying %s", name.c_str());
+;				finishedReading = false;
 				targetDevice.reset();
 				ConnectionData data = ConnectionData::defaultData;
 				data.ssid = name;
@@ -297,7 +306,10 @@ namespace commproto
 				{
 					++attempts;
 					builder->pollAndReadTimes(100);
-					device.delayT(100);
+					if (!finishedReading) 
+					{
+						device.delayT(100);
+					}
 				}
 				if (finishedReading) {
 					LOG_INFO("Device details received, closing connection");

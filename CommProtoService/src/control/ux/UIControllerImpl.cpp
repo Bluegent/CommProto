@@ -282,29 +282,33 @@ namespace commproto
 
 			Removals UIControllerImpl::getRemovals(const std::string& tracker)
 			{
-				Removals removals;
-				auto trackerIt = trackers.find(tracker);
-				if(trackerIt != trackers.end())
-				{
-					const auto & removalIds = trackerIt->second->getRemoved();
-					for(const auto & id : removalIds)
-					{
-						removals.emplace_back(getControlId(id));
-					}
-					trackerIt->second->clearRemoved();
-				}
+				Removals removals; {
+					std::lock_guard<std::mutex> lock(controlMutex);
 
-				auto notifIt = notifTrackers.find(tracker);
-				if (notifIt != notifTrackers.end())
-				{
-					const auto & removalIds = notifIt->second->getRemoved();
-					for (const auto & id : removalIds)
+					auto trackerIt = trackers.find(tracker);
+					if (trackerIt != trackers.end())
 					{
-						removals.emplace_back(getControlId(id,"notif"));
+						const auto & removalIds = trackerIt->second->getRemoved();
+						for (const auto & id : removalIds)
+						{
+							removals.emplace_back(getControlId(id));
+						}
+						trackerIt->second->clearRemoved();
 					}
-					notifIt->second->clearRemoved();
 				}
-
+				{
+					std::lock_guard<std::mutex> lock(notificationMutex);
+					auto notifIt = notifTrackers.find(tracker);
+					if (notifIt != notifTrackers.end())
+					{
+						const auto & removalIds = notifIt->second->getRemoved();
+						for (const auto & id : removalIds)
+						{
+							removals.emplace_back(getControlId(id, "notif"));
+						}
+						notifIt->second->clearRemoved();
+					}
+				}
 				return removals;
 
 			}

@@ -126,7 +126,7 @@ function removeNonContained(controllerButton, controllersJSON)
     
     if("btn-"+selectedController == controllerButton.id)
     {
-        document.getElementById("controller-display").innerHTML = 0;
+        document.getElementById("controller-display").innerHTML =;
     }
     controllerButton.remove();
 }

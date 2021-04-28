@@ -61,8 +61,7 @@ namespace commproto
 			dep.client = tryConnect();
 			if (!dep.client)
 			{
-				LOG_INFO("All connection attempts failed, ressetting configuration and restarting in AP mode");
-				device.resetAPData();
+				LOG_INFO("All connection attempts failed, restarting");
 				device.reboot();
 				return;
 			}
@@ -78,7 +77,7 @@ namespace commproto
 			auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", dep.mapper, dep.client);
 			dep.controller = uiFactory->makeController();
 
-			ui.tempLabel = uiFactory->makeLabel("Temperature", "0.00 C");
+			ui.tempLabel = uiFactory->makeLabel("Temperature", "0.00 *C");
 			ui.humLabel = uiFactory->makeLabel("Humidity", "0.00 %");
 			dep.controller->addControl(ui.tempLabel);
 			dep.controller->addControl(ui.humLabel);
@@ -97,14 +96,20 @@ namespace commproto
 			dep.controller->addControl(ui.intensitySlider);
 
 			control::endpoint::SliderAction desiredtempAction = std::bind(&Thermostat::setDesiredTemp, this, std::placeholders::_1);
-			ui.desiredTempSlider = uiFactory->makeSlider("Desired Temperature:", desiredtempAction);
+			ui.desiredTempSlider = uiFactory->makeSlider("Desired Temperature:", desiredtempAction," *C");
 			ui.desiredTempSlider->setInitialValue(25.f);
 			ui.desiredTempSlider->setLimits(5.f, 38.f);
 			ui.desiredTempSlider->setStep(0.5f);
 			dep.controller->addControl(ui.desiredTempSlider);
 			thermo.setDesiredTemp(25.f);
 
+			auto unpair = uiFactory->makeButton("Unpair", [this]()
+			{
+				device.resetAPData();
+				device.reboot();
+			});
 
+			dep.controller->addControl(unpair);
 
 			//registering our name
 			uint32_t registerId = dep.mapper->registerType<service::RegisterChannelMessage>();
@@ -130,7 +135,7 @@ namespace commproto
 				device.delayT(100);
 			} while (SenderMapping::getId() == 0);
 
-			dep.controller->setControlShownState(ui.desiredTempSlider->getId(), false);
+			dep.controller->setControlState(ui.desiredTempSlider->getId(), false);
 
 			LOG_INFO("Succesfully set ID to %d", SenderMapping::getId());
 
@@ -196,8 +201,10 @@ namespace commproto
 			{
 				thermo.toggleTempAdjust(adjustState);
 			}
-			thermo.loop();
-
+			else
+			{
+				thermo.loop();
+			}
 		}
 
 		void Thermostat::setDesiredTemp(const float temp)
@@ -209,10 +216,9 @@ namespace commproto
 
 		void Thermostat::setAdjustIntensity(const float temp)
 		{
-			adjustState = static_cast<uint32_t>(temp);
+			adjustState = static_cast<int32_t>(temp);
 			LOG_INFO("Temperature adjust set to %.0f", temp);
-			thermo.toggleAutoTempAdjust(false);
-			
+			thermo.toggleTempAdjust(adjustState);
 		}
 	}
 }
