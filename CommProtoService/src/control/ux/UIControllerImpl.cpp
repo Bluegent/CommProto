@@ -15,14 +15,15 @@ namespace commproto
 
 			UIControllerImpl::UIControllerImpl(
 				const std::string& name, const std::string& connectionName_
-				, const messages::TypeMapperHandle & mapper
+				, const messages::TypeMapperHandle & mapper_
 				, const sockets::SocketHandle & socket_
 				, const uint32_t id
 				, const TemplateEngineHandle & engine_)
 				: UIController{ name }
 				, connectionName{ connectionName_ }
-				, provider{ mapper }
+				, provider{ mapper_ }
 				, socket{ socket_ }
+				, mapper{mapper_}
 				, connectionId{ id }
 				, engine{ engine_ }
 				, checkingTrackers(false)
@@ -314,6 +315,11 @@ namespace commproto
 				}
 				return removals;
 
+			}
+
+			messages::TypeMapperHandle UIControllerImpl::getMapper() const
+			{
+				return mapper;
 			}
 
 			UpdateMap UIControllerImpl::getUpdates(const std::string& addr, bool force)

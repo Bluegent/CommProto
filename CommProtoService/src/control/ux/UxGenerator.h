@@ -165,22 +165,6 @@ namespace commproto
 
 			}
 
-
-			inline std::string getString(const uint32_t number)
-			{
-				std::stringstream stream;
-				stream << number;
-				return stream.str();
-			}
-
-			inline std::string getString(const float value, const uint32_t precision = 3)
-			{
-				std::stringstream stream;
-				stream.precision(precision);
-				stream << value;
-				return stream.str();
-			}
-
 			template <>
 			inline std::string Generator::generate(const SliderImpl& control) const
 			{
@@ -194,11 +178,11 @@ namespace commproto
 
 				auto replacements = getBaseReplacements(control);
 				replacements.emplace("@slider_id", manager.getControlId(control.getId(), "slider"));
-				replacements.emplace("@left", getString(left));
-				replacements.emplace("@right", getString(right));
-				replacements.emplace("@mid", getString((right + left) / 2.f));
-				replacements.emplace("@value", getString(value));
-				replacements.emplace("@step", getString(step));
+				replacements.emplace("@left", utils::getString(left));
+				replacements.emplace("@right", utils::getString(right));
+				replacements.emplace("@mid", utils::getString((right + left) / 2.f));
+				replacements.emplace("@value", utils::getString(value));
+				replacements.emplace("@step", utils::getString(step));
 				replacements.emplace("@unit", encode(control.getUnitOfMeasure()));
 
 				return manager.getEngine()->getTemplateWithReplacements("slider", std::move(replacements));
@@ -213,7 +197,7 @@ namespace commproto
 				}
 
 				auto replacements = getBaseReplacements(control);
-				replacements.emplace("@value", getString(control.getProgress()));
+				replacements.emplace("@value", utils::getString(control.getProgress()));
 
 				return manager.getEngine()->getTemplateWithReplacements("progress_bar", std::move(replacements));
 			}

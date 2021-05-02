@@ -5,6 +5,8 @@
 #include <commproto/control/ux/ControlCollection.h>
 #include <commproto/control/ux/Notification.h>
 #include <commproto/control/ux/TemplateEngine.h>
+#include <commproto/messages/TypeMapper.h>
+
 namespace commproto
 {
 	namespace control {
@@ -38,6 +40,7 @@ namespace commproto
 				virtual std::string getControlId(const uint32_t control, const std::string & controlType = std::string{}) const = 0;
 				virtual void notifyTrackerUpdate(const std::string & tracker, const uint32_t control) = 0;
 				virtual Removals getRemovals(const std::string & tracker) = 0;
+				virtual messages::TypeMapperHandle getMapper() const = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;

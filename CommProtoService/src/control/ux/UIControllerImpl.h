@@ -61,7 +61,7 @@ namespace commproto
 				std::string getControlId(const uint32_t control, const std::string& controlType = std::string{}) const override;
 				void notifyTrackerUpdate(const std::string& tracker, const uint32_t control) override;
 				Removals getRemovals(const std::string& tracker) override;
-
+				messages::TypeMapperHandle getMapper() const override;
 			private:
 				void checkTrackers();
 				std::map<uint32_t, ControlHandle> controls;
@@ -69,6 +69,7 @@ namespace commproto
 				const std::string connectionName;
 				IdProvider provider;
 				sockets::SocketHandle socket;
+				messages::TypeMapperHandle mapper;
 				uint32_t connectionId;
 				std::mutex controlMutex;
 				std::map<uint32_t, NotificationData> pendingNotifications;
