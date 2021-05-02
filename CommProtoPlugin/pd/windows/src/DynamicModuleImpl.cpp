@@ -23,7 +23,7 @@ namespace commproto
 			{
 				return false;
 			}
-			path = path_;
+			path = getLibraryName(path_);
 
 			dllInstance = LoadLibraryA(path.c_str());
 			if (!dllInstance)
@@ -52,6 +52,13 @@ namespace commproto
 		std::string DynamicModuleImpl::getPath() const
 		{
 			return path;
+		}
+
+		const std::string libSuffix = std::string{ ".dll" };
+
+		std::string DynamicModuleImpl::getLibraryName(const std::string& name)
+		{
+			return name + libSuffix;
 		}
 	}
 }

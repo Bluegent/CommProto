@@ -18,6 +18,8 @@ namespace commproto
 			void close() override;
 			void* getFunction(const std::string& name) override;
 			std::string getPath() const override;
+
+			static std::string getLibraryName(const std::string & name);
 		private:
 			HINSTANCE dllInstance;
 			std::string path;
