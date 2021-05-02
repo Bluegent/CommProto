@@ -13,8 +13,11 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
 
-target_link_libraries(${PROJECT_NAME} CommProtoService)
+target_link_libraries(${PROJECT_NAME} CommProtoService CommProtoPlugin)
+target_include_directories(${PROJECT_NAME} INTERFACE interface)
+
 include_directories(.)
+include_directories(interface)
 
 set(INSTALL_DIR "${CMAKE_BINARY_DIR}/../install")
 

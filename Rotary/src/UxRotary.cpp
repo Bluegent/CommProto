@@ -1,4 +1,4 @@
-#include "UxRotary.h"
+#include <rotary/UxRotary.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/utils/String.h>
 #include <sstream>

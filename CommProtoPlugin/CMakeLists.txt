@@ -7,9 +7,7 @@ elseif(WIN32)
 endif()
 
 if(DEFINED RPI)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
     SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/unix")
-    find_package(Threads REQUIRED)
 endif()
 
 SET(PD_INTERFACE_FOLDER "${PD_BASE}/interface")
@@ -28,7 +26,9 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
         )
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SRC})
-target_link_libraries(${PROJECT_NAME} PUBLIC CommProto)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC CommProtoService)
+
 foreach(source IN LISTS PROJECT_SRC)
     get_filename_component(source_path "${source}" PATH)
     string(REPLACE "/" "\\" source_path_msvc "${source_path}")
@@ -36,4 +36,6 @@ foreach(source IN LISTS PROJECT_SRC)
 endforeach()  
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
-include_directories(interface)
+
+include_directories(interface ${PD_INTERFACE_FOLDER})
+

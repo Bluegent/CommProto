@@ -2,6 +2,7 @@
 #define CONFIG_PARSER_H
 
 #include <rapidjson/document.h>
+#include <vector>
 
 namespace commproto
 {
@@ -78,6 +79,40 @@ namespace commproto
 				return defaultValue;
 			}
 			return doc[name].GetString();
+		}
+
+
+		template <>
+		inline std::vector<std::string> getValueOrDefault(rapidjson::Document & doc, const char* const name, const std::vector<std::string>& defaultValue)
+		{
+			if (doc.HasParseError() || !doc.IsObject())
+			{
+				return defaultValue;
+			}
+			if (!doc.HasMember(name))
+			{
+				return defaultValue;
+			}
+			if (!doc[name].IsArray())
+			{
+				return defaultValue;
+			}
+			auto arr = doc[name].GetArray();
+			if(!arr.Size())
+			{
+				return defaultValue;
+			}
+			std::vector<std::string> result;
+			for(const auto &entry : arr)
+			{
+				if(!entry.IsString())
+				{
+					return defaultValue;
+				}
+				result.emplace_back(entry.GetString());
+			}
+			return result;
+			
 		}
     }
 }

@@ -13,7 +13,7 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 
-target_link_libraries(${PROJECT_NAME} CommProtoService Poco::Net Poco::Util Poco::Crypto OpenSSL::SSL)
+target_link_libraries(${PROJECT_NAME} CommProtoService CommProtoPlugin Poco::Net Poco::Util Poco::Crypto OpenSSL::SSL)
 
 include_directories(.)
 

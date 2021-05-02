@@ -28,6 +28,8 @@ namespace commproto
 				TemplateEngineHandle engine;
 				std::vector<ExtensionHandle> extensions;
 			};
+
+			using UXServiceProviderHandle = std::shared_ptr<UXServiceProvider>;
 		}
 	}
 }

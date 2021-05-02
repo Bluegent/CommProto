@@ -14,6 +14,7 @@
 #include <commproto/control/ux/UxDelegatorProvider.h>
 #include <commproto/control/ux/TemplateEngine.h>
 #include "TemplateEngineLoader.h"
+#include <commproto/plugin/PluginLoaderFactory.h>
 
 namespace ConfigValues
 {
@@ -31,6 +32,9 @@ namespace ConfigValues
 
 	static constexpr const char * const logToConsole = "logToConsole";
 	static constexpr const bool logToConsoleDefault = true;
+
+	static constexpr const char * const plugins = "plugins";
+	static const std::vector<std::string> pluginsDefault = {};
 };
 
 using namespace commproto;
@@ -60,6 +64,7 @@ int main(int argc, char * argv[])
     const int32_t httpPort = config::getValueOrDefault(doc, ConfigValues::httpPort, ConfigValues::defaultHttpPort);
 	const char * const name = config::getValueOrDefault(doc, ConfigValues::channelName, ConfigValues::defaultChannelName);
 	bool logToConsole = config::getValueOrDefault(doc, ConfigValues::logToConsole, ConfigValues::logToConsoleDefault);
+	std::vector<std::string> plugins = config::getValueOrDefault(doc, ConfigValues::plugins, ConfigValues::pluginsDefault);
 
 	logger::FileLogger logger("ux_log_" + logger::FileLogger::getTimestamp() + ".txt");
 	if (!logToConsole)
@@ -118,6 +123,23 @@ int main(int argc, char * argv[])
 	uint32_t sendtoId = mapper->registerType<service::SendToMessage>();
 
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, channelDelegator);
+
+
+
+	plugin::PluginLoaderHandle pluginLoader;
+	
+	if (logToConsole) {
+		pluginLoader = plugin::PluginLoaderFactory::build();
+	}
+	else
+	{
+		pluginLoader = plugin::PluginLoaderFactory::build(&logger);
+	}
+
+	for (const auto & pluginPath : plugins)
+	{
+		pluginLoader->load(pluginPath,provider);
+	}
 
 
     LOG_INFO("Waiting to acquire ID");
