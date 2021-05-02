@@ -17,8 +17,12 @@ endif()
 
 set(CMAKE_FOLDER "Libs")
 add_subdirectory(CommProtoLib)
+add_subdirectory(CommProtoPlugin)
 add_subdirectory(CommProtoService)
 add_subdirectory(CommProtoDevice)
+
+set(CMAKE_FOLDER "Plugins")
+add_subdirectory(Rotary)
 
 set(CMAKE_FOLDER "Runnable")
 add_subdirectory(Dispatch)

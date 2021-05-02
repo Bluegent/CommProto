@@ -1,6 +1,17 @@
 1. ce dispozitiv sa implementez
     - ghiveciul
     - altceva?
-2. focus pe localizare (traducere a string-urilor)?
-3. ce lipseste/se poate imbunatatii?
-4. ce sa prezint?
+2. layouts
+3. focus pe localizare (traducere a string-urilor)?
+4. ce lipseste/se poate imbunatatii?
+5. ce sa prezint? 
+    > schema cu pasi necesari pentru a adauga un tip nou de dispozitiv
+    > schema cu pasi necesari pentru a adauga un nou tip de control
+    > avantaje si dezavantaje commproto
+    > cui se adreseaza
+    > framework user vs end user
+    
+6. https?
+=====================
+
+cum dau de profu' de automate?
