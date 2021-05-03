@@ -1,6 +1,21 @@
 var sessionID;
 var selectedController="Service::Diagnosis";
 
+var extensionObvservers=[];
+
+function addObserver(func)
+{
+    extensionObvservers.push(func);
+}
+
+function executeObservers()
+{
+    for(var i =0;i<extensionObvservers.length;++i)
+    {
+        extensionObvservers[i]();
+    }
+}
+
 function generateSessionId()
 {
     sessionID = "session-" + Date.now()+ "-"+ Math.floor(Math.random()*25565);
@@ -207,6 +222,7 @@ function updateUI()
                     reconnectingShown = false;
                 }
                 parseUiUpdate(xhttp.responseText);
+                executeObservers();
                               
             }
             else

@@ -180,10 +180,21 @@ int main(int argc, const char * argv[])
 	controller->addControl(disablableSlider);
 
 
-	auto toggleSlider = uiFactory->makeToggle("Disable slider", [&controller,&disablableSlider](bool state)
+	const uint32_t rotaryId = mapper->registerType<rotary::endpoint::RotaryMessage>();
+	rotary::endpoint::RotaryAction rotAction = [](float value)
+	{
+		LOG_INFO("Extension says %f", value);
+	};
+	auto rotary = std::make_shared<rotary::endpoint::Rotary>("Extension Test", controller->reserveId(), rotaryId, rotAction);
+	controller->addControl(rotary);
+
+
+	auto toggleSlider = uiFactory->makeToggle("Disable slider", [&controller,&disablableSlider, &rotary](bool state)
 	{
 		controller->setControlState(disablableSlider->getId(), state);
+		controller->setControlState(rotary->getId(), state);
 	});
+	toggleSlider->toggle();
 	controller->addControl(toggleSlider);
 
 
@@ -201,13 +212,6 @@ int main(int argc, const char * argv[])
 	slider->setInitialValue(24.f);
 	controller->addControl(slider);
 
-	const uint32_t rotaryId = mapper->registerType<rotary::endpoint::RotaryMessage>();
-	rotary::endpoint::RotaryAction rotAction = [](float value)
-	{
-		LOG_INFO("Extension says %f", value);
-	};
-	auto rotary = std::make_shared<rotary::endpoint::Rotary>("Extension Test",controller->reserveId(), rotaryId, rotAction);
-	controller->addControl(rotary);
 
 	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 \370C");
 	controller->addControl(tempLabel);

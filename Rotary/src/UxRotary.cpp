@@ -69,13 +69,14 @@ namespace rotary
 			replacements.emplace("@id", controller->getControlId(id));
 			replacements.emplace("@name", name);
 			replacements.emplace("@connection_name", controller->getConnectionName());
-			replacements.emplace("@disabled", enabled ? "" : "disabled");
+			replacements.emplace("@disabled", enabled ? "false" : "true");
 			replacements.emplace("@rotary_id", controller->getControlId(id, "rotary"));
 			replacements.emplace("@control_id", utils::getString(id));
 			replacements.emplace("@left", utils::getString(left));
 			replacements.emplace("@right", utils::getString(right));
 			replacements.emplace("@value", utils::getString(value));
 			replacements.emplace("@step", utils::getString(step));
+			replacements.emplace("@fg_color",enabled?"#0d6efd":"#666666");
 			return controller->getEngine()->getTemplateWithReplacements("rotary", std::move(replacements));
 
 		}

@@ -24,7 +24,6 @@ namespace commproto
 				{
 					return;
 				}
-				LOG_DEBUG("Sending a mapping %d - %s", id, name.c_str());
 				stream->sendBytes(MappingTypeSerializer::serialize(std::move(MappingType(name, id))));
 			}
 		private:
