@@ -9,6 +9,17 @@ namespace commproto
 			{
 				ControlData result{};
 
+				auto type = attributes.find("controlType");
+				if (type != attributes.end())
+				{
+					result.controlType = type->second;
+				}
+				auto ext = attributes.find("extension");
+				if (ext != attributes.end())
+				{
+					result.extension = ext->second;
+				}
+
 				auto tracker = attributes.find("session");
 				if (tracker != attributes.end())
 				{

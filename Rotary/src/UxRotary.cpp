@@ -61,7 +61,7 @@ namespace rotary
 
 		std::string Rotary::getUx()
 		{
-			if(!shown)
+			if (!shown)
 			{
 				return std::string{};
 			}
@@ -69,9 +69,9 @@ namespace rotary
 			replacements.emplace("@id", controller->getControlId(id));
 			replacements.emplace("@name", name);
 			replacements.emplace("@connection_name", controller->getConnectionName());
-			replacements.emplace("@disabled", enabled?"":"disabled");
+			replacements.emplace("@disabled", enabled ? "" : "disabled");
 			replacements.emplace("@rotary_id", controller->getControlId(id, "rotary"));
-			replacements.emplace("@control_id",utils::getString(id));
+			replacements.emplace("@control_id", utils::getString(id));
 			replacements.emplace("@left", utils::getString(left));
 			replacements.emplace("@right", utils::getString(right));
 			replacements.emplace("@value", utils::getString(value));
@@ -83,6 +83,7 @@ namespace rotary
 		RotaryHandler::RotaryHandler(const control::ux::UIControllerHandle& controller_)
 			: controller{ controller_ }
 		{
+			rotdayAdjustId = controller->getMapper()->registerType<RotaryAdjust>();
 		}
 
 		void RotaryHandler::handle(messages::MessageBase&& data)
@@ -105,7 +106,7 @@ namespace rotary
 			float value = msg.prop3[2];
 			float step = msg.prop3[3];
 
-			RotaryHandle rotary = std::make_shared<Rotary>(msg.prop2[0], msg.prop, controller->getMapper()->registerType<RotaryAdjust>(), controller);
+			RotaryHandle rotary = std::make_shared<Rotary>(msg.prop2[0], msg.prop, rotdayAdjustId, controller);
 			controller->addControl(rotary);
 		}
 	}

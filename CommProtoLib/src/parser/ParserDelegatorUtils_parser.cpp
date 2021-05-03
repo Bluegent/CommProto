@@ -1,6 +1,7 @@
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/parser/MappingType.h>
 #include <commproto/messages/KeepAlive.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {
@@ -36,6 +37,7 @@ namespace commproto
 			void handle(messages::MessageBase && data) override
 			{
 				messages::MappingType & mapping = static_cast<messages::MappingType&>(data);
+				LOG_DEBUG("Adding mapping %d -%s",mapping.typeId,mapping.name.c_str());
 				delegator->registerMapping(mapping.name, mapping.typeId);
 			}
 

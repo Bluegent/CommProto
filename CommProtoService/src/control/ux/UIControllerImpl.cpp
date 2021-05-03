@@ -448,7 +448,6 @@ namespace commproto
 				if (extIt != attributes.end())
 				{
 					extesion = extIt->second;
-					return;
 				}
 
 				auto handlerIt = handlers.find(extesion);

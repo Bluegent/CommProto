@@ -40,6 +40,7 @@ namespace rotary
 			void handle(messages::MessageBase&& data) override;
 		private:
 			control::ux::UIControllerHandle controller;
+			uint32_t rotdayAdjustId;
 		};
 
 	}

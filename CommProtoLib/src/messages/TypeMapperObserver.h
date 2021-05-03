@@ -2,6 +2,7 @@
 #define COMMPROTO_TYPE_MAPPER_OBSERVER_H
 #include <commproto/stream/Stream.h>
 #include <commproto/parser/MappingType.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {
@@ -23,6 +24,7 @@ namespace commproto
 				{
 					return;
 				}
+				LOG_DEBUG("Sending a mapping %d - %s", id, name.c_str());
 				stream->sendBytes(MappingTypeSerializer::serialize(std::move(MappingType(name, id))));
 			}
 		private:

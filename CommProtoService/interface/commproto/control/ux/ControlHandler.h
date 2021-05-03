@@ -15,6 +15,8 @@ namespace commproto
 			struct ControlData
 			{
 				std::string tracker;
+				std::string extension;
+				std::string controlType;
 				uint32_t id;
 			};
 
