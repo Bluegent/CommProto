@@ -14,9 +14,12 @@ namespace commproto
 
 			void setLoggable(logger::Loggable * loggable) override;
 			void load(const std::string & path, const control::ux::UXServiceProviderHandle& provider) override;
+			void setStaticsForModules() override;
 		private:
 
-			void setLoggableForModule(const DynamicModuleHandle& module) const;
+			void setStaticsForModule(const DynamicModuleHandle& module) const;
+			
+		private:
 			logger::Loggable * loggable;
 			std::vector<DynamicModuleHandle> modules;
 

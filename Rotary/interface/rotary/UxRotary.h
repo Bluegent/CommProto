@@ -4,6 +4,7 @@
 #include <commproto/control/ux/Control.h>
 #include <commproto/control/ux/UIController.h>
 #include "RotaryChains.h"
+#include <commproto/plugin/Definitions.h>
 
 using namespace commproto;
 

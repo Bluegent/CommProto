@@ -12,6 +12,7 @@ namespace commproto
 		public:
 			virtual ~PluginLoader() = default;
 			virtual void setLoggable(logger::Loggable * loggable) = 0;
+			virtual void setStaticsForModules() = 0;
 			virtual void load(const std::string & path, const control::ux::UXServiceProviderHandle& provider) = 0;
 		};
 		using PluginLoaderHandle = std::shared_ptr<PluginLoader>;

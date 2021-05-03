@@ -8,7 +8,7 @@ namespace commproto
 	namespace plugin
 	{
 
-		typedef void(CALL_CONV *SET_LOGGABLE)(logger::Loggable*);
+		typedef void(CALL_CONV *SET_STATICS)(logger::Loggable*, const char * name, const uint32_t id);
 		typedef void(CALL_CONV *EXTEND)(const commproto::control::ux::UXServiceProviderHandle & provider);
 
 		PluginLoaderImpl::PluginLoaderImpl(): loggable{nullptr}
@@ -28,8 +28,6 @@ namespace commproto
 			{
 				LOG_ERROR("Could not open path %s", path.c_str());
 			}
-			setLoggableForModule(module);
-
 			void* ptr = module->getFunction(PLUGIN_EXTEND_NAME);
 			if (!ptr)
 			{
@@ -44,23 +42,29 @@ namespace commproto
 			modules.push_back(module);
 		}
 
-		void PluginLoaderImpl::setLoggableForModule(const DynamicModuleHandle& module) const
+		void PluginLoaderImpl::setStaticsForModules()
 		{
-			if(!loggable)
+			for(auto module : modules)
 			{
-				return;
+				setStaticsForModule(module);
 			}
-			void* ptr = module->getFunction(PLUGIN_LOGGER_NAME);
+		}
+
+		void PluginLoaderImpl::setStaticsForModule(const DynamicModuleHandle& module) const
+		{
+			void* ptr = module->getFunction(PLUGIN_STATICS_NAME);
 			if (!ptr)
 			{
 				LOG_WARNING("Could find the set loggable function for library %s", module->getPath().c_str());
+				return;
 			}
-			SET_LOGGABLE setL = static_cast<SET_LOGGABLE>(ptr);
+			SET_STATICS setL = static_cast<SET_STATICS>(ptr);
 			if(!setL)
 			{
 				LOG_WARNING("Set loggable function has wrong format", module->getPath().c_str());
+				return;
 			}
-			setL(loggable);
+			setL(loggable,SenderMapping::getName().c_str(),SenderMapping::getId());
 		}
 	}
 }

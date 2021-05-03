@@ -1,0 +1,13 @@
+<div class="row bg-gray my-1">
+    <div class="col mt-2">
+    <div class ="row my-1 justify-content-between">
+        <div class="col-auto"> @name</div>      
+        <div class="col-auto" ><span id="@slider_id">@value</span>@unit</div>  
+    </div>
+    <div class="mt-1 mb-3 d-flex justify-content-between">
+        <div class="smalltext text-faded pe-2">@left</div>
+        <input type="range" class="form-range flex-fill" value="@value" min="@left" max="@right" step="@step" oninput="setRotaryValue('@rotary_id',this.value)" onmouseup="postSlider('@connection_name','@control_id',this.value)" onTouchEnd="postSlider('@connection_name','@control_id',this.value)" @disabled>
+        <div class="smalltext text-faded ps-2">@right</div>
+    </div> 
+    </div>
+</div>

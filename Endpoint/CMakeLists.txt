@@ -6,7 +6,7 @@ add_executable(${PROJECT_NAME}
     endpoint_main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} CommProtoService)
+target_link_libraries(${PROJECT_NAME} CommProtoService Rotary)
 
 include_directories(.)
 

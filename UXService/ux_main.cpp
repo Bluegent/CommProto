@@ -108,6 +108,24 @@ int main(int argc, char * argv[])
 	std::shared_ptr<control::ux::UXServiceProvider> provider = std::make_shared<control::ux::UXServiceProvider>(mapper, socket, controllers,engine);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 
+	plugin::PluginLoaderHandle pluginLoader;
+
+	if (logToConsole) {
+		pluginLoader = plugin::PluginLoaderFactory::build();
+	}
+	else
+	{
+		pluginLoader = plugin::PluginLoaderFactory::build(&logger);
+	}
+
+	for (const auto & pluginPath : plugins)
+	{
+		pluginLoader->load(pluginPath, provider);
+	}
+
+
+
+
 	endpoint::MappingNotification removeController = [controllers](const std::string & name, const uint32_t id)
 	{
 		LOG_INFO("Removing UX controller for connection %s(%d)", name.c_str(), id);
@@ -126,21 +144,6 @@ int main(int argc, char * argv[])
 
 
 
-	plugin::PluginLoaderHandle pluginLoader;
-	
-	if (logToConsole) {
-		pluginLoader = plugin::PluginLoaderFactory::build();
-	}
-	else
-	{
-		pluginLoader = plugin::PluginLoaderFactory::build(&logger);
-	}
-
-	for (const auto & pluginPath : plugins)
-	{
-		pluginLoader->load(pluginPath,provider);
-	}
-
 
     LOG_INFO("Waiting to acquire ID");
 
@@ -150,6 +153,8 @@ int main(int argc, char * argv[])
 		builder->pollAndRead();
 	} while (SenderMapping::getId() == 0);
     LOG_INFO("Acquired ID: %d",SenderMapping::getId());
+
+	pluginLoader->setStaticsForModules();
 
 	service::SubscribeMessage sub(registerSubId, "");
 	socket->sendBytes(service::SubscribeSerializer::serialize(std::move(sub)));

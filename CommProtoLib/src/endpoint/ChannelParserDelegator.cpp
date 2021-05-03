@@ -15,9 +15,10 @@ namespace commproto
 		bool ChannelParserDelegator::parse(Message& msg)
 		{
 			parser::ByteStream stream(msg);
+			uint32_t msgId = 0;
 			uint32_t senderId = 0;
 			//read twice to ignore message Id
-			stream.read(senderId);
+			stream.read(msgId);
 			stream.read(senderId);
 
 			auto it = delegators.find(senderId);

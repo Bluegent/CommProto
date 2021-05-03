@@ -13,6 +13,9 @@
 #include <commproto/config/ConfigParser.h>
 #include <commproto/parser/MessageBuilder.h>
 #include <thread>
+#include <rotary/ExtensionProvider.h>
+#include <rotary/EndpointRotary.h>
+#include <rotary/Integration.h>
 
 namespace ConfigValues
 {
@@ -48,6 +51,7 @@ public:
 	{
 		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
 		control::endpoint::DelegatorUtils::addParsers(delegator, controller);
+		rotary::EndpointRotaryProvider::extend(delegator,controller);
 
 		return delegator;
 	}
@@ -197,6 +201,14 @@ int main(int argc, const char * argv[])
 	slider->setInitialValue(24.f);
 	controller->addControl(slider);
 
+	const uint32_t rotaryId = mapper->registerType<rotary::endpoint::RotaryMessage>();
+	rotary::endpoint::RotaryAction rotAction = [](float value)
+	{
+		LOG_INFO("Extension says %f", value);
+	};
+	auto rotary = std::make_shared<rotary::endpoint::Rotary>("Extension Test",controller->reserveId(), rotaryId, rotAction);
+	controller->addControl(rotary);
+
 	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 \370C");
 	controller->addControl(tempLabel);
 
@@ -212,6 +224,8 @@ int main(int argc, const char * argv[])
 	{
 		builder->pollAndRead();
 	} while (SenderMapping::getId() == 0);
+
+	setStatics(nullptr,SenderMapping::getName().c_str(),SenderMapping::getId());
 
 	for (uint32_t index = 0; index < 100; ++index)
 	{

@@ -2,6 +2,8 @@
 #include <commproto/logger/Logging.h>
 #include <commproto/utils/String.h>
 #include <sstream>
+#include <map>
+#include <string>
 
 
 namespace rotary
@@ -59,15 +61,22 @@ namespace rotary
 
 		std::string Rotary::getUx()
 		{
-			std::string rotaryTemplate = getTemplate();
-			utils::replaceAll(rotaryTemplate, "@id", utils::getString(id));
-			utils::replaceAll(rotaryTemplate, "@name", name);
-			utils::replaceAll(rotaryTemplate, "@rotary_id", controller->getControlId(id, "rotary"));
-			utils::replaceAll(rotaryTemplate, "@left", utils::getString(left));
-			utils::replaceAll(rotaryTemplate, "@right", utils::getString(right));
-			utils::replaceAll(rotaryTemplate, "@value", utils::getString(value));
-			utils::replaceAll(rotaryTemplate, "@step", utils::getString(step));
-			return rotaryTemplate;
+			if(!shown)
+			{
+				return std::string{};
+			}
+			std::map<std::string, std::string> replacements;
+			replacements.emplace("@id", controller->getControlId(id));
+			replacements.emplace("@name", name);
+			replacements.emplace("@connection_name", controller->getConnectionName());
+			replacements.emplace("@disabled", enabled?"":"disabled");
+			replacements.emplace("@rotary_id", controller->getControlId(id, "rotary"));
+			replacements.emplace("@control_id",utils::getString(id));
+			replacements.emplace("@left", utils::getString(left));
+			replacements.emplace("@right", utils::getString(right));
+			replacements.emplace("@value", utils::getString(value));
+			replacements.emplace("@step", utils::getString(step));
+			return controller->getEngine()->getTemplateWithReplacements("rotary", std::move(replacements));
 
 		}
 
@@ -80,7 +89,7 @@ namespace rotary
 		{
 			endpoint::RotaryMessage & msg = static_cast<endpoint::RotaryMessage&>(data);
 
-			if (msg.prop2.size() != 2)
+			if (msg.prop2.size() != 1)
 			{
 				LOG_ERROR("Insufficient rotary parameters for rotary \"%d\"", msg.prop);
 				return;

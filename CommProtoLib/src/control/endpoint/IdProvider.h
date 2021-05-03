@@ -9,6 +9,7 @@
 #include <commproto/control/LabelChains.h>
 #include <commproto/control/ProgressBarChains.h>
 #include <commproto/control/ControllerChains.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {
@@ -32,7 +33,7 @@ namespace commproto
 					, toggleControlStateId{ mapper->registerType<ToggleControlEnabledState>() }
 					, toggleControlShownStateId{ mapper->registerType<ToggleControlShownState>() }
 				{
-
+					LOG_DEBUG("Slider id: %d",sliderId);
 				}
 				const uint32_t buttonId;
 				const uint32_t toggleId;

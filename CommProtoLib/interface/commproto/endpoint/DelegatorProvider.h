@@ -1,6 +1,6 @@
-#ifndef DELGATOR_PROVIDER_H
-#define DELGATOR_PROVIDER_H
-
+#ifndef CP_DELGATOR_PROVIDER_H
+#define CP_DELGATOR_PROVIDER_H
+#include <commproto/parser/ParserDelegator.h>
 
 namespace commproto
 {
@@ -17,4 +17,4 @@ namespace commproto
 	}
 }
 
-#endif //DELGATOR_PROVIDER_H
+#endif //CP_DELGATOR_PROVIDER_H

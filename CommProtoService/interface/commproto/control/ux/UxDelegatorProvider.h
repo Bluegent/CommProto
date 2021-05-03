@@ -12,10 +12,11 @@ namespace commproto
 {
 	namespace control
 	{
-		namespace ux 
+		namespace ux
 		{
 
-			class UXServiceProvider : public  endpoint::DelegatorProvider {
+			class UXServiceProvider : public  commproto::endpoint::DelegatorProvider
+			{
 			public:
 				UXServiceProvider(const messages::TypeMapperHandle& mapper_, const sockets::SocketHandle& socket_, const UxControllersHandle& controllers, const TemplateEngineHandle & engine);
 				parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override;
