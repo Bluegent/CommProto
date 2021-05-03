@@ -34,7 +34,7 @@ function makeKnob(id)
     var con_id = knob.attr('control_id');
     console.log(knob);
     
-    console.log(min+" "+max+" "+step+" "+con_name+" "+con_id+" "+disable);
+    //console.log(min+" "+max+" "+step+" "+con_name+" "+con_id+" "+disable);
     knob.knob({
         'min':min,
         'max':max,

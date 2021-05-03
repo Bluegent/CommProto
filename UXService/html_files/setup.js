@@ -75,7 +75,7 @@ function submitForm(evt)
     {
         var data = new FormData();
         data.append("username",$("#username").val());
-        data.append("password",$("#password").val());
+        data.append("password",CryptoJS.MD5($("#password").val()));
         data.append("serial",$("#serial").val());
         $.ajax({
           url: '/setup',
