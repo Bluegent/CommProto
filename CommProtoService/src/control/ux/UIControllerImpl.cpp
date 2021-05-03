@@ -3,6 +3,7 @@
 #include <commproto/logger/Logging.h>
 #include <algorithm>
 #include <commproto/control/ControllerChains.h>
+#include "BaseControlHandler.h"
 
 #include "UxGenerator.h"
 
@@ -29,6 +30,7 @@ namespace commproto
 				, checkingTrackers(false)
 				, generator{ std::make_shared<Generator>(*this) }
 			{
+				handlers.emplace("", std::make_shared<BaseControlHandler>());
 			}
 
 			void UIControllerImpl::addControl(const ControlHandle& control)
@@ -427,6 +429,35 @@ namespace commproto
 						++it;
 					}
 				}
+			}
+
+			void UIControllerImpl::addControlHandler(const std::string& extensionName, const ControlHandlerHandle& handler)
+			{
+				auto it = handlers.find(extensionName);
+				if(it!=handlers.end())
+				{
+					return;
+				}
+				handlers.emplace(extensionName, handler);
+			}
+
+			void UIControllerImpl::handle(AttributeMap&& attributes)
+			{
+				auto extIt = attributes.find("extension");
+				std::string extesion;
+				if (extIt != attributes.end())
+				{
+					extesion = extIt->second;
+					return;
+				}
+
+				auto handlerIt = handlers.find(extesion);
+				if(handlerIt == handlers.end())
+				{
+					return;
+				}
+
+				handlerIt->second->handle(std::move(attributes), *this);
 			}
 		}
 	}

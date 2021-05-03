@@ -64,6 +64,10 @@ namespace commproto
 				messages::TypeMapperHandle getMapper() const override;
 			private:
 				void checkTrackers();
+			public:
+				void addControlHandler(const std::string & extensionName, const ControlHandlerHandle& handler) override;
+				void handle(AttributeMap&& attributes) override;
+			private:
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;
 				const std::string connectionName;
@@ -80,6 +84,7 @@ namespace commproto
 				std::shared_ptr<std::thread> checkTrackersThread;
 				std::atomic_bool checkingTrackers;
 				GeneratorHandle generator;
+				std::map<std::string, ControlHandlerHandle> handlers;
 			};
 
 
