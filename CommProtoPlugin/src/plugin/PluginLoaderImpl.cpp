@@ -32,11 +32,13 @@ namespace commproto
 			if (!ptr)
 			{
 				LOG_WARNING("Could find the extend function for library %s", module->getPath().c_str());
+				return;
 			}
             EXTEND extendFunc = (EXTEND)(ptr);
 			if (!extendFunc)
 			{
 				LOG_WARNING("Extend function has wrong format", module->getPath().c_str());
+				return;
 			}
 			extendFunc(provider);
 			modules.push_back(module);
