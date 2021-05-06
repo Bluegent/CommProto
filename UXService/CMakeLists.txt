@@ -1,5 +1,7 @@
 project(UXService)
 
+
+message("********** POCO DIR: ${Poco_DIR}")
 find_package(Poco "1.10.1" REQUIRED COMPONENTS Net Util Crypto)
 find_package(OpenSSL REQUIRED)
 

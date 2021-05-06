@@ -33,7 +33,7 @@ namespace commproto
 			{
 				LOG_WARNING("Could find the extend function for library %s", module->getPath().c_str());
 			}
-			EXTEND extendFunc = static_cast<EXTEND>(ptr);
+            EXTEND extendFunc = (EXTEND)(ptr);
 			if (!extendFunc)
 			{
 				LOG_WARNING("Extend function has wrong format", module->getPath().c_str());
@@ -58,7 +58,7 @@ namespace commproto
 				LOG_WARNING("Could find the set loggable function for library %s", module->getPath().c_str());
 				return;
 			}
-			SET_STATICS setL = static_cast<SET_STATICS>(ptr);
+            SET_STATICS setL = (SET_STATICS)(ptr);
 			if(!setL)
 			{
 				LOG_WARNING("Set loggable function has wrong format", module->getPath().c_str());

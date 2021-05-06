@@ -6,8 +6,10 @@ SET(CMAKE_SYSTEM_VERSION 1)
 # SET(CMAKE_CXX_COMPILER $ENV{HOME}/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++)
 
 # Where is the target environment
-SET(CMAKE_FIND_ROOT_PATH $ENV{HOME}/rpi/tools/arm-bcm2708/arm-linux-gnueabihf/arm-linux-gnueabihf/sysroot)
+SET(CMAKE_FIND_ROOT_PATH "$ENV{HOME}/berry/")
+#SET(CMAKE_FIND_ROOT_PATH $ENV{HOME}/rpi/tools/arm-bcm2708/arm-linux-gnueabihf/arm-linux-gnueabihf/sysroot)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --sysroot=${CMAKE_FIND_ROOT_PATH}")
+#set(CMAKE_SYSROOT "$ENV{HOME}/rootfs/sysroot/")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --sysroot=${CMAKE_FIND_ROOT_PATH}")
 SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} --sysroot=${CMAKE_FIND_ROOT_PATH}")
 
@@ -21,3 +23,4 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 # For checking if on raspberry arch
 SET(RPI "" CACHE STRING "For checking raspberry platform")
 SET(Poco_DIR "/home/dan/Projects/PocoInstall/lib/cmake/Poco" CACHE PATH "Path to Poco libraries" FORCE)
+#SET(OPENSSL_ROOT_DIR "/home/dan/rootfs/sysroot/usr/lib/ssl" CACHE PATH "Openssl dir" FORCE)

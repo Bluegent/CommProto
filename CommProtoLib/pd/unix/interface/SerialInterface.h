@@ -1,6 +1,6 @@
 #ifndef SERIAL_INTERFACE_H
 #define SERIAL_INTERFACE_H
-#include <commproto/Stream/Stream.h>
+#include <commproto/stream/Stream.h>
 
 namespace commproto
 {

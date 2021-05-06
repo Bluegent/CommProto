@@ -18,11 +18,9 @@
 
 #ifdef _WIN32
 #define SPEED CBR_115200
-
-#elif	
+#else
 #include <termios.h>
 #define SPEED B115200
-
 #endif
 
 

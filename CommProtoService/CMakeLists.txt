@@ -1,5 +1,12 @@
 project (CommProtoService)
 
+
+if(DEFINED RPI)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+endif()
+
+
 file(GLOB_RECURSE PROJECT_SRC RELATIVE
         "${CMAKE_CURRENT_SOURCE_DIR}"
         interface/*.cpp
@@ -16,7 +23,12 @@ foreach(source IN LISTS PROJECT_SRC)
     source_group("${source_path_msvc}" FILES "${source}")
 endforeach()  
 
-target_link_libraries(${PROJECT_NAME} PUBLIC CommProto ConcurrentQueue rapidjson)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PUBLIC CommProto ConcurrentQueue rapidjson)
+elseif(DEFINED RPI)
+    message("RIGHT PATH")
+    target_link_libraries(${PROJECT_NAME} PUBLIC CommProto ConcurrentQueue rapidjson Threads::Threads)
+endif()
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface)
 include_directories(interface)

@@ -9,6 +9,7 @@
 #include "IdProvider.h"
 #include <mutex>
 #include <atomic>
+#include <thread>
 
 namespace commproto
 {

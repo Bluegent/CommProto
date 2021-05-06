@@ -2,7 +2,7 @@
 #define COMMPROTO_STREAM_H
 
 #include <commproto/common/Common.h>
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <memory>

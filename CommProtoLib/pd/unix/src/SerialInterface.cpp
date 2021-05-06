@@ -1,10 +1,10 @@
-#include "../interface/SerialInterface.h"
 #include <commproto/logger/Logging.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include "../interface/SerialInterface.h"
 
 namespace commproto
 {
@@ -95,6 +95,7 @@ namespace serial
         }
 
         cfsetspeed(&tty, speed);
+        ioctl(serialPort, TCFLSH, 2);
         return true;
 
     }
