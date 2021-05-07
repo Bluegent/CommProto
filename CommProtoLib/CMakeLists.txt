@@ -36,13 +36,13 @@ foreach(source IN LISTS PROJECT_SRC)
 endforeach()  
 
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
+    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 pdh)
 elseif(DEFINED RPI)
     target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 endif()
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
-include_directories(interface)
+include_directories(interface ${PD_INTERFACE_FOLDER})
 
 set(ARDUINO_LIB_DEPLOY_LOCATION "H:\\Facultate\\licenta\\ArduinoLibs\\libraries" CACHE PATH "Path where the library will be deployed, same as the Sketchbook path for Arduino IDE")
 message("DEPLOY LOCATION == ${ARDUINO_LIB_DEPLOY_LOCATION}")

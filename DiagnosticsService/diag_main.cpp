@@ -15,6 +15,8 @@
 #include <commproto/endpoint/ChannelParserDelegator.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 #include <commproto/service/DiagnosticChains.h>
+#include <commproto/diagnostics/SystemData.h>
+#include <sstream>
 
 using namespace commproto;
 
@@ -31,6 +33,41 @@ namespace ConfigValues
 
 	static constexpr const char * const channelNames = "channelNames";
 };
+
+
+static constexpr const uint64_t kiloBytes = 1 << 10;
+static constexpr const uint64_t megaBytes = kiloBytes << 10;
+static constexpr const uint64_t gigaBytes = megaBytes << 10;
+
+std::string getBytesoutOf(const uint64_t total, const uint64_t used)
+{
+	std::string unit = "B";
+	uint64_t divisor = 1;
+	if (total > gigaBytes)
+	{
+		unit = "GB";
+		divisor = gigaBytes;
+	}
+	else if (total > megaBytes)
+	{
+		unit = "MB";
+		divisor = megaBytes;
+	}
+	else if (total > kiloBytes)
+	{
+		unit = "KB";
+		divisor = kiloBytes;
+	}
+
+	float totalDiv = static_cast<float>(total) / divisor;
+	float usedDiv = static_cast<float>(used) / divisor;
+
+	std::stringstream res;
+	res.precision(3);
+	res << usedDiv << " " << unit << "/ " << totalDiv << " " << unit;
+	return res.str();
+}
+
 
 using Labels = std::map<std::string, control::endpoint::LabelHandle>;
 
@@ -180,8 +217,8 @@ int main(int argc, const char * argv[]) {
 	controller->addControl(procUsageLabel);
 	controller->addControl(procUsage);
 
-	//delegator to parse incoming messages
-	std::shared_ptr<DiagnosticsProvider> provider = std::make_shared<DiagnosticsProvider>(mapper, controller,labels);
+	//delegator to parse incoming messages 
+	std::shared_ptr<DiagnosticsProvider> provider = std::make_shared<DiagnosticsProvider>(mapper, controller, labels);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
@@ -201,7 +238,9 @@ int main(int argc, const char * argv[]) {
 
 	auto now = std::chrono::system_clock::now().time_since_epoch();
 	auto then = now;
-	const uint32_t update = 500;
+	const uint32_t update = 5000;
+
+	diagnostics::SystemDataHandle data = diagnostics::SystemData::build();
 
 	while (true)
 	{
@@ -213,6 +252,19 @@ int main(int argc, const char * argv[]) {
 			then = now;
 			//update all labels
 			socket->sendBytes(reqSerialized);
+
+			memUsageLabel->setText(getBytesoutOf(data->getTotalMemBytes(), data->getUsedMemBytes()));
+
+			float percentage = (static_cast<float>(data->getUsedMemBytes()) / data->getTotalMemBytes())*100.f;
+			memUsage->setProgress(static_cast<uint32_t>(percentage));
+
+
+			uint32_t usage = static_cast<uint32_t>(data->getProcessorUsage());
+			std::stringstream proc;
+			proc.precision(3);
+			proc << usage << " %";
+			procUsageLabel->setText(proc.str());
+			procUsage->setProgress(usage);
 		}
 	}
 	socket->shutdown();
