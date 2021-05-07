@@ -1,6 +1,7 @@
 #include <commproto/service/Dispatch.h>
 #include <commproto/logger/Logging.h>
 #include <sstream>
+#include <commproto/service/DiagnosticChains.h>
 
 namespace commproto {
 	namespace service {
@@ -213,6 +214,14 @@ namespace commproto {
 					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				}
 			});
+		}
+
+		std::map<std::string, uint32_t> Dispatch::getMapping()
+		{
+
+			std::lock_guard<std::mutex> lock(connectionMutex);
+			std::map<std::string, uint32_t> copy{ connectionMapping };
+			return copy;
 		}
 
 		void Dispatch::sendToNoLock(const uint32_t senderId, const uint32_t id, const commproto::Message& msg)

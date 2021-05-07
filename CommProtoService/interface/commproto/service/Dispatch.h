@@ -24,6 +24,7 @@ namespace commproto {
 			ConnectionHandle getConnection(const uint32_t id) const;
 			void checkActiveConnections();
 			void startCheckingConnections();
+			std::map<std::string, uint32_t> getMapping();
 
 			~Dispatch();
 		private:

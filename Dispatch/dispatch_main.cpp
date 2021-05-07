@@ -19,8 +19,6 @@ namespace ConfigValues
 
     static constexpr const char * const logToConsole = "logToConsole";
 	static constexpr const bool logToConsoleDefault = true;
-
-
 };
 
 

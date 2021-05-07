@@ -1,4 +1,4 @@
-project(AuthService)
+project(DiagnosticsService)
 
 include (${CMAKE_SOURCE_DIR}/cmake/utility.cmake)
 
@@ -16,5 +16,5 @@ include_directories(.)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_DIR})
 
-SET(CONFIG_FILE auth.cfg)
+SET(CONFIG_FILE diag.cfg)
 installConfig(${CONFIG_FILE} ${INSTALL_DIR})

@@ -3,6 +3,7 @@
 
 #include <rapidjson/document.h>
 #include <vector>
+#include <map>
 
 namespace commproto
 {
@@ -114,6 +115,38 @@ namespace commproto
 			return result;
 			
 		}
+
+		template <>
+		inline std::map<std::string,std::string> getValueOrDefault(rapidjson::Document & doc, const char* const name, const  std::map<std::string, std::string>& defaultValue)
+		{
+			if (doc.HasParseError() || !doc.IsObject())
+			{
+				return defaultValue;
+			}
+			if (!doc.HasMember(name))
+			{
+				return defaultValue;
+			}
+			if (!doc[name].IsObject())
+			{
+				return defaultValue;
+			}
+			std::map<std::string, std::string> result;
+
+			auto obj = doc[name].GetObject();
+
+			for(const auto & entry :obj)
+			{
+				if(entry.name.IsString() &&  entry.value.IsString())
+				{
+					result.emplace(entry.name.GetString(), entry.value.GetString());
+				}
+			}
+
+			return result;
+			
+		}
+
     }
 }
 

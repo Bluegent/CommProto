@@ -23,8 +23,6 @@ if(WIN32)
 target_link_directories(${PROJECT_NAME} PUBLIC ${SSL_Lib})
 endif()
 
-set(INSTALL_DIR "${CMAKE_BINARY_DIR}/../install")
-
 install(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_DIR})
 install (DIRECTORY "html_files" DESTINATION ${INSTALL_DIR})
 

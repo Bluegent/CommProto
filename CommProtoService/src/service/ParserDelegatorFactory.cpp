@@ -6,6 +6,8 @@
 #include <commproto/service/RegisterChannelHandler.h>
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/service/SendToHandler.h>
+#include "RequestAllChannelsHandler.h"
+#include <commproto/service/DiagnosticChains.h>
 
 namespace commproto {
 
@@ -20,6 +22,7 @@ namespace commproto {
 			parser::DelegatorUtils::addParserHandlerPair<SubscribeParser, SubscribeMessage>(delegator, std::make_shared<SubscribeHandler>(connection));
 			parser::DelegatorUtils::addParserHandlerPair<UnsubscribeParser, UnsubscribeMessage>(delegator, std::make_shared<UnsubscribeHandler>(connection));
 			parser::DelegatorUtils::addParserHandlerPair<SendtoParser, SendToMessage>(delegator, std::make_shared<SendToHandler>(dispatch));
+			parser::DelegatorUtils::addParserHandlerPair<diagnostics::RequestAllConnectionsParser, diagnostics::RequestAllConnections>(delegator, std::make_shared<RequestAllChannelsHandler>(*dispatch));
 
 			return delegator;
 		}

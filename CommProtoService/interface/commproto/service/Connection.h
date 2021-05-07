@@ -48,6 +48,8 @@ namespace commproto
 		
 			void handshake(const ConnectionHandle& target);
 
+			void sendAllChannels(const std::map<std::string,uint32_t> & mapping);
+
 			void clearSubscriptions();
 			friend bool operator==(const Connection& lhs, const Connection& rhs);
 		private:
@@ -71,6 +73,7 @@ namespace commproto
 			uint32_t channelMappingId;
 			Message keepAliveMessage;
 			uint32_t terminationId;
+			uint32_t channelResponseId;
 			std::vector<uint32_t> sentMapping;
 		};
 

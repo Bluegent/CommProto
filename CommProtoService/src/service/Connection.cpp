@@ -4,6 +4,7 @@
 #include <commproto/endpoint/EndpointChains.h>
 #include <commproto/messages/KeepAlive.h>
 #include <commproto/parser/MappingType.h>
+#include <commproto/service/DiagnosticChains.h>
 
 namespace commproto {
 	namespace service {
@@ -24,6 +25,7 @@ namespace commproto {
 			delegator->setNoParserWarining(false);
 			channelMappingId = mapper->registerType<endpoint::ChannelMappingMessage>();
 			terminationId = mapper->registerType<endpoint::ChannelTerminationMessage>();
+			channelResponseId = mapper->registerType<diagnostics::AllChannelsResponse>();
 
 			endpoint::RegisterIdMessage registerId(mapper->registerType<endpoint::RegisterIdMessage>(), id);
             int res = socket->sendBytes(endpoint::RegisterIdSerializer::serialize(std::move(registerId)));
@@ -152,6 +154,20 @@ namespace commproto {
 		void Connection::handshake(const ConnectionHandle& target)
 		{
 			sendMappings(target);
+		}
+
+
+		void Connection::sendAllChannels(const std::map<std::string, uint32_t>& mapping)
+		{
+			std::vector<std::string> channelNames;
+			std::vector<uint32_t> channelIds;
+			for(const auto & map : mapping)
+			{
+				channelNames.push_back(map.first);
+				channelIds.push_back(map.second);
+			}
+			Message msg = diagnostics::AllChannelsResponseSerializer::serialize(diagnostics::AllChannelsResponse(channelResponseId,channelNames,channelIds));
+			send(msg);
 		}
 
 		void Connection::clearSubscriptions()

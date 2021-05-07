@@ -1,5 +1,5 @@
 var sessionID;
-var selectedController="Service::Diagnosis";
+var selectedController="Service::Diagnostics";
 
 var extensionObvservers=[];
 
