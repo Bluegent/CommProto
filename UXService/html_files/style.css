@@ -17,6 +17,11 @@
     background-color:rgb(25,25,25);
 }
 
+.bg-light-gray
+{
+    background-color:rgb(200,200,200);
+}
+
 html {
   font-size: 1rem;
 }

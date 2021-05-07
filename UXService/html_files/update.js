@@ -223,6 +223,7 @@ function updateUI()
                 }
                 parseUiUpdate(xhttp.responseText);
                 executeObservers();
+                updateMode();
                               
             }
             else

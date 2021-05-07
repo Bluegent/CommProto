@@ -18,6 +18,7 @@
     
     <script src="cookie.js"></script>
     <script src="login.js"></script>
+    <script src="common.js"></script>
       
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -25,20 +26,38 @@
 
 <body class="bg-dark m-0 p-0 vw-100">
 
-
+<!-- Settings -->
+<div class="offcanvas offcanvas-end bg-gray text-light" tabindex="-1" id="settings_bar" data-bs-keyboard="false" data-bs-backdrop="false" aria-labelledby="settings_bar_label">
+   <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="settings_bar_label"> <span><i class="fa fa-cog"></i></span> Settings</h5>
+      <button type="button" class="btn-close btn-close-white " data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+    <!-- settings -->
+    <div class="p-2 d-flex flex-column" id="notifications">
+    <div class="d-flex justify-content-between">
+        <div> Dark Mode</div>
+        
+        <div class="form-check form-switch form-switch">
+        <input class="form-check-input" id="@toggle_id" type="checkbox" onclick="toggleMode(this)" checked>
+        </div>
+    </div>
+    </div>
+</div>
+</div>
 
 <!-- Navbar -->
 <nav class="navbar navbar-default bg-gray m-0 py-3 d-flex justify-content-left">
 
-    <button disabled type="button" class="btn btn-primary  bg-dark mx-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#controllers_bar" aria-controls="controllers_bar">
+    <button type="button" class="btn btn-primary bg-dark mx-3 text-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#controllers_bar" aria-controls="controllers_bar">
         <i class="fa fa-bars"></i> Controllers
     </button>
     <div class="flex-fill"></div>
-    <i type="button" class="disabled fa fa-cog btn btn-primary bg-dark pull-right mx-3 my-1 disabled" type="button"></i>
-    <div><i type="button" class="disabled fa fa-bell btn btn-primary bg-dark pull-right mx-3 my-1" type="button"  data-bs-toggle="offcanvas" data-bs-target="#notifications_bar" aria-controls="notifications_bar"> </i><b class="badge bg-danger text-light counter" id="notif_counter"></b></div>
-
+    <i type="button" class="fa fa-cog btn btn-primary bg-dark pull-right mx-3 my-1 text-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#settings_bar" aria-controls="settings_bar"></i>
+    <div>
+    <i type="button" class="fa fa-bell btn btn-primary bg-dark pull-right mx-3 my-1 text-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#notifications_bar" aria-controls="notifications_bar"> </i><b class="badge bg-danger text-light counter" id="notif_counter"></b>
+    </div>
 </nav>
-
 <div class="container-fluid py-3">
 <div class="row">
 
