@@ -8,23 +8,23 @@
 namespace commproto {
 	namespace service {
 
-		class Dispatch
+		class Dispatch : public ChannelManager, public std::enable_shared_from_this<Dispatch>
 		{
 		public:
 			Dispatch();
-			void sendTo(const uint32_t sender, const std::string& name, const commproto::Message& msg);
-			void sendTo(const uint32_t sender, const uint32_t id, const commproto::Message& msg);
-			void sendAll(const commproto::Message& msg);
-			void addConnection(const commproto::sockets::SocketHandle& connection);
-			void removeConnection(const uint32_t id);
-			void registerChannel(const uint32_t id, const std::string & name);
-			void subsribeAll(const uint32_t id);
-			void unsubsribeAll(const uint32_t id);
-			ConnectionHandle getConnection(const std::string& name) const;
-			ConnectionHandle getConnection(const uint32_t id) const;
+			void sendTo(const uint32_t sender, const std::string& name, const commproto::Message& msg) override;
+			void sendTo(const uint32_t sender, const uint32_t id, const commproto::Message& msg) override;
+			void sendAll(const commproto::Message& msg) override;
+			void addConnection(const commproto::sockets::SocketHandle& connection) override;
+			void removeConnection(const uint32_t id) override;
+			void registerChannel(const uint32_t id, const std::string & name) override;
+			void subsribeAll(const uint32_t id) override;
+			void unsubsribeAll(const uint32_t id) override;
+			ConnectionHandle getConnection(const std::string& name) const override;
+			ConnectionHandle getConnection(const uint32_t id) const override;
 			void checkActiveConnections();
 			void startCheckingConnections();
-			std::map<std::string, uint32_t> getMapping();
+			std::map<std::string, uint32_t> getMapping() override;
 
 			~Dispatch();
 		private:
@@ -42,8 +42,10 @@ namespace commproto {
 			std::map<std::string, uint32_t> connectionMapping;
 			uint32_t idCounter;
 			std::atomic_bool checkAlive;
-            std::shared_ptr<std::thread> checkAliveThread;
+			std::shared_ptr<std::thread> checkAliveThread;
 		};
+
+		using DispatchHandle = std::shared_ptr<Dispatch>;
 
 	}
 }

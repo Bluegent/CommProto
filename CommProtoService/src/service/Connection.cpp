@@ -9,13 +9,13 @@
 namespace commproto {
 	namespace service {
 
-		Connection::Connection(uint32_t id_, const commproto::sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTime_)
+		Connection::Connection(uint32_t id_, const commproto::sockets::SocketHandle& socket_, const ChannelManagerHandle& manager_, uint32_t sleepTime_)
 			: socket{ socket_ }
 			, id{ id_ }
 			, running{ false }
 			, sleepMicro{ sleepTime_ }
-			, dispatch{ dispatch_ }
-			, delegator{ ParserDelegatorFactory::build(*this, dispatch_) }
+			, manager{ manager_ }
+			, delegator{ ParserDelegatorFactory::build(*this, manager_) }
 			, builder{ std::make_shared<parser::MessageBuilder>(socket_,delegator)}
 			, mapper{messages::TypeMapperFactory::build(socket)}
 			, channelMappingId(0)
@@ -94,12 +94,12 @@ namespace commproto {
 
 			if(channelName.compare("")==0)
 			{
-				dispatch->subsribeAll(id);
+				manager->subsribeAll(id);
 				return;
 			}
 
 			
-			ConnectionHandle target = dispatch->getConnection(channelName);
+			ConnectionHandle target = manager->getConnection(channelName);
 			if (!target)
 			{
 				return;
@@ -112,7 +112,7 @@ namespace commproto {
 		void Connection::unsubscribe(const std::string& channelName)
 		{
 			LOG_INFO("[%s-%d] Attempting to unsubscribe from \"%s\".", name.c_str(), id, channelName.c_str());
-			ConnectionHandle target = dispatch->getConnection(channelName);
+			ConnectionHandle target = manager->getConnection(channelName);
 			if (!target)
 			{
 				return;

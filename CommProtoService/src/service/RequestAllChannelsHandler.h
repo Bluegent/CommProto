@@ -2,7 +2,7 @@
 #define REQ_CHANNELS_HANDLER_H
 
 #include <commproto/parser/Handler.h>
-#include <commproto/service/Dispatch.h>
+#include <commproto/service/ChannelManager.h>
 
 namespace commproto
 {
@@ -11,10 +11,10 @@ namespace commproto
 		class RequestAllChannelsHandler : public parser::Handler
 		{
 		public:
-			RequestAllChannelsHandler(Dispatch& dispatch);
+			RequestAllChannelsHandler(const ChannelManagerHandle & dispatch);
 			void handle(messages::MessageBase&& data) override;
 		private:
-			Dispatch& dispatch;
+			ChannelManagerHandle dispatch;
 		};
     }
 }

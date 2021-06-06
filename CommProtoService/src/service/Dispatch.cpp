@@ -37,7 +37,7 @@ namespace commproto {
 		{
 			std::lock_guard<std::mutex> lock(connectionMutex);
 			const uint32_t connectionId = idCounter++;
-			ConnectionHandle newCon = std::make_shared<Connection>(connectionId, connection, this);
+			ConnectionHandle newCon = std::make_shared<Connection>(connectionId, connection, shared_from_this());
 			connections.insert({ connectionId,  newCon });
 			newCon->start();
 		}

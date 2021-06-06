@@ -13,7 +13,7 @@ namespace commproto {
 
 	namespace service {
 
-		parser::ParserDelegatorHandle ParserDelegatorFactory::build(Connection& connection, Dispatch * dispatch)
+		parser::ParserDelegatorHandle ParserDelegatorFactory::build(Connection& connection, const ChannelManagerHandle & dispatch)
 		{
 			std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<ParserDelegator>(connection);
 			parser::DelegatorUtils::buildBase(delegator);
@@ -22,7 +22,7 @@ namespace commproto {
 			parser::DelegatorUtils::addParserHandlerPair<SubscribeParser, SubscribeMessage>(delegator, std::make_shared<SubscribeHandler>(connection));
 			parser::DelegatorUtils::addParserHandlerPair<UnsubscribeParser, UnsubscribeMessage>(delegator, std::make_shared<UnsubscribeHandler>(connection));
 			parser::DelegatorUtils::addParserHandlerPair<SendtoParser, SendToMessage>(delegator, std::make_shared<SendToHandler>(dispatch));
-			parser::DelegatorUtils::addParserHandlerPair<diagnostics::RequestAllConnectionsParser, diagnostics::RequestAllConnections>(delegator, std::make_shared<RequestAllChannelsHandler>(*dispatch));
+			parser::DelegatorUtils::addParserHandlerPair<diagnostics::RequestAllConnectionsParser, diagnostics::RequestAllConnections>(delegator, std::make_shared<RequestAllChannelsHandler>(dispatch));
 
 			return delegator;
 		}

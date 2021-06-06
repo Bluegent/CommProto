@@ -49,7 +49,7 @@ int main(int argc, const char * argv[])
 		commproto::logger::setLoggable(&logger);
 	}
 
-	commproto::service::Dispatch dsp;
+	commproto::service::DispatchHandle dsp = std::make_shared<commproto::service::Dispatch>();
 	commproto::sockets::SocketHandle socket = std::make_shared<commproto::sockets::SocketImpl>();
 
     LOG_INFO("Dispatch server starting on %s:%d...",address,port);
@@ -60,13 +60,13 @@ int main(int argc, const char * argv[])
 	}
 
 
-	dsp.startCheckingConnections();
+	dsp->startCheckingConnections();
 
     LOG_INFO("Dispatch server started on %s:%d, wating for new connection...",address,port);
 
 	while (true) {
 		commproto::sockets::SocketHandle newCon = socket->acceptNext();
-		dsp.addConnection(newCon);
+		dsp->addConnection(newCon);
 	}
 	return 0;
 }

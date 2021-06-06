@@ -7,6 +7,7 @@
 #include <concurrentqueue.h>
 #include <mutex>
 #include <commproto/messages/TypeMapper.h>
+#include <commproto/service/ChannelManager.h>
 #include "ParserDelegator.h"
 
 
@@ -15,8 +16,6 @@ namespace commproto
 	namespace service
 	{
 
-		class Dispatch;
-		using DispatchHandle = Dispatch *;
 		class Connection;
 		using ConnectionHandle = std::shared_ptr<Connection>;
 		using Subscribers = std::vector<ConnectionHandle>;
@@ -26,7 +25,7 @@ namespace commproto
 		{
 		public:
 
-			Connection(uint32_t id, const sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTimeMicro_ = 10);
+			Connection(uint32_t id, const sockets::SocketHandle& socket_, const ChannelManagerHandle& manager_, uint32_t sleepTimeMicro_ = 10);
 			~Connection();
 			void start();
 			void stop();
@@ -64,7 +63,7 @@ namespace commproto
 			moodycamel::ConcurrentQueue<Message> messagesOut;
 			std::atomic_bool running;
 			const uint32_t sleepMicro;
-			DispatchHandle dispatch;
+			ChannelManagerHandle manager;
 			parser::ParserDelegatorHandle delegator;
 			parser::MessageBuilderHandle builder;
 			Subscribers subs;

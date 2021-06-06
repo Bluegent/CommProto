@@ -5,7 +5,7 @@ namespace commproto
 {
 namespace service
 {
-	SendToHandler::SendToHandler(Dispatch* dispatch_) : dispatch{ dispatch_ }
+	SendToHandler::SendToHandler(const ChannelManagerHandle & dispatch_) : dispatch{ dispatch_ }
 	{
 	}
 

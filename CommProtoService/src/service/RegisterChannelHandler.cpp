@@ -5,7 +5,7 @@ namespace commproto
 {
 	namespace service
 	{
-		RegisterChannelHandler::RegisterChannelHandler(Dispatch* dispatch_, const uint32_t id_)
+		RegisterChannelHandler::RegisterChannelHandler(const ChannelManagerHandle & dispatch_, const uint32_t id_)
 			: dispatch{ dispatch_ }
 			, id{ id_ }
 		{
