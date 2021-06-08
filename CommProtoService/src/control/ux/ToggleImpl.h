@@ -4,6 +4,7 @@
 #include <commproto/control/ux/Toggle.h>
 #include <commproto/control/ux/UIController.h>
 #include <commproto/control/ToggleChains.h>
+#include "BaseControlType.h"
 
 namespace commproto
 {
@@ -22,15 +23,13 @@ namespace commproto
 				ux::UIControllerHandle controller;
 			};
 
-			class Generator;
-			using GeneratorHandle = std::shared_ptr<Generator>;
-
 			class ToggleImpl : public Toggle {
 			public:
 				ToggleImpl(const std::string& name, uint32_t id, const uint32_t messageId, const GeneratorHandle& generator_, const bool defaultState = false);
-				std::string getUx() override;
+				UxContainerHandle getUx() override;
 				void toggle() override;
 				bool getState() const override;
+				uint32_t getType() const override { return static_cast<uint32_t>(BaseControlType::Toggle); }
 			private:
 				GeneratorHandle generator;
 				const uint32_t messageId;

@@ -5,8 +5,6 @@
 #include <commproto/control/ControllerChains.h>
 #include "BaseControlHandler.h"
 
-#include "UxGenerator.h"
-
 namespace commproto
 {
 	namespace control {
@@ -28,7 +26,6 @@ namespace commproto
 				, connectionId{ id }
 				, engine{ engine_ }
 				, checkingTrackers(false)
-				, generator{ std::make_shared<Generator>(*this) }
 			{
 				handlers.emplace("", std::make_shared<BaseControlHandler>());
 			}
@@ -53,9 +50,9 @@ namespace commproto
 				return connectionName;
 			}
 
-			std::string UIControllerImpl::getUx()
+			UxContainerHandle UIControllerImpl::getUx()
 			{
-				return std::string{};
+				return UxContainerHandle{};
 			}
 
 			void UIControllerImpl::send(Message msg)
@@ -201,7 +198,7 @@ namespace commproto
 					{
 						continue;
 					}
-					std::string notifString = it->second->getUx(notification.second.text, notification.first);
+					UxContainerHandle notifString = it->second->getUx(notification.second.text, notification.first);
 					updates.emplace_back(std::make_pair(getControlId(notification.first, "notif"), notifString));
 					trackerIt->second->setUpdate(notification.first, false);
 				}
@@ -324,7 +321,8 @@ namespace commproto
 				return mapper;
 			}
 
-			UpdateMap UIControllerImpl::getUpdates(const std::string& addr, bool force)
+			UpdateMap UIControllerImpl::
+			getUpdates(const std::string& addr, bool force)
 			{
 				std::lock_guard<std::mutex> lock(controlMutex);
 
@@ -457,6 +455,16 @@ namespace commproto
 				}
 
 				handlerIt->second->handle(std::move(attributes), *this);
+			}
+
+			GeneratorHandle UIControllerImpl::getGenerator()
+			{
+				return generator;
+			}
+
+			void UIControllerImpl::setGenerator(const GeneratorHandle& generator_)
+			{
+				generator = generator_;
 			}
 		}
 	}

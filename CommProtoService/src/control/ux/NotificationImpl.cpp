@@ -1,6 +1,5 @@
 #include "NotificationImpl.h"
 #include "IdProvider.h"
-#include "UxGenerator.h"
 
 namespace commproto
 {
@@ -16,7 +15,7 @@ namespace commproto
 					msg.prop,
 					controller->getIdProvider().notificationResponseId,
 					msg.prop3,
-					std::make_shared<ux::Generator>(*controller));
+					controller->getGenerator());
 				controller->addNotification(notification);
 			}
 
@@ -26,9 +25,9 @@ namespace commproto
 				controller->displayNotification(msg.prop, msg.prop3, msg.prop2);
 			}
 
-			std::string NotificationImpl::getUx()
+			UxContainerHandle NotificationImpl::getUx()
 			{
-				return "";
+				return UxContainerHandle{};
 			}
 
 			void NotificationImpl::execute(const std::string& option, const uint32_t actionId)
@@ -42,7 +41,7 @@ namespace commproto
 				return options;
 			}
 
-			std::string NotificationImpl::getUx(const std::string& text, const uint32_t action) const
+			UxContainerHandle NotificationImpl::getUx(const std::string& text, const uint32_t action) const
 			{
 				return generator->generateNotification(*this, text, action);
 			}

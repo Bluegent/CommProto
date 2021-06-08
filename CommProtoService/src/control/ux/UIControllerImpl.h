@@ -10,6 +10,7 @@
 #include <mutex>
 #include <atomic>
 #include <thread>
+#include "BaseControlType.h"
 
 namespace commproto
 {
@@ -17,10 +18,6 @@ namespace commproto
 	{
 		namespace ux
 		{
-
-			class Generator;
-			using GeneratorHandle = std::shared_ptr<Generator>;
-
 			struct NotificationData
 			{
 				NotificationData(const std::string& text, uint32_t control_id)
@@ -39,7 +36,7 @@ namespace commproto
 				UIControllerImpl(const std::string& name, const std::string& connectionName_, const messages::TypeMapperHandle & mapper, const sockets::SocketHandle & socket, const uint32_t id, const TemplateEngineHandle& engine_);
 				void addControl(const ControlHandle& control) override;
 				std::string getConnectionName() const override;
-				std::string getUx() override;
+				UxContainerHandle getUx() override;
 				void send(Message msg) override;
 				~UIControllerImpl();
 				IdProvider& getIdProvider() override;
@@ -68,6 +65,9 @@ namespace commproto
 			public:
 				void addControlHandler(const std::string & extensionName, const ControlHandlerHandle& handler) override;
 				void handle(AttributeMap&& attributes) override;
+				uint32_t getType() const override { return static_cast<uint32_t>(BaseControlType::Unknown); }
+				GeneratorHandle getGenerator() override;
+				void setGenerator(const GeneratorHandle& generator_) override;
 			private:
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;

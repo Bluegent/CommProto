@@ -7,6 +7,7 @@
 #include <commproto/control/ux/TemplateEngine.h>
 #include <commproto/messages/TypeMapper.h>
 #include <commproto/control/ux/ControlHandler.h>
+#include <commproto/control/ux/UxGenerator.h>
 
 namespace commproto
 {
@@ -15,7 +16,7 @@ namespace commproto
 
 			class IdProvider;
 
-			using UpdateMap = std::vector<std::pair<std::string, std::string>>;
+			using UpdateMap = std::vector<std::pair<std::string, UxContainerHandle>>;
 			using Removals = std::vector<std::string>;
 
 			class UIController : public Control, public ControlCollection
@@ -44,6 +45,8 @@ namespace commproto
 				virtual messages::TypeMapperHandle getMapper() const = 0;
 				virtual void addControlHandler(const std::string & extensionName, const ControlHandlerHandle & handler) = 0;
 				virtual void handle(AttributeMap&& attributes) = 0;
+				virtual GeneratorHandle getGenerator() = 0;
+				virtual void setGenerator(const GeneratorHandle & generator_) = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;

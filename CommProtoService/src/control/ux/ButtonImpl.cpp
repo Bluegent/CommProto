@@ -1,6 +1,6 @@
 //#include "ButtonImpl.h"
 #include "IdProvider.h"
-#include "UxGenerator.h"
+#include "ButtonImpl.h"
 
 namespace commproto
 {
@@ -16,7 +16,7 @@ namespace commproto
 			void ButtonHandler::handle(messages::MessageBase&& data)
 			{
 				endpoint::ButtonMessage& msg = static_cast<endpoint::ButtonMessage&>(data);
-				ButtonHandle button = std::make_shared<ux::ButtonImpl>(msg.prop2, msg.prop, controller->getIdProvider().buttonId, std::make_shared<ux::Generator>(*controller));
+				ButtonHandle button = std::make_shared<ux::ButtonImpl>(msg.prop2, msg.prop, controller->getIdProvider().buttonId, controller->getGenerator());
 				controller->addControl(button);
 			}
 
@@ -34,7 +34,7 @@ namespace commproto
 				generator->send(std::move(msg));
 			}
 
-			std::string ButtonImpl::getUx()
+			UxContainerHandle ButtonImpl::getUx()
 			{
 				return generator->generate(*this);
 			}

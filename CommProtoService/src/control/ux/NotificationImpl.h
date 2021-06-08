@@ -3,6 +3,8 @@
 #include <commproto/control/ux/Notification.h>
 #include <commproto/control/ux/UIController.h>
 #include <commproto/control/NotificationChains.h>
+#include <commproto/control/ux/UxGenerator.h>
+#include "BaseControlType.h"
 
 namespace commproto
 {
@@ -28,8 +30,6 @@ namespace commproto
 			private:
 				UIControllerHandle controller;
 			};
-			class Generator;
-			using GeneratorHandle = std::shared_ptr<Generator>;
 
 			class NotificationImpl : public Notification
 			{
@@ -42,10 +42,11 @@ namespace commproto
 				{
 				}
 
-				std::string getUx() override;
+				UxContainerHandle getUx() override;
 				void execute(const std::string& option,const uint32_t actionId) override;
 				std::vector<std::string> getOptions() const override;
-				std::string getUx(const std::string& text, const uint32_t action) const override;
+				UxContainerHandle getUx(const std::string& text, const uint32_t action) const override;
+				uint32_t getType() const override { return  static_cast<uint32_t>(BaseControlType::Notification); }
 			private:
 				const uint32_t executeId;
 				const std::vector<std::string> options;

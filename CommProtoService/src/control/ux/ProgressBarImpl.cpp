@@ -1,5 +1,4 @@
 #include "ProgressBarImpl.h"
-#include "UxGenerator.h"
 
 namespace commproto
 {
@@ -10,7 +9,7 @@ namespace commproto
 			void ProgressBarHandler::handle(messages::MessageBase&& data)
 			{
 				endpoint::ProgressBarMessage& message = static_cast<endpoint::ProgressBarMessage&>(data);
-				ControlHandle label = std::make_shared<ProgressBarImpl>(message.prop2, message.prop, std::make_shared<ux::Generator>(*controller),message.prop3);
+				ControlHandle label = std::make_shared<ProgressBarImpl>(message.prop2, message.prop, controller->getGenerator(),message.prop3);
 				controller->addControl(label);
 			}
 
@@ -56,7 +55,7 @@ namespace commproto
 				return progress;
 			}
 
-			std::string ProgressBarImpl::getUx()
+			UxContainerHandle ProgressBarImpl::getUx()
 			{
 				return generator->generate(*this);
 			}

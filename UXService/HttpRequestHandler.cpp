@@ -11,6 +11,7 @@
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 #include <Poco/StreamCopier.h>
+#include <commproto/control/ux/HtmlUxContainer.h>
 #include <sstream>
 
 void UxRequestHandler::handleGet(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
@@ -181,7 +182,8 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 			{
 				Poco::JSON::Object cUpdate;
 				cUpdate.set("element", controlUpdate.first);
-				cUpdate.set("controlString", controlUpdate.second);
+				std::string updateString(std::static_pointer_cast<commproto::control::ux::HtmlUxContainer>(controlUpdate.second)->html);
+				cUpdate.set("controlString", updateString);
 				cUpdates.add(cUpdate);
 			}
 			uiJSON.set("updates", cUpdates);
@@ -220,7 +222,8 @@ void UxRequestHandler::handleUpdate(Poco::Net::HTTPServerRequest& req, Poco::Net
 			{
 				Poco::JSON::Object cUpdate;
 				cUpdate.set("name", notifUpdate.first);
-				cUpdate.set("notification", notifUpdate.second);
+				std::string updateString(std::static_pointer_cast<commproto::control::ux::HtmlUxContainer>(notifUpdate.second)->html);
+				cUpdate.set("notification", updateString);
 				notifsJSON.add(cUpdate);
 			}
 		}

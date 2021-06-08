@@ -15,13 +15,14 @@ namespace rotary
 		class Rotary : public control::ux::Control
 		{
 		public:
-			Rotary(const std::string& name, const uint32_t id, const uint32_t rotaryMoveId_,const control::ux::UIControllerHandle & controller_);
+			Rotary(const std::string& name, const uint32_t id, const uint32_t rotaryMoveId_, const control::ux::UIControllerHandle & controller_);
 
 			void setValues(const float left_, const float right_, const float step_);
 			void setValue(const float value_);
 			float getValue() const;
-			std::string getUx() override;
+			control::ux::UxContainerHandle getUx() override;
 
+			uint32_t getType() const override { return  0; }
 		private:
 			const uint32_t rotaryMoveId;
 			float value;

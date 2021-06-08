@@ -4,6 +4,7 @@
 #include <commproto/control/SliderChains.h>
 #include <commproto/parser/Handler.h>
 #include <commproto/control/ux/UIController.h>
+#include "BaseControlType.h"
 
 namespace commproto
 {
@@ -11,19 +12,18 @@ namespace commproto
 	{
 		namespace ux
 		{
-			class Generator;
-			using GeneratorHandle = std::shared_ptr<Generator>;
 			class SliderImpl : public Slider
 			{
 			public:
 				SliderImpl(const std::string& name, uint32_t id, const uint32_t sliderAdjustId_, const GeneratorHandle & generator_);
 
-				std::string getUx() override;
+				UxContainerHandle getUx() override;
 				void setValue(const float) override;
 				void setValues(const float left_, const float right_, const float value_, const float step_) override;
 				void getValues(float & left_, float & right_, float & value_, float & step_) const;
 				std::string getUnitOfMeasure() const override { return unitOfMeasure; }
 				void setUnitOfMeasure(const std::string& unit) override { unitOfMeasure = unit; }
+				uint32_t getType() const override { return static_cast<uint32_t>(BaseControlType::Slider); }
 			private:
 				float left, right;
 				float value;

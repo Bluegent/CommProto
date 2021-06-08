@@ -1,6 +1,5 @@
 #include "SliderImpl.h"
 #include <commproto/logger/Logging.h>
-#include "UxGenerator.h"
 #include "IdProvider.h"
 
 namespace commproto
@@ -20,7 +19,7 @@ namespace commproto
 			{
 			}
 
-			std::string SliderImpl::getUx()
+			UxContainerHandle SliderImpl::getUx()
 			{
 				return generator->generate(*this);
 			}
@@ -72,7 +71,7 @@ namespace commproto
 				float right = msg.prop3[1];
 				float value = msg.prop3[2];
 				float step = msg.prop3[3];
-				SliderHandle slider = std::make_shared<SliderImpl>(msg.prop2[0], msg.prop, controller->getIdProvider().adjustSliderId, std::make_shared<Generator>(*controller));
+				SliderHandle slider = std::make_shared<SliderImpl>(msg.prop2[0], msg.prop, controller->getIdProvider().adjustSliderId, controller->getGenerator());
 				slider->setValues(left, right, value, step);
 				slider->setUnitOfMeasure(msg.prop2[1]);
 				controller->addControl(slider);

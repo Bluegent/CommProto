@@ -4,6 +4,8 @@
 #include <commproto/control/ux/Button.h>
 #include <commproto/control/ux/UIController.h>
 #include <commproto/control/ButtonChains.h>
+#include <commproto/control/ux/UxGenerator.h>
+#include "BaseControlType.h"
 
 namespace commproto
 {
@@ -21,10 +23,6 @@ namespace commproto
 
 			};
 
-			class Generator;
-			using GeneratorHandle = std::shared_ptr<Generator>;
-
-
 			class ButtonImpl : public Button
 			{
 			public:
@@ -32,7 +30,8 @@ namespace commproto
 
 				void press() override;
 
-				std::string getUx() override;
+				UxContainerHandle getUx() override;
+				uint32_t getType() const override { return static_cast<uint32_t>(BaseControlType::Button); }
 			private:
 				GeneratorHandle generator;
 				const uint32_t pressId;

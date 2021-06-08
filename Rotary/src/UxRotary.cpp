@@ -4,6 +4,7 @@
 #include <sstream>
 #include <map>
 #include <string>
+#include "commproto/control/ux/HtmlUxContainer.h"
 
 
 namespace rotary
@@ -52,18 +53,18 @@ namespace rotary
 			step = step_;
 		}
 
-		std::string getTemplate()
+		std::string getTemplate() 
 		{
 			//TODO: make template
 			std::stringstream stream;
 			return stream.str();
 		}
 
-		std::string Rotary::getUx()
+		control::ux::UxContainerHandle Rotary::getUx()
 		{
 			if (!shown)
 			{
-				return std::string{};
+				return control::ux::UxContainerHandle{};
 			}
 			std::map<std::string, std::string> replacements;
 			replacements.emplace("@id", controller->getControlId(id));
@@ -77,7 +78,7 @@ namespace rotary
 			replacements.emplace("@value", utils::getString(value));
 			replacements.emplace("@step", utils::getString(step));
 			replacements.emplace("@fg_color",enabled?"#0d6efd":"#666666");
-			return controller->getEngine()->getTemplateWithReplacements("rotary", std::move(replacements));
+			return std::make_shared<control::ux::HtmlUxContainer>(controller->getEngine()->getTemplateWithReplacements("rotary", std::move(replacements)));
 
 		}
 

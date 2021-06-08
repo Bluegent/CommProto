@@ -4,6 +4,7 @@
 #include <commproto/control/ux/ProgressBar.h>
 #include <commproto/control/ProgressBarChains.h>
 #include <commproto/control/ux/UIController.h>
+#include "BaseControlType.h"
 
 namespace commproto
 {
@@ -31,15 +32,15 @@ namespace commproto
 				UIControllerHandle controller;
 			};
 
-			class Generator;
-			using GeneratorHandle = std::shared_ptr<Generator>;
 			class ProgressBarImpl : public ProgressBar
 			{
 			public:
 				ProgressBarImpl(const std::string& name, const uint32_t id, const GeneratorHandle& generator_, const uint32_t progress = 0 );
 				void setProgress(const uint32_t progress) override;
 				uint32_t getProgress() const override;
-				std::string getUx() override;
+				UxContainerHandle getUx() override;
+				uint32_t getType() const override { return static_cast<uint32_t>(BaseControlType::ProgressBar); }
+
 			private:
 				uint32_t progress;
 				GeneratorHandle generator;

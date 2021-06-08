@@ -1,5 +1,4 @@
 #include "ToggleImpl.h"
-#include "UxGenerator.h"
 #include "IdProvider.h"
 
 namespace commproto
@@ -17,7 +16,7 @@ namespace commproto
 			void ToggleHandler::handle(messages::MessageBase&& data)
 			{
 				endpoint::ToggleMessage& msg = static_cast<endpoint::ToggleMessage&>(data);
-				ToggleHandle button = std::make_shared<ToggleImpl>(msg.prop2, msg.prop, controller->getIdProvider().toggleId, std::make_shared<Generator>(*controller), msg.prop3);
+				ToggleHandle button = std::make_shared<ToggleImpl>(msg.prop2, msg.prop, controller->getIdProvider().toggleId, controller->getGenerator(), msg.prop3);
 				controller->addControl(button);
 			}
 
@@ -29,7 +28,7 @@ namespace commproto
 			{
 			}
 
-			std::string ToggleImpl::getUx()
+			UxContainerHandle ToggleImpl::getUx()
 			{
 				return generator->generate(*this);
 			}

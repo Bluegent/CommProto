@@ -10,12 +10,20 @@ namespace commproto
 	namespace control {
 
 		namespace ux
-		{
+		{			
+			class UxContainer
+			{
+			public:
+				virtual ~UxContainer() = default;
+			};
+			using UxContainerHandle = std::shared_ptr<UxContainer>;
+
 			class Control : public BaseControl {
 			public:
 				Control(const std::string & name, const uint32_t id) : BaseControl(name,id) {}
 				virtual ~Control() = default;
-				virtual std::string getUx() = 0;
+				virtual UxContainerHandle getUx() = 0;
+				virtual uint32_t getType() const = 0;
 			};
 			using ControlHandle = std::shared_ptr<Control>;
 		}

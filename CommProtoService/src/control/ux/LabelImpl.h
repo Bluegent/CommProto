@@ -3,6 +3,8 @@
 #include <commproto/control/ux/Label.h>
 #include <commproto/control/ux/UIController.h>
 #include <commproto/control/LabelChains.h>
+#include <commproto/control/ux/UxGenerator.h>
+#include "BaseControlType.h"
 
 namespace commproto
 {
@@ -29,16 +31,14 @@ namespace commproto
 				UIControllerHandle controller;
 			};
 
-			class Generator;
-			using GeneratorHandle = std::shared_ptr<Generator>;
-
 			class LabelImpl : public Label {
 			public:
 				LabelImpl(const std::string& name, uint32_t id, const std::string& text_, const GeneratorHandle & generator);
 
-				std::string getUx() override;
+				UxContainerHandle getUx() override;
 				void setText(const std::string& text) override;
 				std::string getText() const override;
+				uint32_t getType() const override { return static_cast<uint32_t>(BaseControlType::Label); }
 			private:
 				std::string text;
 				GeneratorHandle generator;

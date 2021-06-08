@@ -1,5 +1,4 @@
 #include "LabelImpl.h"
-#include "UxGenerator.h"
 
 namespace commproto
 {
@@ -17,7 +16,7 @@ namespace commproto
 			void LabelHandler::handle(messages::MessageBase&& data)
 			{
 				endpoint::LabelMessage& message = static_cast<endpoint::LabelMessage&>(data);
-				ux::ControlHandle label = std::make_shared<ux::LabelImpl>(message.prop2, message.prop, message.prop3, std::make_shared<ux::Generator>(*controller));
+				ux::ControlHandle label = std::make_shared<ux::LabelImpl>(message.prop2, message.prop, message.prop3, controller->getGenerator());
 				controller->addControl(label);
 			}
 
@@ -50,7 +49,7 @@ namespace commproto
 			{
 			}
 
-			std::string LabelImpl::getUx()
+			UxContainerHandle LabelImpl::getUx()
 			{
 				return generator->generate(*this);
 			}

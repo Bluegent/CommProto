@@ -10,6 +10,8 @@
 #include "NotificationImpl.h"
 #include "SliderImpl.h"
 #include "ProgressBarImpl.h"
+#include  <commproto/control/ux/HtmlUxContainer.h>
+#include "BaseControlType.h"
 #include <commproto/utils/String.h>
 
 namespace commproto
@@ -18,27 +20,37 @@ namespace commproto
 	{
 		namespace ux
 		{
-			class Generator
+			class HtmlGenerator : public UxGenerator
 			{
 			public:
-				Generator(UIController& manager_)
+				HtmlGenerator(UIController& manager_)
 					: manager(manager_)
 				{
 
 				}
+
+				UxContainerHandle generate(const Control& handle) override;
+				UxContainerHandle generateNotification(const Control& handle, const std::string& text, const uint32_t actionId) override;
+
+				template <typename ControlType>
+				UxContainerHandle generateUx(const Control& handle);
+
 				template <typename ControlType>
 				std::string generate(const ControlType& control) const;
-				std::string generateNotification(const NotificationImpl& control, const std::string & text, const uint32_t actionId);
+				std::string generateNotif(const NotificationImpl& control, const std::string & text, const uint32_t actionId);
 
-				std::string generateText(const std::string & text) const;
+				UxContainerHandle generateText(const std::string & text) const override;
 
-				void send(Message && msg) const;
-				void notifyUpdate(const uint32_t id) const;
+				void send(Message && msg) const override;
+				void notifyUpdate(const uint32_t id) const override;
 			private:
 				template <typename ControlType>
 				std::map<std::string, std::string> getBaseReplacements(const ControlType& control) const;
 
 
+			public:
+				
+			private:
 				UIController& manager;
 
 			};
@@ -62,8 +74,40 @@ namespace commproto
 			}
 
 
+			inline UxContainerHandle HtmlGenerator::generate(const Control& handle)
+			{
+				BaseControlType type = static_cast<BaseControlType>(handle.getType());
+				switch(type)
+				{
+				case BaseControlType::Button: 
+					return generateUx<ButtonImpl>(handle);
+				case BaseControlType::Label: 
+					return generateUx<LabelImpl>(handle);
+				case BaseControlType::ProgressBar: 
+					return generateUx<ProgressBarImpl>(handle);
+				case BaseControlType::Slider: 
+					return generateUx<SliderImpl>(handle);
+				case BaseControlType::Toggle: 
+					return generateUx<ToggleImpl>(handle);
+				default: ;
+				}
+				return nullptr;
+			}
 
-			inline std::string Generator::generateNotification(const NotificationImpl& control, const std::string& text, const uint32_t actionId)
+
+			template <typename ControlType>
+			UxContainerHandle HtmlGenerator::generateUx(const Control& handle)
+			{
+				return std::make_shared<HtmlUxContainer>(generate<ControlType>(static_cast<const ControlType &>(handle)));
+			}
+
+
+			inline UxContainerHandle HtmlGenerator::generateNotification(const Control& handle, const std::string& text, const uint32_t actionId)
+			{
+				return std::make_shared<HtmlUxContainer>(generateNotif(static_cast<const NotificationImpl&>(handle), text, actionId));
+			}
+
+			inline std::string HtmlGenerator::generateNotif(const NotificationImpl& control, const std::string& text, const uint32_t actionId)
 			{
 				std::stringstream buttons;
 				auto options = control.getOptions();
@@ -84,26 +128,26 @@ namespace commproto
 				return manager.getEngine()->getTemplateWithReplacements("notification", std::move(replacements));
 			}
 
-			inline std::string Generator::generateText(const std::string& text) const
+			inline UxContainerHandle HtmlGenerator::generateText(const std::string& text) const
 			{
 				std::map<std::string, std::string>  replacements;
 				replacements.emplace("@text", encode(text));
 				replacements.emplace("@id", manager.getControlId(0));
-				return manager.getEngine()->getTemplateWithReplacements("text-line", std::move(replacements));
+				return std::make_shared<HtmlUxContainer>(manager.getEngine()->getTemplateWithReplacements("text-line", std::move(replacements)));
 			}
 
-			inline void Generator::send(Message&& msg) const
+			inline void HtmlGenerator::send(Message&& msg) const
 			{
 				manager.send(msg);
 			}
 
-			inline void Generator::notifyUpdate(const uint32_t id) const
+			inline void HtmlGenerator::notifyUpdate(const uint32_t id) const
 			{
 				manager.notifyUpdate(id);
 			}
 
 			template <typename ControlType>
-			inline std::map<std::string, std::string> Generator::getBaseReplacements(const ControlType& control)const
+			inline std::map<std::string, std::string> HtmlGenerator::getBaseReplacements(const ControlType& control)const
 			{
 				std::map<std::string, std::string>  replacements;
 				replacements.emplace("@name", encode(control.getName()));
@@ -116,14 +160,15 @@ namespace commproto
 				return replacements;
 			}
 
+
 			template <typename ControlType>
-			std::string Generator::generate(const ControlType& control) const
+			std::string HtmlGenerator::generate(const ControlType& control) const
 			{
 				return "";
 			}
 
 			template <>
-			inline std::string Generator::generate(const ButtonImpl& control) const
+			inline std::string HtmlGenerator::generate(const ButtonImpl& control) const
 			{
 				if (!control.isVisible())
 				{
@@ -136,7 +181,7 @@ namespace commproto
 			}
 
 			template <>
-			inline std::string Generator::generate(const ToggleImpl& control) const
+			inline std::string HtmlGenerator::generate(const ToggleImpl& control) const
 			{
 				if (!control.isVisible())
 				{
@@ -152,7 +197,7 @@ namespace commproto
 			}
 
 			template <>
-			inline std::string Generator::generate(const LabelImpl& control) const
+			inline std::string HtmlGenerator::generate(const LabelImpl& control) const
 			{
 				if (!control.isVisible())
 				{
@@ -166,7 +211,7 @@ namespace commproto
 			}
 
 			template <>
-			inline std::string Generator::generate(const SliderImpl& control) const
+			inline std::string HtmlGenerator::generate(const SliderImpl& control) const
 			{
 				if (!control.isVisible())
 				{
@@ -189,7 +234,7 @@ namespace commproto
 			}
 
 			template <>
-			inline std::string Generator::generate(const ProgressBarImpl& control) const
+			inline std::string HtmlGenerator::generate(const ProgressBarImpl& control) const
 			{
 				if (!control.isVisible())
 				{
@@ -201,9 +246,6 @@ namespace commproto
 
 				return manager.getEngine()->getTemplateWithReplacements("progress_bar", std::move(replacements));
 			}
-
-
-			using GeneratorHandle = std::shared_ptr<Generator>;
 		}
 	}
 }
