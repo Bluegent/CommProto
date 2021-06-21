@@ -13,6 +13,7 @@ namespace commproto
 		{
 			MAKE_DOUBLE_PROP_CHAIN(ToggleControlEnabledState, uint32_t, bool);
 			MAKE_DOUBLE_PROP_CHAIN(ToggleControlShownState, uint32_t, bool);
+			MAKE_EMPTY_CHAIN(NoControllerResponse);
 		}
 		namespace ux
 		{
@@ -23,6 +24,7 @@ namespace commproto
 	DEFINE_DATA_TYPE(control::ux::RequestControllerState);
 	DEFINE_DATA_TYPE(control::endpoint::ToggleControlEnabledState);
 	DEFINE_DATA_TYPE(control::endpoint::ToggleControlShownState);
+	DEFINE_DATA_TYPE(control::endpoint::NoControllerResponse);
 }
 
 #endif// LABEL_CHAINS_H
