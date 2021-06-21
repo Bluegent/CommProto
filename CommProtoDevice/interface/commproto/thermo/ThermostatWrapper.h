@@ -18,6 +18,7 @@ namespace commproto
 			virtual void toggleTempAdjust(float intensity) = 0;
 			virtual void toggleAutoTempAdjust(const bool on) = 0;
 			virtual void setDesiredTemp(const float temp) = 0;
+
 		};
 	}
 }

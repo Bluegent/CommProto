@@ -45,12 +45,12 @@ namespace commproto
 
 		const uint32_t Thermostat::totalMem = 520 * 1024;
 
-
 		Thermostat::Thermostat(endpointdevice::BaseEndpointWrapper& wrapper, const endpointdevice::DeviceDetails& details, ThermostateWrapper& thermo)
 			: BaseEndpointAuth(wrapper, details)
 			, thermo(thermo)
 			, tempTime(0)
 			, then(0)
+			, thenRst(0)
 			, now(0)
 			, adjustState(0)
 		{
@@ -171,6 +171,13 @@ namespace commproto
 
 				humStr << humidity << " %";
 				ui.humLabel->setText(humStr.str());
+			}
+
+			diff = now - thenRst;
+			if(diff > 1000)
+			{
+				thenRst = now;
+				checkResetState();
 			}
 
 			if (dep.builder)

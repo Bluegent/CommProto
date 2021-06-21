@@ -2,13 +2,13 @@
 #include <FastLED.h>
 
 //pins
-#define LED_PIN D6
+#define LED_PIN 16
 #define NUM_LEDS 8
 #define HEAT_LED 4
 
-#define DHT_PIN D2
+#define DHT_PIN 18
 #define DHT_TYPE DHT22   // DHT 22  (AM2302)
-
+#define RESET_BTN_PIN 32
 // sensors/actuators
 DHT dht(DHT_PIN, DHT_TYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 CRGB leds[NUM_LEDS];
@@ -98,9 +98,10 @@ void setBuiltinState(bool on)
 
 void setupBoardStuff()
 {
-  FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
+  FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
   FastLED.setBrightness(10);
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(RESET_BTN_PIN,INPUT_PULLUP);
   blankLEDS();
   dht.begin();
 }
@@ -240,15 +241,6 @@ void setup()
 
 void loop()
 {
-  if (Serial.available() > 0) {
-    float desired = Serial.parseFloat();
-    if (!isnan(desired) && desired > 1.f) {
-      thermo.setDesiredTemp(desired);
-      thermo.toggleAutoTempAdjust(true);
-    }
-  }
-
-
   thermo.loop();
-  delay(5000);
+  delay(1000);
 }

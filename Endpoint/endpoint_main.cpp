@@ -105,35 +105,15 @@ int main(int argc, const char * argv[])
 	socket->sendBytes(nameSerialized);
 
 
-	float increment = 0.01f;
-	float direction = 1;
+	
 
 	//delegator to parse incoming messages
 	auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", mapper, socket);
 	control::endpoint::UIControllerHandle controller = uiFactory->makeController();
 
-	auto toggleIncrement = uiFactory->makeToggle("Toggle increment 0.x/x.0", [&increment](bool state)
-	{
-		LOG_INFO("MyToggle state switched: %s", state ? "True" : "False");
-		if (state)
-		{
-			increment = 1.0f;
-		}
-		else
-		{
-			increment = 0.01;
-		}
-	});
-	controller->addControl(toggleIncrement);
-
-
-
-
 	auto notif = uiFactory->makeNotification("Hello!");
 	std::string noOption = "No, I didn't!";
-	notif->addOption("Okay?");
-	notif->addOption(noOption);
-
+	notif->addOption("Okay");
 
 	bool lastReplyWasOk = true;
 	auto genericAction = [&noOption, &lastReplyWasOk](const std::string& option)
@@ -156,11 +136,11 @@ int main(int argc, const char * argv[])
 
 
 
-	auto notifButton = uiFactory->makeButton("Send me a notification", [&direction, &controller, &notif, &genericAction, &lastReplyWasOk]()
+	auto notifButton = uiFactory->makeButton("Send me a notification", [&controller, &notif, &genericAction, &lastReplyWasOk]()
 	{
 		LOG_INFO("MyButton has been pressed, last reply good:%s",lastReplyWasOk?"True":"False");
 		if (lastReplyWasOk) {
-			controller->displayNotification(notif->getId(), "You just pressed the notification button", genericAction);
+			controller->displayNotification(notif->getId(), "You just pressed the notification button!", genericAction);
 		} 
 		else
 		{
@@ -186,7 +166,7 @@ int main(int argc, const char * argv[])
 		LOG_INFO("Extension says %f", value);
 	};
 	auto rotary = std::make_shared<rotary::endpoint::Rotary>("Extension Test", controller->reserveId(), rotaryId, rotAction);
-	controller->addControl(rotary);
+
 
 
 	auto toggleSlider = uiFactory->makeToggle("Disable slider", [&controller,&disablableSlider, &rotary](bool state)
@@ -196,9 +176,9 @@ int main(int argc, const char * argv[])
 	});
 	toggleSlider->toggle();
 	controller->addControl(toggleSlider);
+	controller->addControl(rotary);
 
-
-	auto progressBar = uiFactory->makeProgresBar("Pointlessness");
+	auto progressBar = uiFactory->makeProgresBar("Progress");
 	controller->addControl(progressBar);
 
 	control::endpoint::SliderAction slAction = [](float value)
@@ -206,12 +186,29 @@ int main(int argc, const char * argv[])
 		LOG_INFO("Desired temp: %.2f", value);
 	};
 	
+
+
 	auto slider = uiFactory->makeSlider("Desired temperature", slAction," \370C");
 	slider->setLimits(5.f, 40.f);
 	slider->setStep(0.5f);
 	slider->setInitialValue(24.f);
 	controller->addControl(slider);
 
+
+	float increment = 0.1f;
+	auto toggleIncrement = uiFactory->makeToggle("Toggle increment +/-", [&increment](bool state)
+	{
+		LOG_INFO("MyToggle state switched: %s", state ? "True" : "False");
+		if (state)
+		{
+			increment = -0.1f;
+		}
+		else
+		{
+			increment = 0.1;
+		}
+	});
+	controller->addControl(toggleIncrement);
 
 	control::endpoint::LabelHandle tempLabel = uiFactory->makeLabel("Temperature", "0.00 \370C");
 	controller->addControl(tempLabel);
@@ -248,7 +245,7 @@ int main(int argc, const char * argv[])
 		if (counter == updateCounter)
 		{
 			
-			temp += direction * increment;
+			temp += increment;
 			
 			std::stringstream tempStr;
 			tempStr.precision(3);

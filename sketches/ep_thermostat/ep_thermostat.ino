@@ -6,16 +6,18 @@
 #include <FastLED.h>
 
 //pins
-#define LED_PIN 5
+#define LED_PIN 16
 #define NUM_LEDS 8
 #define HEAT_LED 4
 
-#define DHT_PIN 4
+#define DHT_PIN 18
 #define DHT_TYPE DHT22   // DHT 22  (AM2302)
+#define RESET_BTN_PIN 32
 
 // sensors/actuators
 DHT dht(DHT_PIN, DHT_TYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 CRGB leds[NUM_LEDS];
+
 
 
 float humidity = 13.f;
@@ -99,6 +101,7 @@ void setupBoardStuff()
   FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
   FastLED.setBrightness(10);
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(RESET_BTN_PIN,INPUT_PULLUP);
   blankLEDS();
   dht.begin();
 }
@@ -208,14 +211,41 @@ class ThermostatDevice : public commproto::thermo::ThermostateWrapper
     const float tolerance;
 };
 
-ThermostatDevice thermo;
+class HelperImpl : public commproto::endpointdevice::Helper
+{
+    public:
+    HelperImpl() : ledCount(0){}
+    bool readButton() override
+    {
+      int state = digitalRead(RESET_BTN_PIN);
+      return state != HIGH;
+    }
+    virtual void advanceLED() override
+    {
+      blankLEDS();
+      leds[ledCount] = CRGB::Blue;
+      FastLED.show();
+      ++ledCount;
+      if(ledCount >= NUM_LEDS)
+      {
+        ledCount = 0;
+      }
+    }
+    private:
+      int ledCount; 
+};
 
-commproto::endpointdevice::BaseAuthWrapperImpl realDevice;
+
+ThermostatDevice thermo;
+HelperImpl helperimp;
+
+commproto::endpointdevice::BaseAuthWrapperImpl realDevice(helperimp);
 commproto::endpointdevice::DeviceDetails details = { "Thermostat", "Commproto", "A simple device that provides data about temperature, humidity and the possibility to start heating." };
 commproto::thermo::Thermostat device(realDevice, details, thermo);
 
 void setup()
 {
+  setupBoardStuff();
   device.setup();
 }
 

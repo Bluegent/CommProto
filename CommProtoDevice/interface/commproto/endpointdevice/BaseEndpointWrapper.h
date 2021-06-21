@@ -25,6 +25,9 @@ namespace commproto
 			virtual bool readAPData() = 0;
 			virtual void initFs() = 0;
 			virtual uint32_t getFreeMem() = 0;
+			virtual void tickStatusLED() = 0;
+			virtual uint32_t getResetBtnCount() = 0;
+			virtual void readResetButton() = 0;
 		};
 	}
 }

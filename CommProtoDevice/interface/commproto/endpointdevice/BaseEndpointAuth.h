@@ -28,12 +28,15 @@ namespace commproto
 		class BaseEndpointAuth : public EndpointAuthRequestHandler
 		{
 		public:
+			
 			BaseEndpointAuth(BaseEndpointWrapper& wrapper, const DeviceDetails& details);
 			void setup();
 			void loop();
 			void accept(const authdevice::ConnectionData& data) override;
 			void reject() override;
+			void checkResetState() const;
 		protected:
+			static const uint32_t resetAmount;
 			virtual void setupDevice();
 			virtual void loopDevice();
 			sockets::SocketHandle tryConnect(const uint32_t attempts = 10) const;
@@ -53,6 +56,7 @@ namespace commproto
 			parser::ParserDelegatorHandle delegator;
 			uint32_t responseAttempts;
 			const DeviceDetails thisDevice;
+
 			
 
 		};

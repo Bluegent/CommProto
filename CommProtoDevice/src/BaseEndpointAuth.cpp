@@ -18,6 +18,8 @@ namespace commproto
 			return delegator;
 		}
 
+		const uint32_t BaseEndpointAuth::resetAmount = 5;
+
 		BaseEndpointAuth::BaseEndpointAuth(BaseEndpointWrapper& wrapper, const DeviceDetails& details)
 			: isAP(true)
 			, device(wrapper)
@@ -73,6 +75,7 @@ namespace commproto
 
 		void BaseEndpointAuth::loopAP()
 		{
+			device.tickStatusLED();
 			switch (state)
 			{
 			case BaseAuthState::SendAuthData:
@@ -181,17 +184,24 @@ namespace commproto
 
 		sockets::SocketHandle BaseEndpointAuth::tryConnect(const uint32_t attempts) const
 		{
-			if(isAP)
-			{
-				return nullptr;
+			for (uint32_t attempt = 0; attempt < attempts; ++attempt) {
+				if (isAP)
+				{
+					return nullptr;
+				}
+				
+
+				authdevice::ConnectionData connection = device.getAuthData();
+				LOG_INFO("Attempting to connect to dispatch service");
+				sockets::SocketHandle client = device.connect(connection, 1);
+				if (client)
+				{
+					return client;
+				}
+				checkResetState();
+				device.tickStatusLED();
 			}
-
-			authdevice::ConnectionData connection = device.getAuthData();
-			LOG_INFO("Attempting to connect to dispatch service");
-			sockets::SocketHandle client = device.connect(connection,attempts);
-
-
-			return client;
+			return nullptr;
 		}
 
 		void BaseEndpointAuth::accept(const authdevice::ConnectionData& data)
@@ -208,6 +218,17 @@ namespace commproto
 			builder.reset();
 			mapper.reset();
 			LOG_INFO("Got rejected :(");
+		}
+
+		void BaseEndpointAuth::checkResetState() const
+		{
+			device.readResetButton();
+			if (device.getResetBtnCount() == resetAmount)
+			{
+				LOG_INFO("Resetting from factory reset button");
+				device.resetAPData();
+				device.reboot();
+			}
 		}
 	}
 }

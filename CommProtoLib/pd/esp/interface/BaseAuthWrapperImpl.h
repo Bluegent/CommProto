@@ -22,6 +22,15 @@ namespace commproto
 {
 	namespace endpointdevice
 	{
+        
+        class Helper
+        {
+            public:
+            virtual ~Helper() = default;
+            virtual bool readButton() = 0;
+            virtual void advanceLED() = 0;
+        };
+
 
 		class BaseAuthWrapperImpl : public BaseEndpointWrapper
 		{
@@ -44,8 +53,10 @@ namespace commproto
                 }
             }
             
-			BaseAuthWrapperImpl()
+			BaseAuthWrapperImpl(Helper & helper_)
 				: readAuth(false)
+                , resetBtnCount(0)
+                , helper(helper_)
 			{
 
 			}
@@ -238,9 +249,33 @@ namespace commproto
                  }
                  
             }
+            
+            void tickStatusLED() override
+            {
+                helper.advanceLED();
+            }
+            uint32_t getResetBtnCount() override 
+            { 
+                return resetBtnCount; 
+            }
+            void readResetButton() override 
+            {
+                bool state = helper.readButton();
+                if(state)
+                {
+                    ++resetBtnCount;
+                }
+                else
+                {
+                    resetBtnCount = 0;
+                }
+            }
+            
 		private:
 			authdevice::ConnectionData apData;
 			bool readAuth;
+            uint32_t resetBtnCount;
+            Helper& helper;
 
 		};
 	}

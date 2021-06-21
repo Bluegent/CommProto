@@ -54,9 +54,11 @@ namespace commproto
 			UI ui;
 			int tempTime;
 			uint32_t then;
+			uint32_t thenRst;
 			uint32_t now;
 			static const uint32_t totalMem;
 			int32_t adjustState;
+			static const uint32_t resetAmount;
 			
 
 		};

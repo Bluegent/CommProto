@@ -110,6 +110,7 @@ namespace commproto
 			{
 				std::lock_guard<std::mutex> lock(controlMutex);
 				controls.clear();
+				generator.reset();
 			}
 
 			void UIControllerImpl::notifyUpdate(const uint32_t &controlId)

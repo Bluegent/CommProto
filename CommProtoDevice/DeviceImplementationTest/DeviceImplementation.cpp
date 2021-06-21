@@ -55,6 +55,9 @@ public:
 	}
 
 	uint32_t getFreeMem() override { return 0; }
+	void tickStatusLED() override{}
+	uint32_t getResetBtnCount() override { return 0; }
+	void readResetButton() override {};
 };
 
 class WindowsThermo : public commproto::thermo::ThermostateWrapper
