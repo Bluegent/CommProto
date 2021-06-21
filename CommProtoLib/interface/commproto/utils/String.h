@@ -12,7 +12,7 @@ namespace commproto
 
 		std::string getString(const uint32_t number);
 
-		std::string getString(const float value, const uint32_t precision = 3);
+		std::string getString(const float value, const uint32_t precision = 5);
 	}
 }
 

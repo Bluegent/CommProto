@@ -60,8 +60,9 @@ struct AbsoluteToPercentage
 
 	void setValue(const uint32_t value);
 	float getPercentage() const;
-private:
 	void calcPercentage();
+	uint32_t getValue() const { return value; }
+private:
 	uint32_t value;
 	float percentage;
 

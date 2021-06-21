@@ -16,6 +16,7 @@
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 #include <commproto/service/DiagnosticChains.h>
 #include <plant/interface/PlantMessages.h>
+#include <sstream>
 #include "Numbers.h"
 
 using namespace commproto;
@@ -37,27 +38,198 @@ namespace ConfigValues
 };
 
 
-class PlantHealthTracker
+
+
+
+class PercentageSingleHealthTracker
+{
+
+public:
+
+	void setValue(const uint32_t value)
+	{
+		tracker.value.setValue(value);
+		updateLabels();
+	}
+
+	void updateLabels()
+	{
+		tracker.value.calcPercentage();
+
+		if (scoreLabel)
+		{
+			uint32_t score = tracker.getScore();
+			std::stringstream scoreStream;
+			scoreStream << score;
+			scoreLabel->setText(scoreStream.str());
+		}
+
+		if (valueLabel)
+		{
+			float percentage = tracker.value.getPercentage();
+			std::stringstream valueStream;
+			valueStream.precision(3);
+			valueStream << percentage << "%(" << tracker.value.getValue() << ")";
+			valueLabel->setText(valueStream.str());
+		}
+
+	}
+
+	void calibrateMin(const float value)
+	{
+		tracker.total.left = static_cast<uint32_t>(value);
+		updateLabels();
+	}
+
+	void calibrateMax(const float value)
+	{
+		tracker.total.right = static_cast<uint32_t>(value);
+		updateLabels();
+	}
+
+
+	void setDesiredMin(const float value)
+	{
+		tracker.desired.left = value;
+		updateLabels();
+	}
+
+
+	void setDesiredMax(const float value)
+	{
+		tracker.desired.right = value;
+		updateLabels();
+	}
+
+	void toggleCalibrationF(const bool state) const
+	{
+		if (minCalibration)
+		{
+			controller->setControlShownState(minCalibration->getId(), state);
+		}
+		if (maxCalibration)
+		{
+			controller->setControlShownState(maxCalibration->getId(), state);
+		}
+	}
+
+	PercentageSingleHealthTracker(control::endpoint::UIFactory& factory, const std::string & name, const PercentageSensorTracker & tracker_)
+		: tracker(tracker_)
+	{
+
+
+		control::endpoint::ToggleAction toggleCalibrationAct = [&, this](bool state)
+		{
+			this->toggleCalibrationF(state);
+		};
+
+		toggleCalibration = factory.makeToggle(name + " Calibration", toggleCalibrationAct);
+
+
+
+		control::endpoint::SliderAction calibrateMinAct = [&, this](float value)
+		{
+			this->calibrateMin(value);
+		};
+		minCalibration = factory.makeSlider(name + " - Calibrate Min", calibrateMinAct);
+		minCalibration->setInitialValue(tracker.value.absolute.left);
+		minCalibration->setLimits(tracker.value.absolute.left, tracker.value.absolute.right);
+		minCalibration->setStep(1);
+		minCalibration->setDisplayState(false);
+
+
+
+		control::endpoint::SliderAction calibrateMaxAct = [&, this](float value)
+		{
+			this->calibrateMax(value);
+		};
+		maxCalibration = factory.makeSlider(name + " - Calibrate Max", calibrateMaxAct);
+		maxCalibration->setInitialValue(tracker.value.absolute.right);
+		maxCalibration->setLimits(tracker.value.absolute.left, tracker.value.absolute.right);
+		maxCalibration->setStep(1);
+		maxCalibration->setDisplayState(false);
+
+
+		control::endpoint::SliderAction desiredMinAct = [&, this](float value)
+		{
+			this->setDesiredMin(value);
+		};
+		minSlider = factory.makeSlider("Desired Min " + name, desiredMinAct, "%");
+		minSlider->setInitialValue(tracker.desired.left);
+		minSlider->setLimits(0, 100);
+		minSlider->setStep(.5);
+
+
+
+		control::endpoint::SliderAction desiredMaxAct = [&, this](float value)
+		{
+			this->setDesiredMax(value);
+		};
+		maxSlider = factory.makeSlider("Desired Max " + name, desiredMaxAct, "%");
+		maxSlider->setInitialValue(tracker.desired.right);
+		maxSlider->setLimits(0, 100);
+		maxSlider->setStep(.5);
+
+		valueLabel = factory.makeLabel(name, "");
+		scoreLabel = factory.makeLabel(name + " Score", "");
+		updateLabels();
+
+
+		controller = factory.makeController();
+		controller->addControl(toggleCalibration);
+		controller->addControl(minCalibration);
+		controller->addControl(maxCalibration);
+		controller->addControl(minSlider);
+		controller->addControl(maxSlider);
+		controller->addControl(valueLabel);
+		controller->addControl(scoreLabel);
+
+	}
+
+
+private:
+	control::endpoint::UIControllerHandle controller;
+	control::endpoint::ToggleHandle toggleCalibration;
+	control::endpoint::SliderHandle minCalibration;
+	control::endpoint::SliderHandle maxCalibration;
+
+	control::endpoint::SliderHandle minSlider;
+	control::endpoint::SliderHandle maxSlider;
+
+	control::endpoint::LabelHandle valueLabel;
+	control::endpoint::LabelHandle scoreLabel;
+
+	PercentageSensorTracker tracker;
+};
+
+class SoilHandler : public parser::Handler
 {
 public:
-	void setSoilCalibration(const uint32_t dry, const uint32_t wet);
-	void setUvCalibration(const uint32_t dark, const uint32_t light);
-	void setSoilReading(const uint32_t value);
-	void setUvReading(const uint32_t value);
+	SoilHandler(PercentageSingleHealthTracker & tracker_) : tracker(tracker_) {}
+	void handle(messages::MessageBase&& data) override;
 private:
-	SensorTracker<uint32_t> soil;
-	SensorTracker<uint32_t> uv;
+	PercentageSingleHealthTracker & tracker;
 };
+
+void SoilHandler::handle(messages::MessageBase&& data)
+{
+	auto msg = static_cast<plant::Soil&>(data);
+	tracker.setValue(msg.prop);
+}
+
 
 class InputHelper
 {
-	public:
-		void notifyTempHum(const float temp, const float hum);
-		void notifySoil(const uint32_t soil);
-		void notifyUV(const uint32_t uv);
-	private:
-		control::endpoint::UIControllerHandle controller;
+public:
+	explicit InputHelper(PercentageSingleHealthTracker& soil_tracker)
+		: soilTracker(soil_tracker)
+	{
+	}
+
+	PercentageSingleHealthTracker soilTracker;
 };
+
+using InputHelperHandle = std::shared_ptr<InputHelper>;
 
 
 parser::ParserDelegatorHandle buildSelfDelegator()
@@ -70,9 +242,10 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 
 class PlantHealthProvider : public endpoint::DelegatorProvider {
 public:
-	PlantHealthProvider(const messages::TypeMapperHandle & mapper_, const control::endpoint::UIControllerHandle & controller_)
+	PlantHealthProvider(const messages::TypeMapperHandle & mapper_, const control::endpoint::UIControllerHandle & controller_, const InputHelperHandle & helper_)
 		: mapper{ mapper_ }
 		, controller{ controller_ }
+		, helper(helper_)
 	{
 
 	}
@@ -80,12 +253,14 @@ public:
 	{
 		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
 		control::endpoint::DelegatorUtils::addParsers(delegator, controller);
+		parser::DelegatorUtils::addParserHandlerPair<plant::SoilParser,plant::Soil>(delegator,std::make_shared<SoilHandler>(helper->soilTracker));
 
 		return delegator;
 	}
 private:
 	messages::TypeMapperHandle mapper;
 	control::endpoint::UIControllerHandle controller;
+	InputHelperHandle helper;
 };
 
 
@@ -118,6 +293,8 @@ int main(int argc, const char * argv[]) {
 
 	const int32_t port = config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
 	const char * const address = config::getValueOrDefault(doc, ConfigValues::serverAddress, ConfigValues::serverAddressDefault);
+
+	const char * const epName = config::getValueOrDefault(doc, ConfigValues::targetEpName, ConfigValues::targetEpNameDefault);
 
 	LOG_INFO("Plant Health service attempting to connect to %s:%d", address, port);
 
@@ -153,13 +330,25 @@ int main(int argc, const char * argv[]) {
 	auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", mapper, socket);
 	control::endpoint::UIControllerHandle controller = uiFactory->makeController();
 
+	PercentageSensorTracker soilTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(40, 60), Interval<float>(0, 100));
+	PercentageSingleHealthTracker soilHealthTracker(*uiFactory.get(), "Soil Humidity", soilTracker);
+	auto inputHelper = std::make_shared<InputHelper>(soilHealthTracker);
 
-	std::shared_ptr<PlantHealthProvider> provider = std::make_shared<PlantHealthProvider>(mapper, controller);
+
+	std::shared_ptr<PlantHealthProvider> provider = std::make_shared<PlantHealthProvider>(mapper, controller, inputHelper);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
 
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, channelDelegator);
+
+
+	uint32_t subscribeMsgId = mapper->registerType<service::SubscribeMessage>();
+
+
+	auto sub = service::SubscribeSerializer::serialize(service::SubscribeMessage(subscribeMsgId, epName));
+
+
 
 	LOG_INFO("Waiting to acquire ID");
 	//wait until we are sure we have an ID
@@ -169,6 +358,7 @@ int main(int argc, const char * argv[]) {
 	} while (SenderMapping::getId() == 0);
 	LOG_INFO("Acquired ID: %d", SenderMapping::getId());
 
+	socket->sendBytes(sub);
 
 	while (true)
 	{
