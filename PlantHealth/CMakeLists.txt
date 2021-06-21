@@ -10,7 +10,7 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 
-target_link_libraries(${PROJECT_NAME} CommProtoService)
+target_link_libraries(${PROJECT_NAME} CommProtoService PlantInterface)
 
 include_directories(.)
 
