@@ -64,6 +64,14 @@ void PercentageSingleHealthTracker::toggleCalibrationF(const bool state) const
 	{
 		controller->setControlShownState(maxCalibration->getId(), state);
 	}
+	if(minSlider)
+	{
+		controller->setControlShownState(minSlider->getId(), state);
+	}
+	if (maxSlider)
+	{
+		controller->setControlShownState(maxSlider->getId(), state);
+	}
 }
 
 PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_): tracker(tracker_)
@@ -106,6 +114,7 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	minSlider->setInitialValue(tracker.desired.left);
 	minSlider->setLimits(0, 100);
 	minSlider->setStep(.5);
+	minSlider->setDisplayState(false);
 
 
 	control::endpoint::SliderAction desiredMaxAct = [&, this](float value)
@@ -116,6 +125,7 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	maxSlider->setInitialValue(tracker.desired.right);
 	maxSlider->setLimits(0, 100);
 	maxSlider->setStep(.5);
+	maxSlider->setDisplayState(false);
 
 	valueLabel = factory.makeLabel(name, "");
 	scoreLabel = factory.makeLabel(name + " Score", "");

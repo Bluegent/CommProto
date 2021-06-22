@@ -28,6 +28,7 @@ parser::ParserDelegatorHandle PlantHealthProvider::provide(const std::string& na
 	parser::ParserDelegatorHandle delegator = buildSelfDelegator();
 	control::endpoint::DelegatorUtils::addParsers(delegator, controller);
 	parser::DelegatorUtils::addParserHandlerPair<plant::SoilParser, plant::Soil>(delegator, std::make_shared<SoilHandler>(helper->soilTracker));
+	parser::DelegatorUtils::addParserHandlerPair<plant::UvLightParser, plant::UvLight>(delegator, std::make_shared<UvHandler>(helper->uvTracker));
 
 	return delegator;
 }

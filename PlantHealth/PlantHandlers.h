@@ -15,6 +15,15 @@ private:
 	PercentageSingleHealthTracker & tracker;
 };
 
+class UvHandler : public parser::Handler
+{
+public:
+	UvHandler(PercentageSingleHealthTracker& tracker_);
+	void handle(messages::MessageBase&& data) override;
+private:
+	PercentageSingleHealthTracker & tracker;
+};
+
 
 
 

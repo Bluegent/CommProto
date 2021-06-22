@@ -92,7 +92,12 @@ int main(int argc, const char * argv[]) {
 
 	PercentageSensorTracker soilTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(40, 60), Interval<float>(0, 100));
 	PercentageSingleHealthTracker soilHealthTracker(*uiFactory.get(), "Soil Humidity", soilTracker);
-	auto inputHelper = std::make_shared<InputHelper>(soilHealthTracker);
+
+
+	PercentageSensorTracker uvTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 200)), Interval<float>(60, 100), Interval<float>(0, 100));
+	PercentageSingleHealthTracker uvHealthTracker(*uiFactory.get(), "UV Exposure", uvTracker);
+
+	auto inputHelper = std::make_shared<InputHelper>(soilHealthTracker,uvHealthTracker);
 
 
 	std::shared_ptr<PlantHealthProvider> provider = std::make_shared<PlantHealthProvider>(mapper, controller, inputHelper);
