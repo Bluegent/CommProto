@@ -12,6 +12,7 @@
 #include <plant/interface/PlantMessages.h>
 #include <thread>
 #include <random>
+#include <commproto/control/ControllerChains.h>
 
 namespace ConfigValues
 {
@@ -50,12 +51,36 @@ void PumpHandler::handle(messages::MessageBase&& data)
 	LOG_INFO("Toggling Pump %s", msg.prop ? "on" : "off");
 }
 
-parser::ParserDelegatorHandle buildSelfDelegator()
+
+class UxRequestHandler : public parser::Handler
+{
+public:
+	UxRequestHandler(messages::TypeMapperHandle & mapper_, const sockets::SocketHandle & socket_)
+		: noControllerMsgId(mapper_->registerType<control::endpoint::NoControllerResponse>())
+		, socket(socket_)
+	{
+	}
+
+	void handle(messages::MessageBase&& data) override;
+private:
+	uint32_t noControllerMsgId;
+	sockets::SocketHandle socket;
+};
+
+void UxRequestHandler::handle(messages::MessageBase&& data)
+{
+	auto noConMsg = control::endpoint::NoControllerResponseSerializer::serialize(control::endpoint::NoControllerResponse(noControllerMsgId));
+	socket->sendBytes(noConMsg);
+	LOG_INFO("Sent reply that I don't have a controller");
+}
+
+parser::ParserDelegatorHandle buildSelfDelegator(messages::TypeMapperHandle & mapper_, const sockets::SocketHandle & socket_)
 {
 	std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
 	parser::DelegatorUtils::buildBase(delegator);
-	parser::DelegatorUtils::addParserHandlerPair<plant::TogglePumpParser,plant::TogglePump>(delegator,std::make_shared<PumpHandler>());
-	parser::DelegatorUtils::addParserHandlerPair<plant::ToggleUVLampParser,plant::ToggleUVLamp>(delegator,std::make_shared<UvHandler>());
+	parser::DelegatorUtils::addParserHandlerPair<plant::TogglePumpParser, plant::TogglePump>(delegator, std::make_shared<PumpHandler>());
+	parser::DelegatorUtils::addParserHandlerPair<plant::ToggleUVLampParser, plant::ToggleUVLamp>(delegator, std::make_shared<UvHandler>());
+	parser::DelegatorUtils::addParserHandlerPair<control::ux::RequestControllerStateParser, control::ux::RequestControllerState>(delegator, std::make_shared<UxRequestHandler>(mapper_,socket_));
 	return delegator;
 }
 
@@ -66,20 +91,22 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 
 class PlantTesterProvider : public endpoint::DelegatorProvider {
 public:
-	PlantTesterProvider(const messages::TypeMapperHandle & mapper_)
+	PlantTesterProvider(messages::TypeMapperHandle & mapper_, const sockets::SocketHandle & socket_)
 		: mapper{ mapper_ }
+		, socket{ socket_ }
 	{
 
 	}
 	parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override
 	{
-		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
-		
+		parser::ParserDelegatorHandle delegator = buildSelfDelegator(mapper,socket);
+
 		return delegator;
 	}
 private:
 	messages::TypeMapperHandle mapper;
 	control::endpoint::UIControllerHandle controller;
+	sockets::SocketHandle socket;
 };
 
 const uint32_t top = 4096;
@@ -91,15 +118,15 @@ void ranMod_int(uint32_t & target)
 {
 	int32_t ran = uniform_dist(engine);
 
-	if(ran < 0 && ran *-1 > static_cast<int32_t>(target))
+	if (ran < 0 && ran *-1 > static_cast<int32_t>(target))
 	{
 		target = 0;
-	} 
+	}
 	else
 	{
 		target += ran;
 	}
-	if(target > top)
+	if (target > top)
 	{
 		target = top;
 	}
@@ -109,7 +136,7 @@ void ranMod_float(float & target, const float min, const float max)
 {
 	float ran = uniform_dist(engine);
 	target += ran / 50.f;
-	if(target < min)
+	if (target < min)
 	{
 		target = min;
 	}
@@ -167,7 +194,7 @@ int main(int argc, const char * argv[])
 
 	//delegator to parse incoming messages	
 
-	std::shared_ptr<PlantTesterProvider> provider = std::make_shared<PlantTesterProvider>(mapper);
+	std::shared_ptr<PlantTesterProvider> provider = std::make_shared<PlantTesterProvider>(mapper,socket);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
@@ -178,7 +205,7 @@ int main(int argc, const char * argv[])
 	uint32_t soilMsgId = mapper->registerType<plant::Soil>();
 	uint32_t uvMsgId = mapper->registerType<plant::UvLight>();
 
-	
+
 	//wait until we are sure we have an ID
 	do
 	{
@@ -197,7 +224,7 @@ int main(int argc, const char * argv[])
 
 	while (true)
 	{
-		now =  std::chrono::system_clock::now().time_since_epoch();
+		now = std::chrono::system_clock::now().time_since_epoch();
 		if (std::chrono::duration_cast<std::chrono::seconds>(now - then).count() > 3)
 		{
 			then = now;
@@ -206,13 +233,13 @@ int main(int argc, const char * argv[])
 			ranMod_float(temperature, -5.f, 50.f);
 			ranMod_float(humidity, 0.f, 100.f);
 
-			LOG_INFO("Soil Humidity: %d, UV: %d, Temperature: %.2f C, Humidity: %.2f%%",soil,uv,temperature,humidity);
+			LOG_INFO("Soil Humidity: %d, UV: %d, Temperature: %.2f C, Humidity: %.2f%%", soil, uv, temperature, humidity);
 
-					
+
 			socket->sendBytes(plant::TempHumSerializer::serialize(plant::TempHum(tempMsgId, temperature, humidity)));
 			socket->sendBytes(plant::SoilSerializer::serialize(plant::Soil(soilMsgId, soil)));
 			socket->sendBytes(plant::UvLightSerializer::serialize(plant::UvLight(uvMsgId, uv)));
-		
+
 
 		}
 		builder->pollAndReadTimes(100);

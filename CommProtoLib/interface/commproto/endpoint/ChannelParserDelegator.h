@@ -24,6 +24,8 @@ namespace commproto
 			void addDelegator(const uint32_t id, const parser::ParserDelegatorHandle & delegator);
 			void subscribeToChannelMapping(MappingNotification& onMapping);
 			void subscribeToChannelRemoval(MappingNotification& onTermination );
+			std::string getChannelName(const uint32_t id);
+
 		private:
 			void notifyTerminationSubs(const uint32_t id);
 			std::map<uint32_t, parser::ParserDelegatorHandle> delegators;

@@ -20,7 +20,7 @@ namespace commproto
 
 			void notify(const std::string & name, uint32_t id)
 			{
-				if(id == 0 || name == "")
+				if (id == 0 || name == "")
 				{
 					return;
 				}

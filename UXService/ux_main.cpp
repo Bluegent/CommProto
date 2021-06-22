@@ -9,7 +9,7 @@
 #include <commproto/control/ux/UxControllers.h>
 #include <commproto/config/ConfigParser.h>
 #include <commproto/logger/FileLogger.h>
-
+#include "UxChannelParserDelegator.h"
 #include "HttpServer.h"
 #include <commproto/control/ux/UxDelegatorProvider.h>
 #include <commproto/control/ux/TemplateEngine.h>
@@ -106,7 +106,10 @@ int main(int argc, char * argv[])
 	//delegator to parse incoming messages
 	control::ux::UxControllersHandle controllers = std::make_shared<control::ux::UxControllers>();
 	std::shared_ptr<control::ux::UXServiceProvider> provider = std::make_shared<control::ux::UXServiceProvider>(mapper, socket, controllers,engine);
-	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
+	UxChannelParserDelegatorHandle channelDelegator = std::make_shared<UxChannelParserDelegator>(provider);
+
+	control::ux::ExtensionHandle noUxExt = std::make_shared<NoUxExtender>(channelDelegator);
+	provider->addExtension(noUxExt);
 
 	plugin::PluginLoaderHandle pluginLoader;
 
@@ -132,11 +135,14 @@ int main(int argc, char * argv[])
 		controllers->removeController(name);
 	};
 	channelDelegator->subscribeToChannelRemoval(removeController);
+	
+
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
 
 	//subscribe - unsubscribe
 	uint32_t registerSubId = mapper->registerType<service::SubscribeMessage>();
+	uint32_t unregisterSubId = mapper->registerType<service::UnsubscribeMessage>();
 	uint32_t unsubId = mapper->registerType<service::UnsubscribeMessage >();
 	uint32_t sendtoId = mapper->registerType<service::SendToMessage>();
 
@@ -154,7 +160,20 @@ int main(int argc, char * argv[])
 	} while (SenderMapping::getId() == 0);
     LOG_INFO("Acquired ID: %d",SenderMapping::getId());
 
+
+	
+
+	NoUxNotification removeControllerNoUx = [socket,unregisterSubId,controllers](const std::string & name)
+	{
+		LOG_INFO("Removing UX controller for connection %s because it can't provide UX", name.c_str());
+		controllers->removeController(name);
+		auto msg = service::UnsubscribeSerializer::serialize(service::UnsubscribeMessage(unregisterSubId, name));
+		socket->sendBytes(msg);
+
+	};
+
 	pluginLoader->setStaticsForModules();
+	channelDelegator->subscribeToNoUx(removeControllerNoUx);
 
 	service::SubscribeMessage sub(registerSubId, "");
 	socket->sendBytes(service::SubscribeSerializer::serialize(std::move(sub)));

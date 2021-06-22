@@ -96,5 +96,15 @@ namespace commproto
 			}
 			delegators.erase(it);
 		}
+
+		std::string ChannelParserDelegator::getChannelName(const uint32_t id)
+		{
+			auto it = channelNames.find(id);
+			if(it == channelNames.end())
+			{
+				return std::string{};
+			}
+			return it->second;
+		}
 	}
 }
