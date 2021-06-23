@@ -220,10 +220,16 @@ class HelperImpl : public commproto::endpointdevice::Helper
       int state = digitalRead(RESET_BTN_PIN);
       return state != HIGH;
     }
-    virtual void advanceLED() override
+    void blankLEDs() override{
+      blankLEDS();
+    }
+    void advanceLED(const bool apMode) override
     {
       blankLEDS();
-      leds[ledCount] = CRGB::Blue;
+      if(apMode)
+        leds[ledCount] = CRGB::Green;
+      else
+        leds[ledCount] = CRGB::Blue;  
       FastLED.show();
       ++ledCount;
       if(ledCount >= NUM_LEDS)

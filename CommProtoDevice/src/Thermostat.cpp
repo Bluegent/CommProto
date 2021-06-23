@@ -66,6 +66,7 @@ namespace commproto
 				return;
 			}
 			thermo.setup();
+			device.blankLED();
 
 			//intital setup
 			dep.client->sendByte(sizeof(void*));

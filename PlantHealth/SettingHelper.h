@@ -12,11 +12,12 @@ struct PlantStat
 	T calibrateMax;
 	float desireMin;
 	float desireMax;
+	float coeff;
 };
 
 using IntPlantStat = PlantStat<uint32_t>;
 using FloatPlantStat = PlantStat<float>;
-
+using OverallUpdate = std::function<void()>;
 
 namespace PlantDataNames
 {
@@ -29,6 +30,7 @@ namespace PlantDataNames
 	constexpr const char * const calibrateMax = "calibrate_max";
 	constexpr const char * const desiredMin = "desired_min";
 	constexpr const char * const desiredMax = "desired_max";
+	constexpr const char * const coeff = "coefficient";
 };
 
 struct PlantData
@@ -38,6 +40,7 @@ struct PlantData
 	FloatPlantStat humidity;
 	FloatPlantStat temperature;
 	static PlantData getDefault();
+
 };
 
 

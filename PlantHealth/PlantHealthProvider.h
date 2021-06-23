@@ -6,6 +6,7 @@
 
 #include "PercentageSingleHealthTracker.h"
 #include "OutputHelper.h"
+#include "SingleHealthTracker.h"
 
 
 using namespace commproto;
@@ -13,14 +14,22 @@ using namespace commproto;
 class InputHelper
 {
 public:
-	explicit InputHelper(const SinglePTrackerHandle& soil_tracker,const SinglePTrackerHandle& uv_tracker)
+	explicit InputHelper(const SinglePTrackerHandle& soil_tracker, const SinglePTrackerHandle& uv_tracker, const SingleTrackerHandle & temperature, const SingleTrackerHandle & humidity, const SettingsHelperHandle & helper)
 		: soilTracker(soil_tracker)
 		, uvTracker(uv_tracker)
+		, temperature(temperature)
+		, humidity(humidity)
+		, helper(helper)
 	{
 	}
 
 	SinglePTrackerHandle soilTracker;
 	SinglePTrackerHandle uvTracker;
+	SingleTrackerHandle temperature;
+	SingleTrackerHandle humidity;
+	SettingsHelperHandle helper;
+
+	uint32_t getOverallHealth() const;
 };
 
 using InputHelperHandle = std::shared_ptr<InputHelper>;

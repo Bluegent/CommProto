@@ -185,6 +185,7 @@ namespace commproto
 		sockets::SocketHandle BaseEndpointAuth::tryConnect(const uint32_t attempts) const
 		{
 			for (uint32_t attempt = 0; attempt < attempts; ++attempt) {
+				checkResetState();
 				if (isAP)
 				{
 					return nullptr;
@@ -198,8 +199,7 @@ namespace commproto
 				{
 					return client;
 				}
-				checkResetState();
-				device.tickStatusLED();
+
 			}
 			return nullptr;
 		}

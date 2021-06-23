@@ -6,21 +6,22 @@
 #include <Poco/JSON/Parser.h>
 
 template <typename T>
-void initialize(PlantStat<T> & stat, T min, T max, float dMin, float dMax)
+void initialize(PlantStat<T> & stat, T min, T max, float dMin, float dMax,float coeff)
 {
 	stat.calibrateMin = min;
 	stat.calibrateMax = max;
 	stat.desireMin = dMin;
 	stat.desireMax = dMax;
+	stat.coeff = coeff;
 }
 
 PlantData PlantData::getDefault()
 {
 	PlantData data;
-	initialize<float>(data.humidity, 0, 100.0, 40.0f, 60.0f);
-	initialize<float>(data.temperature, 5, 50.0, 20.f, 35.0f);
-	initialize<uint32_t>(data.soil, 1200, 3500, 40.0f, 60.0f);
-	initialize<uint32_t>(data.uv, 0, 200, 40.0f, 100.0f);
+	initialize<float>(data.humidity, 0, 100.0, 40.0f, 60.0f,0.25);
+	initialize<float>(data.temperature, 5, 50.0, 20.f, 35.0f,0.25);
+	initialize<uint32_t>(data.soil, 1200, 3500, 40.0f, 60.0f,0.40);
+	initialize<uint32_t>(data.uv, 0, 200, 40.0f, 100.0f,0.10);
 
 	return data;
 }
@@ -38,6 +39,7 @@ void readStat(PlantStat<T> & stat, const Poco::JSON::Object::Ptr & obj)
 	stat.calibrateMax = obj->get(PlantDataNames::calibrateMax).convert<T>();
 	stat.desireMin = obj->get(PlantDataNames::desiredMin).convert<float>();
 	stat.desireMax = obj->get(PlantDataNames::desiredMax).convert<float>();
+	stat.coeff = obj->get(PlantDataNames::coeff).convert<float>();
 }
 
 bool SettingsHelper::load()
@@ -92,6 +94,7 @@ void writeStat(const PlantStat<T> & stat, Poco::JSON::Object & obj)
 	obj.set(PlantDataNames::calibrateMax, stat.calibrateMax);
 	obj.set(PlantDataNames::desiredMin, stat.desireMin);
 	obj.set(PlantDataNames::desiredMax, stat.desireMax);
+	obj.set(PlantDataNames::coeff, stat.coeff);
 }
 
 

@@ -60,11 +60,11 @@ uint32_t PercentageSensorTracker::getScore()
 
 void testTracker(SensorTracker<float> & tracker, float value1, float value2, float value3)
 {
-	tracker.value = value1;
+	tracker.setValue(value1);
 	uint32_t score1 = tracker.getScore();
-	tracker.value = value2;
+	tracker.setValue(value1);
 	uint32_t score2 = tracker.getScore();
-	tracker.value = value3;
+	tracker.setValue(value1);
 	uint32_t score3 = tracker.getScore();
 
 	LOG_INFO("Scores: %.2f - %.2f(%d) %.2f(%d)  %.2f(%d) - %.2f", tracker.total.left, value1, score1, value2, score2, value3, score3, tracker.total.right);

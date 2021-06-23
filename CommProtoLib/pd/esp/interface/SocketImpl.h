@@ -109,7 +109,7 @@ public:
           return false;
         }
 
-        bool result = client.connect(addr.c_str(),static_cast<uint16_t>(port));
+        bool result = client.connect(addr.c_str(),static_cast<uint16_t>(port),1000);
         if(result){
             socketMode = Mode::Client;
             isInitialized = true;

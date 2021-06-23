@@ -74,11 +74,14 @@ struct SensorTracker
 {
 	Interval<T> desired;
 	Interval<T> total;
-	T value;
 	SensorTracker(const Interval<T> & desired, const Interval<T> & total);
 	bool isDesired();
 	void setValue(const T type);
 	uint32_t getScore();
+	T getValue() const;
+
+private:
+	T value;
 };
 
 
@@ -111,6 +114,7 @@ template <typename T>
 void SensorTracker<T>::setValue(const T value_)
 {
 	value = value_;
+	clamp(value, total.left, total.right);
 }
 
 template <typename T>
@@ -132,6 +136,12 @@ uint32_t SensorTracker<T>::getScore()
 	}
 
 	return 0;
+}
+
+template <typename T>
+T SensorTracker<T>::getValue() const
+{
+	return value;
 }
 
 

@@ -35,7 +35,7 @@ public:
 	void setOnHigher(const HealthTrackerAction& higher);
 	void setOnDesired(const HealthTrackerAction& desired);
 	void setUpdates(const ISettingUpdate & min, const ISettingUpdate & max, const FSettingUpdate & desireMin, const FSettingUpdate & desireMax);
-
+	void setOvearll(const OverallUpdate& update);
 
 	PercentageSingleHealthTracker(control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues, const std::string & solution);
 	PercentageSensorTracker getTracker() const;
@@ -56,7 +56,7 @@ private:
 	control::endpoint::SliderHandle maxSlider;
 
 	control::endpoint::LabelHandle valueLabel;
-	control::endpoint::LabelHandle scoreLabel;
+	control::endpoint::ProgressBarHandle scoreBar;
 
 
 	control::endpoint::ToggleHandle toggleAuto;
@@ -74,6 +74,7 @@ private:
 	ISettingUpdate onCalibrateMax;
 	FSettingUpdate onDesireMin;
 	FSettingUpdate onDesireMax;
+	OverallUpdate overall;
 };
 
 

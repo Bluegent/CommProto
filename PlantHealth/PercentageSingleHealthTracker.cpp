@@ -9,6 +9,7 @@ void PercentageSingleHealthTracker::setValue(const uint32_t value)
 	tracker.value.calcPercentage();
 	float perc = tracker.value.getPercentage();
 	updateLabels();
+	overall();
 
 	if(!enabledAuto)
 	{
@@ -24,12 +25,10 @@ void PercentageSingleHealthTracker::updateLabels()
 {
 	tracker.value.calcPercentage();
 
-	if (scoreLabel)
+	if (scoreBar)
 	{
 		uint32_t score = tracker.getScore();
-		std::stringstream scoreStream;
-		scoreStream << score;
-		scoreLabel->setText(scoreStream.str());
+		scoreBar->setProgress(score);
 	}
 
 	if (valueLabel)
@@ -113,6 +112,10 @@ void PercentageSingleHealthTracker::setUpdates(const ISettingUpdate& min, const 
 	onDesireMax = desireMax;
 }
 
+void PercentageSingleHealthTracker::setOvearll(const OverallUpdate& update)
+{
+	overall = update;
+}
 
 
 PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues, const std::string & solution)
@@ -174,12 +177,13 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	maxSlider->setDisplayState(false);
 
 	valueLabel = factory.makeLabel(name, "");
-	scoreLabel = factory.makeLabel(name + " Score", "");
+	scoreBar = factory.makeProgresBar(name + " Health Score", 0);
 
 	control::endpoint::ToggleAction autoAction = [&,this](const bool state)
 	{
 		LOG_INFO("%s auto solutioning",state?"Enabling":"Disabling");
 		enabledAuto = state;
+		controller->setControlShownState(solutionLabel->getId(), state);
 		if(enabledAuto)
 		{
 			setValue(tracker.value.getValue());
@@ -200,6 +204,7 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	toggleAuto = factory.makeToggle("Enable auto-" + solution, autoAction);
 
 	solutionLabel = factory.makeLabel(solution, "Off");
+	solutionLabel->setDisplayState(false);
 
 	updateLabels();
 
@@ -211,7 +216,7 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	controller->addControl(minSlider);
 	controller->addControl(maxSlider);
 	controller->addControl(valueLabel);
-	controller->addControl(scoreLabel);
+	controller->addControl(scoreBar);
 	controller->addControl(toggleAuto);
 	controller->addControl(solutionLabel);
 

@@ -4,6 +4,7 @@
 #include <commproto/parser/Handler.h>
 #include <PercentageSingleHealthTracker.h>
 #include <plant/interface/PlantMessages.h>
+#include "PlantHealthProvider.h"
 
 using namespace commproto;
 class SoilHandler : public parser::Handler
@@ -24,7 +25,14 @@ private:
 	SinglePTrackerHandle tracker;
 };
 
-
+class DHTHandler : public parser::Handler
+{
+public:
+	DHTHandler(const InputHelperHandle& helper);
+	void handle(messages::MessageBase&& data) override;
+private:
+	InputHelperHandle helper;
+};
 
 
 #endif

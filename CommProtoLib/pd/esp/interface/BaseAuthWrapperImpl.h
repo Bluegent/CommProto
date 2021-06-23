@@ -28,7 +28,8 @@ namespace commproto
             public:
             virtual ~Helper() = default;
             virtual bool readButton() = 0;
-            virtual void advanceLED() = 0;
+            virtual void advanceLED(const bool) = 0;
+            virtual void blankLEDs() = 0;
         };
 
 
@@ -57,8 +58,10 @@ namespace commproto
 				: readAuth(false)
                 , resetBtnCount(0)
                 , helper(helper_)
+                , apMode(false)
+                , connectedtoWifi(false)
 			{
-
+                
 			}
 			commproto::stream::StreamHandle getStream(const int speed) override {
 				commproto::serial::SerialHandle serial = std::make_shared<commproto::serial::SerialInterface>();
@@ -95,27 +98,39 @@ namespace commproto
 
 			commproto::sockets::SocketHandle connect(const authdevice::ConnectionData& data, const uint32_t attempts) override
 			{
+                apMode = true;
                 WiFi.mode(WIFI_STA);
-                
+                tickStatusLED();
 				LOG_INFO("Attempting to connect to wifi network \"%s\"", data.ssid.c_str());
 				int status = WL_IDLE_STATUS;
 				int attempt = 0;
-				WiFi.begin(data.ssid.c_str(), data.password.c_str());
-				do {
-					LOG_INFO("Attempt #%d connecting to wifi", attempt + 1);
-					status = WiFi.waitForConnectResult();
-                    if(status!=WL_CONNECTED)
+                if(!connectedtoWifi)
+                {
+                    WiFi.begin(data.ssid.c_str(), data.password.c_str());
+                    do {
+                        
+                        LOG_INFO("Attempt #%d connecting to wifi", attempt + 1);
+                        status = WiFi.waitForConnectResult();
+                        if(status!=WL_CONNECTED)
+                        {
+                            LOG_INFO("Didn't connect...");
+                            delay(500);
+                            tickStatusLED();
+                        }
+                        ++attempt;
+                    } while (status != WL_CONNECTED && attempt < attempts);
+                    
+                    if (status != WL_CONNECTED)
                     {
-                        delay(6000);
+                        LOG_INFO("Connection attempt unsuccesful with code %d", status);
+                        return nullptr;
                     }
-					++attempt;
-				} while (status != WL_CONNECTED && attempt != attempts);
-
-				if (status != WL_CONNECTED)
-				{
-					LOG_INFO("Connection attempt unsuccesful with code %d", status);
-					return nullptr;
-				}
+                    
+                    tickStatusLED();
+                    connectedtoWifi = true;
+                }
+                
+				
                 attempt = 0;
 				LOG_INFO("Connection successful wifi network %s", data.ssid.c_str());
 				commproto::sockets::SocketHandle client;
@@ -127,21 +142,24 @@ namespace commproto
                     client = std::make_shared<commproto::sockets::SocketImpl>();
                     client->initClient(data.addr, data.port);
                     connected = client->connected();
-                    if(!connected)
-                    {
-                        delay(6000);
+                    if(!connected){
+                        tickStatusLED();
                     }
                     ++attempt;
-                    if(attempt == 10)
+                    if(attempt == attempts)
                     {
                         break;
                     }
 				}while(!connected); 
-                
                 if (!client->connected()) {
 					LOG_WARNING("Could not connect to %s:%d", data.addr.c_str(), data.port);
 					return nullptr;
 				}
+                apMode= false;
+                if(connected)
+                {
+                    helper.blankLEDs();
+                }
 				return client;
 			}
 
@@ -235,6 +253,11 @@ namespace commproto
 
 			}
             
+            void blankLED()
+            {
+                helper.blankLEDs();
+            }
+            
             void resetAPData() override
             {
 #ifdef ESP32                       
@@ -252,7 +275,7 @@ namespace commproto
             
             void tickStatusLED() override
             {
-                helper.advanceLED();
+                helper.advanceLED(apMode);
             }
             uint32_t getResetBtnCount() override 
             { 
@@ -276,6 +299,8 @@ namespace commproto
 			bool readAuth;
             uint32_t resetBtnCount;
             Helper& helper;
+            bool apMode;
+            bool connectedtoWifi;
 
 		};
 	}

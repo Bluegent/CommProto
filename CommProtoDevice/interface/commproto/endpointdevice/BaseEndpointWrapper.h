@@ -28,6 +28,7 @@ namespace commproto
 			virtual void tickStatusLED() = 0;
 			virtual uint32_t getResetBtnCount() = 0;
 			virtual void readResetButton() = 0;
+			virtual void blankLED() = 0;
 		};
 	}
 }

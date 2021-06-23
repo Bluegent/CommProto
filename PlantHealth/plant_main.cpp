@@ -199,7 +199,51 @@ int main(int argc, const char * argv[]) {
 	uvHealthTracker->setOnLower(uvOnLower);
 	uvHealthTracker->setOnDesired(uvOnDesired);
 
-	auto inputHelper = std::make_shared<InputHelper>(soilHealthTracker,uvHealthTracker);
+
+
+	FSettingUpdate humidityDesireMin = [&settingsHelper](const float value)
+	{
+		settingsHelper->data.humidity.desireMin = value;
+		settingsHelper->save();
+	};
+
+	FSettingUpdate humidityDesireMax = [&settingsHelper](const float value)
+	{
+		settingsHelper->data.humidity.desireMax = value;
+		settingsHelper->save();
+	};
+
+	FSettingUpdate temperatureDesireMin = [&settingsHelper](const float value)
+	{
+		settingsHelper->data.temperature.desireMin = value;
+		settingsHelper->save();
+	};
+
+	FSettingUpdate temperatureDesireMax = [&settingsHelper](const float value)
+	{
+		settingsHelper->data.temperature.desireMax = value;
+		settingsHelper->save();
+	};
+
+	Interval<float> temperatureDesire(settingsHelper->data.temperature.desireMin, settingsHelper->data.temperature.desireMax);
+	Interval<float> temperatureCalibrate(settingsHelper->data.temperature.calibrateMin, settingsHelper->data.temperature.calibrateMax);
+
+	SensorTracker<float> temperatureTracker(temperatureDesire, temperatureCalibrate);
+	SingleTrackerHandle temperatureHealthTracker = std::make_shared<SingleHealthTracker>(*uiFactory.get(), "Ambiental Temperature", temperatureTracker, "\370C");
+
+
+
+	Interval<float> humidityDesire(settingsHelper->data.humidity.desireMin, settingsHelper->data.humidity.desireMax);
+	Interval<float> humidityCalibrate(settingsHelper->data.humidity.calibrateMin, settingsHelper->data.humidity.calibrateMax);
+
+	SensorTracker<float> humidityTracker(humidityDesire,humidityCalibrate);
+	SingleTrackerHandle humidityHealthTracker = std::make_shared<SingleHealthTracker>(*uiFactory.get(), "Ambiental Humidity", humidityTracker, "%");
+
+	temperatureHealthTracker->setUpdates(temperatureDesireMin, temperatureDesireMax);
+	humidityHealthTracker->setUpdates(humidityDesireMin, humidityDesireMax);
+
+
+	auto inputHelper = std::make_shared<InputHelper>(soilHealthTracker,uvHealthTracker, temperatureHealthTracker, humidityHealthTracker,settingsHelper);
 
 
 
@@ -216,6 +260,18 @@ int main(int argc, const char * argv[]) {
 
 	auto sub = service::SubscribeSerializer::serialize(service::SubscribeMessage(subscribeMsgId, epName));
 
+	control::endpoint::ProgressBarHandle overallBar = uiFactory->makeProgresBar("Overall Health", 0);
+	controller->addControl(overallBar);
+
+	OverallUpdate overall = [&overallBar,&inputHelper]()
+	{
+		overallBar->setProgress(inputHelper->getOverallHealth());
+	};
+
+	inputHelper->soilTracker->setOvearll(overall);
+	inputHelper->uvTracker->setOvearll(overall);
+	inputHelper->humidity->setOvearll(overall);
+	inputHelper->temperature->setOvearll(overall);
 
 
 	LOG_INFO("Waiting to acquire ID");
