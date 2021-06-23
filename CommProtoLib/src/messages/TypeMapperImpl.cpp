@@ -22,6 +22,7 @@ namespace commproto
 			uint32_t id = counter++;
 			types.emplace(type, id);
 			if (id != 0) {
+				//LOG_DEBUG("**** Mapped new type \"%s\" - %d", type.c_str(), id);
 				observer->notify(type, id);
 			}
 			return id;

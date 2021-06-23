@@ -66,7 +66,8 @@ int main(int argc, char * argv[])
 	bool logToConsole = config::getValueOrDefault(doc, ConfigValues::logToConsole, ConfigValues::logToConsoleDefault);
 	std::vector<std::string> plugins = config::getValueOrDefault(doc, ConfigValues::plugins, ConfigValues::pluginsDefault);
 
-	logger::FileLogger logger("ux_log_" + logger::FileLogger::getTimestamp() + ".txt");
+	std::string logPath = "ux_log_" + logger::FileLogger::getTimestamp() + ".log";
+	logger::FileLogger logger(logPath);
 	if (!logToConsole)
 	{
 		logger.open();

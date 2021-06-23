@@ -21,6 +21,8 @@ namespace commproto
 			stream.read(msgId);
 			stream.read(senderId);
 
+			//LOG_DEBUG("msg %d from %d", msgId, senderId);
+
 			auto it = delegators.find(senderId);
 			if (it == delegators.end())
 			{

@@ -32,13 +32,13 @@ void PercentageSingleHealthTracker::updateLabels()
 
 void PercentageSingleHealthTracker::calibrateMin(const float value)
 {
-	tracker.total.left = static_cast<uint32_t>(value);
+	tracker.value.absolute.left = static_cast<uint32_t>(value);
 	updateLabels();
 }
 
 void PercentageSingleHealthTracker::calibrateMax(const float value)
 {
-	tracker.total.right = static_cast<uint32_t>(value);
+	tracker.value.absolute.right = static_cast<uint32_t>(value);
 	updateLabels();
 }
 
@@ -74,7 +74,7 @@ void PercentageSingleHealthTracker::toggleCalibrationF(const bool state) const
 	}
 }
 
-PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_): tracker(tracker_)
+PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues): tracker(tracker_)
 {
 	commproto::control::endpoint::ToggleAction toggleCalibrationAct = [&, this](bool state)
 	{
@@ -89,7 +89,7 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 		this->calibrateMin(value);
 	};
 	minCalibration = factory.makeSlider(name + " - Calibrate Min", calibrateMinAct);
-	minCalibration->setInitialValue(tracker.value.absolute.left);
+	minCalibration->setInitialValue(initiakValues.left);
 	minCalibration->setLimits(tracker.value.absolute.left, tracker.value.absolute.right);
 	minCalibration->setStep(1);
 	minCalibration->setDisplayState(false);
@@ -100,7 +100,7 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 		this->calibrateMax(value);
 	};
 	maxCalibration = factory.makeSlider(name + " - Calibrate Max", calibrateMaxAct);
-	maxCalibration->setInitialValue(tracker.value.absolute.right);
+	maxCalibration->setInitialValue(initiakValues.right);
 	maxCalibration->setLimits(tracker.value.absolute.left, tracker.value.absolute.right);
 	maxCalibration->setStep(1);
 	maxCalibration->setDisplayState(false);
@@ -140,4 +140,8 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	controller->addControl(maxSlider);
 	controller->addControl(valueLabel);
 	controller->addControl(scoreLabel);
+
+	tracker.value.absolute.left = static_cast<uint32_t>(initiakValues.left);
+	tracker.value.absolute.right = static_cast<uint32_t>(initiakValues.right);
+	updateLabels();
 }

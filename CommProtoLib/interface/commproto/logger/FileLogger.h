@@ -10,7 +10,7 @@ namespace commproto
 		class FileLogger : public Loggable
 		{
 		public:
-			FileLogger(const std::string & fileName, const bool alwaysFlush = false);
+			FileLogger(const std::string & fileName, const bool alwaysFlush = true);
 			bool isOpen() const;
 			void addLog(const char* line, const uint32_t size) override;
 			void close() override;

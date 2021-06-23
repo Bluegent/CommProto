@@ -7,19 +7,32 @@ namespace commproto
 	{
 		MappingResult ParserDelegator::registerMapping(const std::string& name, uint32_t id)
 		{
+			if (warnOnNoParser)
+			{
+				//LOG_DEBUG("Registering mapping \"%s\" - %d", name.c_str(), id);
+			}
 			auto it = nameToParser.find(name);
 			if (it == nameToParser.end())
 			{
 				nameToId.emplace(name, id);
+				if (warnOnNoParser)
+				{
+					LOG_WARNING("No matching parser for \"%s\"",name.c_str());
+				}
 				return MappingResult::NoMatchingParser;
 			}
 
 			if (idToParser.find(id) != idToParser.end())
 			{
+				if (warnOnNoParser)
+				{
+					LOG_WARNING("Parser already registered for \"%s\"", name.c_str());
+				}
 				return MappingResult::AlreadyRegistered;
 			}
 			idToParser.emplace(id, it->second);
 			nameToId.emplace(name, id);
+
 			return MappingResult::Success;
 		}
 
@@ -43,19 +56,23 @@ namespace commproto
 				}
 				return false;
 			}
-			/*
 			//uncomment for more parsing info
 			//warning : makes it really spammy
-			std::string msgName = "UNKNOWN";
-			for(auto it2 = nameToId.begin(); it2!=nameToId.end();++it2)
-			{
-				if(it2->second == msgId)
+			/*
+			if (warnOnNoParser) {
+				std::string msgName = "UNKNOWN";
+				for (auto it2 = nameToId.cbegin(); it2 != nameToId.cend(); ++it2)
 				{
-					msgName = it2->second;
+					if (it2->second == msgId)
+					{
+						msgName = it2->first;
+					}
 				}
-			}
-			LOG_INFO("Parsing message %d-\"%s\"", msgId, msgName.c_str());
-			*/
+				if (msgName.compare("messages::KeepAliveMessage") != 0)
+				{
+					LOG_INFO("Parsing message %d-\"%s\"", msgId, msgName.c_str());
+				}
+			}*/
 			it->second->parse(std::move(stream));
 			return true;
 

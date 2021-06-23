@@ -55,7 +55,7 @@ T Interval<T>::getDistance(const T value)
 
 struct AbsoluteToPercentage
 {
-	const Interval<uint32_t> absolute;
+	Interval<uint32_t> absolute;
 	AbsoluteToPercentage(const Interval<uint32_t>& absolute);
 
 	void setValue(const uint32_t value);

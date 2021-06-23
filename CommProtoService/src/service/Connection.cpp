@@ -66,6 +66,17 @@ namespace commproto {
 		void Connection::receive(const Message& msg)
 		{
 			//TODO: find if this needs optimization
+			{	
+				Message msg2 = msg;
+				parser::ByteStream handler(msg2);
+				uint32_t size;
+				uint32_t msgId;
+				uint32_t sender;
+				handler.read(size);
+				handler.read(msgId);
+				handler.read(sender);
+				//LOG_DEBUG("Forwarding id %d from %d(sid%d)", msgId, id, sender);
+			}
 			std::lock_guard<std::mutex> lock(subscriberMutex);
 			for (ConnectionHandle con : subs)
 			{

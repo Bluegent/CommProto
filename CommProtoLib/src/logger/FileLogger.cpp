@@ -9,6 +9,7 @@ namespace commproto
 		FileLogger::FileLogger(const std::string& fileName_, const bool alwaysFlush_)
             : fileName{ fileName_ }
             , alwaysFlush{ alwaysFlush_ }
+			, file{}
 		{
 		}
 
@@ -53,7 +54,7 @@ namespace commproto
             time (&rawtime);
             timeinfo = localtime(&rawtime);
 
-            strftime(buffer,sizeof(buffer),"%d-%m-%Y %H:%M:%S",timeinfo);
+            strftime(buffer,sizeof(buffer),"%d-%m-%Y %H-%M-%S",timeinfo);
             std::string str(buffer);
 
             return str;
@@ -61,7 +62,13 @@ namespace commproto
 
 		void FileLogger::open()
 		{
-			file.open(fileName, std::ofstream::app | std::ofstream::out);
+			file.close();
+			file.open(fileName.c_str());
+			if(!file.is_open())
+			{
+				LOG_ERROR("Could not open log file \"%s\"", fileName.c_str());
+				LOG_ERROR("%s", strerror(errno));
+			}
 		}
 	}
 }

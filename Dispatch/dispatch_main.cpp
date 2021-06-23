@@ -42,7 +42,7 @@ int main(int argc, const char * argv[])
     const char * const address = commproto::config::getValueOrDefault(doc, ConfigValues::serverAddress, ConfigValues::serverAddressDefault);
 
 
-	commproto::logger::FileLogger logger("dispatch_log_" + commproto::logger::FileLogger::getTimestamp() + ".txt");
+	commproto::logger::FileLogger logger("dispatch_log_" + commproto::logger::FileLogger::getTimestamp() + ".log");
 	if (!logToConsole)
 	{
 		logger.open();

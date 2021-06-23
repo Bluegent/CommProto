@@ -91,11 +91,11 @@ int main(int argc, const char * argv[]) {
 	control::endpoint::UIControllerHandle controller = uiFactory->makeController();
 
 	PercentageSensorTracker soilTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(40, 60), Interval<float>(0, 100));
-	PercentageSingleHealthTracker soilHealthTracker(*uiFactory.get(), "Soil Humidity", soilTracker);
+	PercentageSingleHealthTracker soilHealthTracker(*uiFactory.get(), "Soil Humidity", soilTracker, Interval<uint32_t>(1200, 3500));
 
 
-	PercentageSensorTracker uvTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 200)), Interval<float>(60, 100), Interval<float>(0, 100));
-	PercentageSingleHealthTracker uvHealthTracker(*uiFactory.get(), "UV Exposure", uvTracker);
+	PercentageSensorTracker uvTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(60, 100), Interval<float>(0, 100));
+	PercentageSingleHealthTracker uvHealthTracker(*uiFactory.get(), "UV Exposure", uvTracker, Interval<uint32_t>(0,200));
 
 	auto inputHelper = std::make_shared<InputHelper>(soilHealthTracker,uvHealthTracker);
 

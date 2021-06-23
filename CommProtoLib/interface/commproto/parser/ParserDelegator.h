@@ -6,6 +6,7 @@
 #include <commproto/parser/Parser.h>
 #include <commproto/parser/ByteStream.h>
 #include <commproto/messages/MessageName.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {

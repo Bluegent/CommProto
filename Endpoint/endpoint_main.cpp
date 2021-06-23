@@ -16,6 +16,7 @@
 #include <rotary/ExtensionProvider.h>
 #include <rotary/EndpointRotary.h>
 #include <rotary/Integration.h>
+#include "commproto/logger/FileLogger.h"
 
 namespace ConfigValues
 {
@@ -24,6 +25,9 @@ namespace ConfigValues
 
 	static constexpr const char * const serverAddress = "serverAddress";
 	static constexpr const char * const serverAddressDefault = "127.0.0.1";
+
+	static constexpr const char * const logToConsole = "logToConsole";
+	static constexpr const bool logToConsoleDefault = true;
 }
 
 
@@ -77,6 +81,17 @@ int main(int argc, const char * argv[])
 
 	const int32_t port = commproto::config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
 	const char * const address = commproto::config::getValueOrDefault(doc, ConfigValues::serverAddress, ConfigValues::serverAddressDefault);
+
+	bool logToConsole = config::getValueOrDefault(doc, ConfigValues::logToConsole, ConfigValues::logToConsoleDefault);
+
+	std::string logPath = "ep_log_" + logger::FileLogger::getTimestamp() + ".log";
+	logger::FileLogger logger(logPath);
+	if (!logToConsole)
+	{
+		logger.open();
+		commproto::logger::setLoggable(&logger);
+	}
+
 
 	LOG_INFO("Attempting to connect to %s:%d", address, port);
 	SenderMapping::InitializeName("Endpoint::Simulator");

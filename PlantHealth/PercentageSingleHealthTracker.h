@@ -27,7 +27,7 @@ public:
 
 	void toggleCalibrationF(const bool state) const;
 
-	PercentageSingleHealthTracker(control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_);
+	PercentageSingleHealthTracker(control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues);
 
 
 private:
