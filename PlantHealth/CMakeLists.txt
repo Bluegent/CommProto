@@ -2,6 +2,9 @@ project(PlantHealthService)
 
 include (${CMAKE_SOURCE_DIR}/cmake/utility.cmake)
 
+find_package(Poco "1.10.1" REQUIRED COMPONENTS Net Util)
+
+
 file(GLOB_RECURSE PROJECT_SRC RELATIVE
         "${CMAKE_CURRENT_SOURCE_DIR}"
         *.cpp
@@ -10,7 +13,7 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 
-target_link_libraries(${PROJECT_NAME} CommProtoService PlantInterface)
+target_link_libraries(${PROJECT_NAME} CommProtoService PlantInterface Poco::Util Poco::Net)
 
 include_directories(.)
 

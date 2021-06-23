@@ -3,6 +3,7 @@
 
 #include <commproto/control/endpoint/UIFactory.h>
 #include "Numbers.h"
+#include "SettingHelper.h"
 
 using namespace commproto;
 
@@ -33,9 +34,11 @@ public:
 	void setOnLower(const HealthTrackerAction& lower);
 	void setOnHigher(const HealthTrackerAction& higher);
 	void setOnDesired(const HealthTrackerAction& desired);
+	void setUpdates(const ISettingUpdate & min, const ISettingUpdate & max, const FSettingUpdate & desireMin, const FSettingUpdate & desireMax);
+
 
 	PercentageSingleHealthTracker(control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues, const std::string & solution);
-
+	PercentageSensorTracker getTracker() const;
 
 private:
 
@@ -67,6 +70,10 @@ private:
 	bool wasLower;
 	bool wasHigher;
 	bool enabledAuto;
+	ISettingUpdate onCalibrateMin;
+	ISettingUpdate onCalibrateMax;
+	FSettingUpdate onDesireMin;
+	FSettingUpdate onDesireMax;
 };
 
 

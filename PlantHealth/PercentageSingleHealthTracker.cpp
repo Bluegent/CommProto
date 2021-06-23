@@ -45,24 +45,28 @@ void PercentageSingleHealthTracker::updateLabels()
 void PercentageSingleHealthTracker::calibrateMin(const float value)
 {
 	tracker.value.absolute.left = static_cast<uint32_t>(value);
+	onCalibrateMin(static_cast<uint32_t>(value));
 	updateLabels();
 }
 
 void PercentageSingleHealthTracker::calibrateMax(const float value)
 {
 	tracker.value.absolute.right = static_cast<uint32_t>(value);
+	onCalibrateMax(static_cast<uint32_t>(value));
 	updateLabels();
 }
 
 void PercentageSingleHealthTracker::setDesiredMin(const float value)
 {
 	tracker.desired.left = value;
+	onDesireMin(value);
 	updateLabels();
 }
 
 void PercentageSingleHealthTracker::setDesiredMax(const float value)
 {
 	tracker.desired.right = value;
+	onDesireMax(value);
 	updateLabels();
 }
 
@@ -100,6 +104,16 @@ void PercentageSingleHealthTracker::setOnDesired(const HealthTrackerAction& desi
 {
 	onDesired = desired;
 }
+
+void PercentageSingleHealthTracker::setUpdates(const ISettingUpdate& min, const ISettingUpdate& max, const FSettingUpdate& desireMin, const FSettingUpdate& desireMax)
+{
+	onCalibrateMax = max;
+	onCalibrateMin = min;
+	onDesireMin = desireMin;
+	onDesireMax = desireMax;
+}
+
+
 
 PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues, const std::string & solution)
 	: tracker(tracker_)
@@ -166,9 +180,16 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	{
 		LOG_INFO("%s auto solutioning",state?"Enabling":"Disabling");
 		enabledAuto = state;
+		if(enabledAuto)
+		{
+			setValue(tracker.value.getValue());
+		}
 		if(!enabledAuto)
 		{
 			solutionLabel->setText("Off");
+			wasLower = false;
+			wasHigher = false;
+			wasDesired = true;
 			if (onDesired) 
 			{
 				onDesired();
@@ -197,6 +218,11 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	tracker.value.absolute.left = static_cast<uint32_t>(initiakValues.left);
 	tracker.value.absolute.right = static_cast<uint32_t>(initiakValues.right);
 	updateLabels();
+}
+
+PercentageSensorTracker PercentageSingleHealthTracker::getTracker() const
+{
+	return tracker;
 }
 
 void PercentageSingleHealthTracker::executeOnDesired()

@@ -21,6 +21,7 @@
 #include "PlantHandlers.h"
 #include "ConfigValues.h"
 #include "PlantHealthProvider.h"
+#include "SettingHelper.h" 
 
 using namespace commproto;
 
@@ -55,6 +56,14 @@ int main(int argc, const char * argv[]) {
 	const char * const address = config::getValueOrDefault(doc, ConfigValues::serverAddress, ConfigValues::serverAddressDefault);
 
 	const char * const epName = config::getValueOrDefault(doc, ConfigValues::targetEpName, ConfigValues::targetEpNameDefault);
+	const char * const cfgFile = config::getValueOrDefault(doc, ConfigValues::cfgFileName, ConfigValues::cfgFileNameDefault);
+
+	SettingsHelperHandle settingsHelper = std::make_shared<SettingsHelper>(cfgFile);
+	bool load = settingsHelper->load();
+	if(!load)
+	{
+		settingsHelper->save();
+	}
 
 	LOG_INFO("Plant Health service attempting to connect to %s:%d", address, port);
 
@@ -98,8 +107,60 @@ int main(int argc, const char * argv[]) {
 	auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", mapper, socket);
 	control::endpoint::UIControllerHandle controller = uiFactory->makeController();
 
-	PercentageSensorTracker soilTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(40, 60), Interval<float>(0, 100));
-	SinglePTrackerHandle soilHealthTracker = std::make_shared<PercentageSingleHealthTracker>(*uiFactory.get(), "Soil Humidity", soilTracker, Interval<uint32_t>(1200, 3500),"Irrigation");
+	ISettingUpdate soilCalibrateMin = [&settingsHelper](const uint32_t value)
+	{
+		settingsHelper->data.soil.calibrateMin = value;
+		settingsHelper->save();
+	};
+
+	ISettingUpdate soilCalibrateMax = [&settingsHelper](const uint32_t value)
+	{
+		settingsHelper->data.soil.calibrateMax = value;
+		settingsHelper->save();
+	};
+
+	ISettingUpdate uvCalibrateMin = [&settingsHelper](const uint32_t value)
+	{
+		settingsHelper->data.uv.calibrateMin = value;
+		settingsHelper->save();
+	};
+
+	ISettingUpdate uvCalibrateMax = [&settingsHelper](const uint32_t value)
+	{
+		settingsHelper->data.uv.calibrateMax = value;
+		settingsHelper->save();
+	};
+
+	FSettingUpdate soilDesireMin = [&settingsHelper](const float value)
+	{
+		settingsHelper->data.soil.desireMin = value;
+		settingsHelper->save();
+	};
+
+	FSettingUpdate soilDesireMax = [&settingsHelper](const float value)
+	{
+		settingsHelper->data.soil.desireMax = value;
+		settingsHelper->save();
+	};
+
+	FSettingUpdate uvDesireMin = [&settingsHelper](const float value)
+	{
+		settingsHelper->data.uv.desireMin = value;
+		settingsHelper->save();
+	};
+
+	FSettingUpdate uvDesireMax = [&settingsHelper](const float value)
+	{
+		settingsHelper->data.uv.desireMax = value;
+		settingsHelper->save();
+	};
+
+	Interval<float> soilDesire(settingsHelper->data.soil.desireMin, settingsHelper->data.soil.desireMax);
+	Interval<uint32_t> soilCalibrate(settingsHelper->data.soil.calibrateMin, settingsHelper->data.soil.calibrateMax);
+	PercentageSensorTracker soilTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), soilDesire, Interval<float>(0, 100));
+	SinglePTrackerHandle soilHealthTracker = std::make_shared<PercentageSingleHealthTracker>(*uiFactory.get(), "Soil Humidity", soilTracker, soilCalibrate,"Irrigation");
+	soilHealthTracker->setUpdates(soilCalibrateMin, soilCalibrateMax, soilDesireMin, soilDesireMax);
+
 
 	HealthTrackerAction onLower = [&outputHelper]()
 	{
@@ -114,12 +175,13 @@ int main(int argc, const char * argv[]) {
 	};
 
 	soilHealthTracker->setOnLower(onLower);
-	soilHealthTracker->setOnDesired(onLower);
+	soilHealthTracker->setOnDesired(onDesired);
 
-
-	PercentageSensorTracker uvTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(60, 100), Interval<float>(0, 100));
-	SinglePTrackerHandle uvHealthTracker = std::make_shared<PercentageSingleHealthTracker>(*uiFactory.get(), "UV Exposure", uvTracker, Interval<uint32_t>(0,200),"UV Lamp");
-
+	Interval<float> uvDesire(settingsHelper->data.uv.desireMin, settingsHelper->data.uv.desireMax);
+	Interval<uint32_t> uvCalibrate(settingsHelper->data.uv.calibrateMin, settingsHelper->data.uv.calibrateMax);
+	PercentageSensorTracker uvTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), uvDesire, Interval<float>(0, 100));
+	SinglePTrackerHandle uvHealthTracker = std::make_shared<PercentageSingleHealthTracker>(*uiFactory.get(), "UV Exposure", uvTracker, uvCalibrate,"UV Lamp");
+	uvHealthTracker->setUpdates(uvCalibrateMin, uvCalibrateMax, uvDesireMin, uvDesireMax);
 
 
 	HealthTrackerAction uvOnLower = [&outputHelper]()

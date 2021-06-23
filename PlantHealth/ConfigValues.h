@@ -15,6 +15,9 @@ namespace ConfigValues
 	static constexpr const char * const targetEpName = "targetEpName";
 	static constexpr const char * const targetEpNameDefault = "Endpoint::SmartPot";
 
+	static constexpr const char * const cfgFileName = "config_file";
+	static constexpr const char * const cfgFileNameDefault = "plantdata.cfg";
+
 };
 
 
