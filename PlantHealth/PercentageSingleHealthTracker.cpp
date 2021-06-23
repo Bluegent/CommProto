@@ -1,5 +1,6 @@
 #include "PercentageSingleHealthTracker.h"
 #include <sstream>
+#include "commproto/logger/Logging.h"
 
 
 void PercentageSingleHealthTracker::setValue(const uint32_t value)
@@ -9,41 +10,14 @@ void PercentageSingleHealthTracker::setValue(const uint32_t value)
 	float perc = tracker.value.getPercentage();
 	updateLabels();
 
-
-	if (perc < tracker.desired.left && !wasLower)
+	if(!enabledAuto)
 	{
-		wasLower = true;
-		wasHigher = false;
-		wasDesired = false;
-		if (onLower) {
-			onLower();
-			solutionLabel->setText("On");
-			return;
-		}
-	}
-	if (perc > tracker.desired.right && !wasHigher)
-	{
-		wasLower = false;
-		wasHigher = true;
-		wasDesired = false;
-		if (onHigher) {
-			onHigher();
-			solutionLabel->setText("On");
-		}
 		return;
 	}
-	if (tracker.desired.contains(perc) && !wasDesired)
-	{
-		wasLower = false;
-		wasHigher = false;
-		wasDesired = true;
-		solutionLabel->setText("Off");
-		if (onDesired) {
-			onDesired();
-		}
-	}
 
-
+	executeOnLower();
+	executeOnDesired();
+	executeOnHigher();
 }
 
 void PercentageSingleHealthTracker::updateLabels()
@@ -132,6 +106,7 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	, wasDesired(false)
 	, wasLower(false)
 	, wasHigher(false)
+	, enabledAuto(false)
 {
 	commproto::control::endpoint::ToggleAction toggleCalibrationAct = [&, this](bool state)
 	{
@@ -187,6 +162,22 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	valueLabel = factory.makeLabel(name, "");
 	scoreLabel = factory.makeLabel(name + " Score", "");
 
+	control::endpoint::ToggleAction autoAction = [&,this](const bool state)
+	{
+		LOG_INFO("%s auto solutioning",state?"Enabling":"Disabling");
+		enabledAuto = state;
+		if(!enabledAuto)
+		{
+			solutionLabel->setText("Off");
+			if (onDesired) 
+			{
+				onDesired();
+			}
+		}
+	};
+
+	toggleAuto = factory.makeToggle("Enable auto-" + solution, autoAction);
+
 	solutionLabel = factory.makeLabel(solution, "Off");
 
 	updateLabels();
@@ -200,9 +191,56 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	controller->addControl(maxSlider);
 	controller->addControl(valueLabel);
 	controller->addControl(scoreLabel);
+	controller->addControl(toggleAuto);
 	controller->addControl(solutionLabel);
 
 	tracker.value.absolute.left = static_cast<uint32_t>(initiakValues.left);
 	tracker.value.absolute.right = static_cast<uint32_t>(initiakValues.right);
 	updateLabels();
+}
+
+void PercentageSingleHealthTracker::executeOnDesired()
+{
+	float perc = tracker.value.getPercentage();
+	if (tracker.desired.contains(perc) && !wasDesired)
+	{
+		wasLower = false;
+		wasHigher = false;
+		wasDesired = true;
+		solutionLabel->setText("Off");
+		if (onDesired) {
+			onDesired();
+		}
+	}
+}
+
+void PercentageSingleHealthTracker::executeOnLower()
+{
+	float perc = tracker.value.getPercentage();
+	if (perc < tracker.desired.left && !wasLower)
+	{
+		wasLower = true;
+		wasHigher = false;
+		wasDesired = false;
+		if (onLower) {
+			onLower();
+			solutionLabel->setText("On");
+		}
+	}
+}
+
+void PercentageSingleHealthTracker::executeOnHigher()
+{
+	float perc = tracker.value.getPercentage();
+	if (perc > tracker.desired.right && !wasHigher)
+	{
+		wasLower = false;
+		wasHigher = true;
+		wasDesired = false;
+		if (onHigher) {
+			onHigher();
+			solutionLabel->setText("On");
+		}
+		return;
+	}
 }

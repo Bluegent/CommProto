@@ -99,7 +99,7 @@ int main(int argc, const char * argv[]) {
 	control::endpoint::UIControllerHandle controller = uiFactory->makeController();
 
 	PercentageSensorTracker soilTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(40, 60), Interval<float>(0, 100));
-	PercentageSingleHealthTracker soilHealthTracker(*uiFactory.get(), "Soil Humidity", soilTracker, Interval<uint32_t>(1200, 3500),"Irrigation");
+	SinglePTrackerHandle soilHealthTracker = std::make_shared<PercentageSingleHealthTracker>(*uiFactory.get(), "Soil Humidity", soilTracker, Interval<uint32_t>(1200, 3500),"Irrigation");
 
 	HealthTrackerAction onLower = [&outputHelper]()
 	{
@@ -113,12 +113,12 @@ int main(int argc, const char * argv[]) {
 		outputHelper->stopPump();
 	};
 
-	soilHealthTracker.setOnLower(onLower);
-	soilHealthTracker.setOnDesired(onLower);
+	soilHealthTracker->setOnLower(onLower);
+	soilHealthTracker->setOnDesired(onLower);
 
 
 	PercentageSensorTracker uvTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(60, 100), Interval<float>(0, 100));
-	PercentageSingleHealthTracker uvHealthTracker(*uiFactory.get(), "UV Exposure", uvTracker, Interval<uint32_t>(0,200),"UV Lamp");
+	SinglePTrackerHandle uvHealthTracker = std::make_shared<PercentageSingleHealthTracker>(*uiFactory.get(), "UV Exposure", uvTracker, Interval<uint32_t>(0,200),"UV Lamp");
 
 
 
@@ -134,8 +134,8 @@ int main(int argc, const char * argv[]) {
 		outputHelper->stopUv();
 	};
 
-	uvHealthTracker.setOnLower(uvOnLower);
-	uvHealthTracker.setOnDesired(uvOnDesired);
+	uvHealthTracker->setOnLower(uvOnLower);
+	uvHealthTracker->setOnDesired(uvOnDesired);
 
 	auto inputHelper = std::make_shared<InputHelper>(soilHealthTracker,uvHealthTracker);
 

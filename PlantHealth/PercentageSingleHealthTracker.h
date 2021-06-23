@@ -38,6 +38,12 @@ public:
 
 
 private:
+
+	void executeOnDesired();
+	void executeOnLower();
+	void executeOnHigher();
+
+
 	control::endpoint::UIControllerHandle controller;
 	control::endpoint::ToggleHandle toggleCalibration;
 	control::endpoint::SliderHandle minCalibration;
@@ -48,6 +54,9 @@ private:
 
 	control::endpoint::LabelHandle valueLabel;
 	control::endpoint::LabelHandle scoreLabel;
+
+
+	control::endpoint::ToggleHandle toggleAuto;
 	control::endpoint::LabelHandle solutionLabel;
 
 	PercentageSensorTracker tracker;
@@ -57,6 +66,10 @@ private:
 	bool wasDesired;
 	bool wasLower;
 	bool wasHigher;
+	bool enabledAuto;
 };
+
+
+using SinglePTrackerHandle = std::shared_ptr<PercentageSingleHealthTracker>;
 
 #endif

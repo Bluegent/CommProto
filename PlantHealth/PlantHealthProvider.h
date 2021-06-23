@@ -13,14 +13,14 @@ using namespace commproto;
 class InputHelper
 {
 public:
-	explicit InputHelper(PercentageSingleHealthTracker& soil_tracker, PercentageSingleHealthTracker& uv_tracker)
+	explicit InputHelper(const SinglePTrackerHandle& soil_tracker,const SinglePTrackerHandle& uv_tracker)
 		: soilTracker(soil_tracker)
 		, uvTracker(uv_tracker)
 	{
 	}
 
-	PercentageSingleHealthTracker soilTracker;
-	PercentageSingleHealthTracker uvTracker;
+	SinglePTrackerHandle soilTracker;
+	SinglePTrackerHandle uvTracker;
 };
 
 using InputHelperHandle = std::shared_ptr<InputHelper>;

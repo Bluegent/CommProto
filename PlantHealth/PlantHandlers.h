@@ -9,19 +9,19 @@ using namespace commproto;
 class SoilHandler : public parser::Handler
 {
 public:
-	SoilHandler(PercentageSingleHealthTracker& tracker_);
+	SoilHandler(const SinglePTrackerHandle& tracker_);
 	void handle(messages::MessageBase&& data) override;
 private:
-	PercentageSingleHealthTracker & tracker;
+	SinglePTrackerHandle tracker;
 };
 
 class UvHandler : public parser::Handler
 {
 public:
-	UvHandler(PercentageSingleHealthTracker& tracker_);
+	UvHandler(const SinglePTrackerHandle& tracker_);
 	void handle(messages::MessageBase&& data) override;
 private:
-	PercentageSingleHealthTracker & tracker;
+	SinglePTrackerHandle tracker;
 };
 
 
