@@ -5,7 +5,45 @@
 void PercentageSingleHealthTracker::setValue(const uint32_t value)
 {
 	tracker.value.setValue(value);
+	tracker.value.calcPercentage();
+	float perc = tracker.value.getPercentage();
 	updateLabels();
+
+
+	if (perc < tracker.desired.left && !wasLower)
+	{
+		wasLower = true;
+		wasHigher = false;
+		wasDesired = false;
+		if (onLower) {
+			onLower();
+			solutionLabel->setText("On");
+			return;
+		}
+	}
+	if (perc > tracker.desired.right && !wasHigher)
+	{
+		wasLower = false;
+		wasHigher = true;
+		wasDesired = false;
+		if (onHigher) {
+			onHigher();
+			solutionLabel->setText("On");
+		}
+		return;
+	}
+	if (tracker.desired.contains(perc) && !wasDesired)
+	{
+		wasLower = false;
+		wasHigher = false;
+		wasDesired = true;
+		solutionLabel->setText("Off");
+		if (onDesired) {
+			onDesired();
+		}
+	}
+
+
 }
 
 void PercentageSingleHealthTracker::updateLabels()
@@ -64,7 +102,7 @@ void PercentageSingleHealthTracker::toggleCalibrationF(const bool state) const
 	{
 		controller->setControlShownState(maxCalibration->getId(), state);
 	}
-	if(minSlider)
+	if (minSlider)
 	{
 		controller->setControlShownState(minSlider->getId(), state);
 	}
@@ -74,7 +112,26 @@ void PercentageSingleHealthTracker::toggleCalibrationF(const bool state) const
 	}
 }
 
-PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues): tracker(tracker_)
+void PercentageSingleHealthTracker::setOnLower(const HealthTrackerAction& lower)
+{
+	onLower = lower;
+}
+
+void PercentageSingleHealthTracker::setOnHigher(const HealthTrackerAction& higher)
+{
+	onHigher = higher;
+}
+
+void PercentageSingleHealthTracker::setOnDesired(const HealthTrackerAction& desired)
+{
+	onDesired = desired;
+}
+
+PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues, const std::string & solution)
+	: tracker(tracker_)
+	, wasDesired(false)
+	, wasLower(false)
+	, wasHigher(false)
 {
 	commproto::control::endpoint::ToggleAction toggleCalibrationAct = [&, this](bool state)
 	{
@@ -129,6 +186,9 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 
 	valueLabel = factory.makeLabel(name, "");
 	scoreLabel = factory.makeLabel(name + " Score", "");
+
+	solutionLabel = factory.makeLabel(solution, "Off");
+
 	updateLabels();
 
 
@@ -140,6 +200,7 @@ PercentageSingleHealthTracker::PercentageSingleHealthTracker(commproto::control:
 	controller->addControl(maxSlider);
 	controller->addControl(valueLabel);
 	controller->addControl(scoreLabel);
+	controller->addControl(solutionLabel);
 
 	tracker.value.absolute.left = static_cast<uint32_t>(initiakValues.left);
 	tracker.value.absolute.right = static_cast<uint32_t>(initiakValues.right);

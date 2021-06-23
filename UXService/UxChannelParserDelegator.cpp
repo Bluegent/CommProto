@@ -8,12 +8,12 @@ void UxChannelParserDelegator::subscribeToNoUx(const NoUxNotification& sub)
 void UxChannelParserDelegator::notifyNoUx(const uint32_t id)
 {
 	std::string name = getChannelName(id);
-	if(name.empty())
+	if (name.empty())
 	{
 		return;
 	}
 
-	for(auto & not : noUxSub)
+	for (auto & not : noUxSub)
 	{
 		not(name);
 	}
@@ -26,7 +26,7 @@ NoUxHandler::NoUxHandler(const UxChannelParserDelegatorHandle& delegator_)
 
 void NoUxHandler::handle(commproto::messages::MessageBase&& data)
 {
-	if(!delegator)
+	if (!delegator)
 	{
 		return;
 	}
@@ -34,7 +34,8 @@ void NoUxHandler::handle(commproto::messages::MessageBase&& data)
 	delegator->notifyNoUx(data.senderId);
 }
 
-NoUxExtender::NoUxExtender(const UxChannelParserDelegatorHandle& delegator_): chDelegator(delegator_)
+NoUxExtender::NoUxExtender(const UxChannelParserDelegatorHandle& delegator_)
+	: chDelegator(delegator_)
 {
 }
 

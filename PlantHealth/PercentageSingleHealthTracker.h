@@ -6,6 +6,9 @@
 
 using namespace commproto;
 
+
+using HealthTrackerAction= std::function<void()>;
+
 class PercentageSingleHealthTracker
 {
 
@@ -27,7 +30,11 @@ public:
 
 	void toggleCalibrationF(const bool state) const;
 
-	PercentageSingleHealthTracker(control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues);
+	void setOnLower(const HealthTrackerAction& lower);
+	void setOnHigher(const HealthTrackerAction& higher);
+	void setOnDesired(const HealthTrackerAction& desired);
+
+	PercentageSingleHealthTracker(control::endpoint::UIFactory& factory, const std::string& name, const PercentageSensorTracker& tracker_, const Interval<uint32_t> & initiakValues, const std::string & solution);
 
 
 private:
@@ -41,8 +48,15 @@ private:
 
 	control::endpoint::LabelHandle valueLabel;
 	control::endpoint::LabelHandle scoreLabel;
+	control::endpoint::LabelHandle solutionLabel;
 
 	PercentageSensorTracker tracker;
+	HealthTrackerAction onLower;
+	HealthTrackerAction onHigher;
+	HealthTrackerAction onDesired;
+	bool wasDesired;
+	bool wasLower;
+	bool wasHigher;
 };
 
 #endif

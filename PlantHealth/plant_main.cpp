@@ -86,21 +86,62 @@ int main(int argc, const char * argv[]) {
 	uint32_t reqChannelID = mapper->registerType<diagnostics::RequestAllConnections>();
 
 
+	auto outputHelper = std::make_shared<OutputHelper>(socket, epName);
+
+	uint32_t startIrrigationId = mapper->registerType<plant::TogglePump>();
+	uint32_t startUvId = mapper->registerType<plant::ToggleUVLamp>();
+	uint32_t sendToId = mapper->registerType <service::SendToMessage>();
+
+	outputHelper->setIds(startIrrigationId, startUvId, sendToId);
+
 	// ui definition
 	auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", mapper, socket);
 	control::endpoint::UIControllerHandle controller = uiFactory->makeController();
 
 	PercentageSensorTracker soilTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(40, 60), Interval<float>(0, 100));
-	PercentageSingleHealthTracker soilHealthTracker(*uiFactory.get(), "Soil Humidity", soilTracker, Interval<uint32_t>(1200, 3500));
+	PercentageSingleHealthTracker soilHealthTracker(*uiFactory.get(), "Soil Humidity", soilTracker, Interval<uint32_t>(1200, 3500),"Irrigation");
+
+	HealthTrackerAction onLower = [&outputHelper]()
+	{
+		LOG_INFO("Turning on irrigation...");
+		outputHelper->startPump();
+	};
+
+	HealthTrackerAction onDesired = [&outputHelper]()
+	{
+		LOG_INFO("Turning off irrigation...");
+		outputHelper->stopPump();
+	};
+
+	soilHealthTracker.setOnLower(onLower);
+	soilHealthTracker.setOnDesired(onLower);
 
 
 	PercentageSensorTracker uvTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), Interval<float>(60, 100), Interval<float>(0, 100));
-	PercentageSingleHealthTracker uvHealthTracker(*uiFactory.get(), "UV Exposure", uvTracker, Interval<uint32_t>(0,200));
+	PercentageSingleHealthTracker uvHealthTracker(*uiFactory.get(), "UV Exposure", uvTracker, Interval<uint32_t>(0,200),"UV Lamp");
+
+
+
+	HealthTrackerAction uvOnLower = [&outputHelper]()
+	{
+		LOG_INFO("Turning on UV Lamp...");
+		outputHelper->startUv();
+	};
+
+	HealthTrackerAction uvOnDesired = [&outputHelper]()
+	{
+		LOG_INFO("Turning off UV Lamp...");
+		outputHelper->stopUv();
+	};
+
+	uvHealthTracker.setOnLower(uvOnLower);
+	uvHealthTracker.setOnDesired(uvOnDesired);
 
 	auto inputHelper = std::make_shared<InputHelper>(soilHealthTracker,uvHealthTracker);
 
 
-	std::shared_ptr<PlantHealthProvider> provider = std::make_shared<PlantHealthProvider>(mapper, controller, inputHelper);
+
+	std::shared_ptr<PlantHealthProvider> provider = std::make_shared<PlantHealthProvider>(mapper, controller, inputHelper,outputHelper);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);

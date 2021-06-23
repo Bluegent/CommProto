@@ -5,7 +5,7 @@
 #include <commproto/endpoint/DelegatorProvider.h>
 
 #include "PercentageSingleHealthTracker.h"
-
+#include "OutputHelper.h"
 
 
 using namespace commproto;
@@ -31,13 +31,14 @@ parser::ParserDelegatorHandle buildSelfDelegator();
 
 class PlantHealthProvider : public endpoint::DelegatorProvider {
 public:
-	PlantHealthProvider(const messages::TypeMapperHandle & mapper_, const control::endpoint::UIControllerHandle & controller_, const InputHelperHandle & helper_);
+	PlantHealthProvider(const messages::TypeMapperHandle & mapper_, const control::endpoint::UIControllerHandle & controller_, const InputHelperHandle & helper_, const OutputHelperHandle & outputHelper);
 
 	parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override;
 private:
 	messages::TypeMapperHandle mapper;
 	control::endpoint::UIControllerHandle controller;
 	InputHelperHandle helper;
+	OutputHelperHandle outHelper;
 };
 
 #endif

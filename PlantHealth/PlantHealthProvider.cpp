@@ -15,10 +15,11 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 	return delegator;
 }
 
-PlantHealthProvider::PlantHealthProvider(const messages::TypeMapperHandle & mapper_, const control::endpoint::UIControllerHandle & controller_, const InputHelperHandle & helper_)
+PlantHealthProvider::PlantHealthProvider(const messages::TypeMapperHandle & mapper_, const control::endpoint::UIControllerHandle & controller_, const InputHelperHandle & helper_, const OutputHelperHandle & outputHelper)
 	: mapper{ mapper_ }
 	, controller{ controller_ }
 	, helper(helper_)
+	, outHelper(outputHelper)
 {
 
 }
@@ -29,6 +30,8 @@ parser::ParserDelegatorHandle PlantHealthProvider::provide(const std::string& na
 	control::endpoint::DelegatorUtils::addParsers(delegator, controller);
 	parser::DelegatorUtils::addParserHandlerPair<plant::SoilParser, plant::Soil>(delegator, std::make_shared<SoilHandler>(helper->soilTracker));
 	parser::DelegatorUtils::addParserHandlerPair<plant::UvLightParser, plant::UvLight>(delegator, std::make_shared<UvHandler>(helper->uvTracker));
+
+	outHelper->notifyMapping(name, id);
 
 	return delegator;
 }
