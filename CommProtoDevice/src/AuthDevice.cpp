@@ -81,7 +81,7 @@ namespace commproto
 
 					return;
 				}
-				device.delayT(100);
+				device.delayT(10);
 				return;
 			}
 			if (shouldScan)
@@ -109,7 +109,7 @@ namespace commproto
 				builder->pollAndReadTimes(100);
 			}
 
-			device.delayT(100);
+			device.delayT(10);
 		}
 
 		void AuthDevice::finishReading(const EndpointData& data, const std::string & name)
@@ -167,9 +167,9 @@ namespace commproto
 			do
 			{
 				++attempts;
-				device.delayT(100);
+				device.delayT(10);
 			} while (attempts < 5 && !connection->connected());
-			device.delayT(100);
+			device.delayT(10);
 			connection->sendByte(sizeof(void*));
 			messages::TypeMapperHandle connectionMapper = messages::TypeMapperFactory::build(connection);
 			uint32_t id = connectionMapper->registerType<device::ConnectionAuthorizedMessage>();
@@ -180,7 +180,7 @@ namespace commproto
 			auto it = std::find(previouslyScanned.begin(), previouslyScanned.end(), name);
 			previouslyScanned.erase(it);
 			LOG_INFO("Sent approval message to \"%s\"", name.c_str());
-			device.delayT(500);
+			device.delayT(10);
 			connection->shutdown();
 			enableKeepAlive();
 		}
@@ -202,9 +202,9 @@ namespace commproto
 			do
 			{
 				++attempts;
-				device.delayT(100);
+				device.delayT(10);
 			} while (attempts < 5 && !connection->connected());
-			device.delayT(100);
+			device.delayT(10);
 			connection->sendByte(sizeof(void*));
 			messages::TypeMapperHandle connectionMapper = messages::TypeMapperFactory::build(connection);
 			uint32_t id = connectionMapper->registerType<device::ConnectionRejectedMessage>();
@@ -306,10 +306,6 @@ namespace commproto
 				{
 					++attempts;
 					builder->pollAndReadTimes(100);
-					if (!finishedReading) 
-					{
-						device.delayT(100);
-					}
 				}
 				if (finishedReading) {
 					LOG_INFO("Device details received, closing connection");

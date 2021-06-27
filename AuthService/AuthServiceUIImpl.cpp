@@ -1,5 +1,6 @@
 #include "AuthServiceUIImpl.h"
 #include <commproto/control/endpoint/UIFactory.h>
+#include <sstream>
 
 const std::string & AuthServiceUIImpl::noString = "No";
 const std::string & AuthServiceUIImpl::yesString = "Yes";
@@ -58,6 +59,11 @@ void AuthServiceUIImpl::startScan(const uint32_t total)
 		controller->displayNotification(scanInProgress->getId(), "No devices were detected.", [](const std::string& option) {});
 		return;
 	}
+
+	std::stringstream stream;
+	stream << total;
+	count->setText(stream.str());
+	controller->setControlShownState(count->getId(), true);
 	currentTotal = total;
 	bar->setProgress(10);
 }
@@ -73,10 +79,14 @@ commproto::control::endpoint::UIControllerHandle AuthServiceUIImpl::build()
 	button = factory.makeButton("Scan", std::bind(&AuthServiceUIImpl::scan, this));
 	controller->addControl(button);
 
-	bar = factory.makeProgresBar("Scan progres");
+	bar = factory.makeProgresBar("Scan progress");
+	bar->setDisplayState(false);
 	controller->addControl(bar);
-	controller->setControlShownState(bar->getId(), false);
 
+
+	count = factory.makeLabel("Potential Devices", "0");
+	count->setDisplayState(false);
+	controller->addControl(count);
 
 	scanInProgress = factory.makeNotification("Scanning...");
 	scanInProgress->addOption("Ok");
@@ -99,6 +109,7 @@ void AuthServiceUIImpl::scanFinished()
 		return;
 	}
 	controller->setControlShownState(bar->getId(), false);
+	controller->setControlShownState(count->getId(), false);
 }
 
 void AuthServiceUIImpl::notifyAuthRequest(const std::string& text, const std::string& name)

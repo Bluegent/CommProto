@@ -8,6 +8,7 @@
 #include <commproto/sockets/Socket.h>
 #include <commproto/messages/TypeMapper.h>
 #include "AuthService.h"
+#include "commproto/control/endpoint/Label.h"
 
 class AuthServiceUIImpl : public AuthServiceUI
 {
@@ -26,6 +27,7 @@ private:
 	AuthService & service;
 	commproto::control::endpoint::UIControllerHandle controller;
 	commproto::control::endpoint::ProgressBarHandle bar;
+	commproto::control::endpoint::LabelHandle count;
 	commproto::control::endpoint::NotificationHandle scanInProgress;
 	commproto::control::endpoint::ButtonHandle button;
 	commproto::control::endpoint::NotificationHandle authorizeEndpoint;
