@@ -180,7 +180,7 @@ int main(int argc, const char * argv[]) {
 	Interval<float> uvDesire(settingsHelper->data.uv.desireMin, settingsHelper->data.uv.desireMax);
 	Interval<uint32_t> uvCalibrate(settingsHelper->data.uv.calibrateMin, settingsHelper->data.uv.calibrateMax);
 	PercentageSensorTracker uvTracker(AbsoluteToPercentage(Interval<uint32_t>(0, 4096)), uvDesire, Interval<float>(0, 100));
-	SinglePTrackerHandle uvHealthTracker = std::make_shared<PercentageSingleHealthTracker>(*uiFactory.get(), "UV Exposure", uvTracker, uvCalibrate,"UV Lamp");
+	SinglePTrackerHandle uvHealthTracker = std::make_shared<PercentageSingleHealthTracker>(*uiFactory.get(), "Ambiental Light", uvTracker, uvCalibrate,"UV Lamp");
 	uvHealthTracker->setUpdates(uvCalibrateMin, uvCalibrateMax, uvDesireMin, uvDesireMax);
 
 

@@ -41,7 +41,7 @@ namespace commproto
 			virtual void loopDevice();
 			sockets::SocketHandle tryConnect(const uint32_t attempts = 10) const;
 			bool isAP;
-			BaseEndpointWrapper& device;
+			BaseEndpointWrapper& device;			
 
 		private:
 			void setupAP();

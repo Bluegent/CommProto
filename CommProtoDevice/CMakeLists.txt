@@ -16,7 +16,7 @@ foreach(source IN LISTS PROJECT_SRC)
     source_group("${source_path_msvc}" FILES "${source}")
 endforeach()  
 
-target_link_libraries(${PROJECT_NAME} CommProto)
+target_link_libraries(${PROJECT_NAME} CommProto PlantInterface)
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)

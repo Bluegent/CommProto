@@ -81,3 +81,7 @@ devInterface = src+"/CommProtoDevice/interface/commproto"
 srcDir = src +"/CommProtoDevice/src"
 copytree_(devInterface, os.path.join(dst,"commproto"))
 copy_dir_contents(srcDir, dst)
+
+# copy stuff from PlantInterface
+devInterface = src+"/PlantInterface/plant"
+copytree_(devInterface,  os.path.join(dst,"plant"))

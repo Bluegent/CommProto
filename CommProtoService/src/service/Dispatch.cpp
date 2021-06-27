@@ -69,7 +69,8 @@ namespace commproto {
 			}
 			auto nameIt = connectionMapping.find(finalName);
 			if (nameIt != connectionMapping.end()) {
-				std::stringstream stream(finalName);
+				std::stringstream stream;
+				stream << finalName;
 				uint32_t attempt = 1;
 				do {
 					stream << "#" << attempt;
