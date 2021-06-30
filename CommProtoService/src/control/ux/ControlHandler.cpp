@@ -1,4 +1,5 @@
 #include <commproto/control/ux/ControlHandler.h>
+#include <stdexcept>
 namespace commproto
 {
 	namespace control

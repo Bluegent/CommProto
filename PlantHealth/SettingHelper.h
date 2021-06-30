@@ -2,6 +2,7 @@
 #define SETTINGS_HELPER_H
 #include <memory>
 #include <functional>
+#include <string>
 
 
 template <typename T>

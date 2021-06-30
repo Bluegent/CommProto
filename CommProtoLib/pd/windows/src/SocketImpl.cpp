@@ -143,8 +143,11 @@ namespace commproto {
 			// attempt to connect to server
 			iResult = connect(socketHandle, outgoingAddr.ai_addr, (int)outgoingAddr.ai_addrlen);
 			if (iResult == SOCKET_ERROR) {
+				int err = WSAGetLastError();
+				LOG_ERROR("Failed to connect with error %d", err);
 				closesocket(socketHandle);
 				socketHandle = INVALID_SOCKET;
+
 				return  false;
 			}
 

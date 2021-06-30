@@ -4,6 +4,7 @@
 #include <commproto/control/ux/Slider.h>
 #include <commproto/control/ux/Toggle.h>
 #include <commproto/control/ux/Notification.h>
+#include <stdexcept>
 
 namespace commproto
 {

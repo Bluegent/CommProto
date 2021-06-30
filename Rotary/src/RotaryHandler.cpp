@@ -1,6 +1,7 @@
 #include <rotary/RotaryHandler.h>
 #include <commproto/control/ux/UIController.h>
 #include <rotary/UxRotary.h>
+#include <stdexcept>
 
 namespace rotary
 {

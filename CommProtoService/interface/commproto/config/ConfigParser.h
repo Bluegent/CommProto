@@ -4,6 +4,7 @@
 #include <rapidjson/document.h>
 #include <vector>
 #include <map>
+#include <string>
 
 namespace commproto
 {
